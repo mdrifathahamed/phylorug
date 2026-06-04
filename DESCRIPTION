@@ -1,13 +1,32 @@
 Package: phylorug
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Visualize Node Support Across Multiple Phylogenomic Analyses
+Version: 0.1.0
+Authors@R: c(
+    person("Md Rifath", "Ahamed",
+           email   = "rifath.ahamed@helsinki.fi",
+           role    = c("aut", "cre"),
+           comment = c(ORCID = "0009-0005-6158-8658")),
+    person("Sergei", "Tarasov",
+           email   = "sergei.tarasov@helsinki.fi",
+           role    = "aut",
+           comment = c(ORCID = "0000-0002-1737-9403")),
+    person("J. Salvador", "Arias",
+           email   = "salvador.ariasbecerra@helsinki.fi",
+           role    = "ctb",
+           comment = c(ORCID = "0000-0002-3717-435X")))
+Description: Implements the rug plot method for visualizing node
+    support from multiple independent phylogenomic analyses
+    simultaneously on a single reference tree. Handles bootstrap
+    proportions, Bayesian posterior probabilities, and ASTRAL
+    local posterior formats automatically.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 URL: https://github.com/mdrifathahamed/phylorug
 BugReports: https://github.com/mdrifathahamed/phylorug/issues
+Imports: 
+    ape
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
