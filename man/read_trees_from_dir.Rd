@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_trees_from_dir.R
 \name{read_trees_from_dir}
 \alias{read_trees_from_dir}
-\title{Read multiple phylogenetic trees from a directory}
+\title{Read phylogenetic trees from a directory}
 \usage{
 read_trees_from_dir(
   dir,
@@ -12,35 +12,44 @@ read_trees_from_dir(
 )
 }
 \arguments{
-\item{dir}{Character string. Path to the directory containing the tree files.}
+\item{dir}{A character string specifying the target directory containing the
+phylogenetic tree files.}
 
-\item{ext}{Character string. File extension to search for, without the
-leading dot. Defaults to \code{"tre"}.}
+\item{ext}{A character string specifying file extension to look for. Defaults
+to \code{"tre"}.}
 
-\item{format}{Character string. File format of the trees. Use \code{"auto"}
-(default) to detect format from file extension, \code{"newick"} to force Newick
-parsing, or \code{"nexus"} to force
-NEXUS parsing.}
+\item{format}{A character string specifying file format of the phylogenetic
+trees. Use \code{"auto"} (default) to detect format from file content, \code{"newick"}
+to force Newick parsing, or \code{"nexus"} to force NEXUS parsing.}
 
-\item{verbose}{Logical. If \code{TRUE} (default), prints a message reporting how
-many trees were read successfully. Set to \code{FALSE} for silent operation
-inside pipelines or loops.}
+\item{verbose}{Logical. If \code{TRUE} (default), prints a message reporting
+the number of trees that were read successfully. Set to \code{FALSE} for silent
+operation.}
 }
 \value{
-A named list of objects of class \code{"phylo"}. List names are the
-filenames the trees were read from. Elements for files that could not be
-read are set to \code{NULL}.
+A named list of class \code{"phylo"} objects. List elements are named
+after the filenames of the original phylogenetic tree files. Elements for
+files that could not be read are set to \code{NULL}.
 }
 \description{
-Searches a specified directory for phylogenetic tree files with a matching
-file extension and imports them into R as a named list of tree objects.
-Supports both Newick and NEXUS formats.
+Looks for phylogenetic tree files with a matching formats and extension
+inside the assigned directory. Once found, returns them as a named list of
+\code{"phylo"} objects. Supports both Newick and NEXUS formats.
 }
 \examples{
 \dontrun{
+# Simplest usage -- auto-detects format from file content
+trees <- read_trees_from_dir("path/to/your/trees")
+
+# Specify extension explicitly
+trees <- read_trees_from_dir(
+  dir = "path/to/your/trees",
+  ext = "nex"
+)
+
+# Force Newick parsing
 trees <- read_trees_from_dir(
   dir    = "path/to/your/trees",
-  ext    = "tre",
   format = "newick"
 )
 }

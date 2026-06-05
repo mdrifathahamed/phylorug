@@ -45,7 +45,7 @@ test_that("stops when no matching files found", {
   tmp <- tempdir()
   expect_error(
     read_trees_from_dir(tmp, ext = "xyz"),
-    "No .xyz files found"
+    "No files matching extensions"
   )
 })
 
@@ -73,7 +73,7 @@ test_that("returns a named list of phylo objects", {
   )
 })
 
-test_that("list names match filenames", {
+test_that("list names matches filenames in the directory", {
   tmp <- make_valid_trees()
   result <- read_trees_from_dir(tmp, ext = "tre", verbose = FALSE)
 
@@ -123,18 +123,16 @@ test_that("forced newick format reads newick file correctly", {
 
 # ---- error handling ---------------------------------------------------------
 
-test_that("warns when a file cannot be read", {
+test_that("errors when a file cannot be read", {
   tmp <- make_trees_with_corrupt()
-  expect_warning(
-    result <- read_trees_from_dir(
+  expect_error(
+    read_trees_from_dir(
       tmp,
       ext     = "tre",
       verbose = FALSE
     ),
     "file\\(s\\) could not be read"
   )
-
-  expect_null(result$corrupt.tre)
 })
 
 test_that("verbose = FALSE produces no messages", {

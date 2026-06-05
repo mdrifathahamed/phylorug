@@ -1,33 +1,43 @@
-#' Read multiple phylogenetic trees from a directory
+#' Read phylogenetic trees from a directory
 #'
-#' Searches a specified directory for phylogenetic tree files with a matching
-#' file extension and imports them into R as a named list of tree objects.
-#' Supports both Newick and NEXUS formats.
+#' Looks for phylogenetic tree files with a matching formats and extension
+#' inside the assigned directory. Once found, returns them as a named list of
+#' `"phylo"` objects. Supports both Newick and NEXUS formats.
 #'
-#' @param dir Character string. Path to the directory containing the tree files.
+#' @param dir A character string specifying the target directory containing the
+#'  phylogenetic tree files.
 #'
-#' @param ext Character string. File extension to search for, without the
-#'  leading dot. Defaults to `"tre"`.
+#' @param ext A character string specifying file extension to look for. Defaults
+#'  to `"tre"`.
 #'
-#' @param format Character string. File format of the trees. Use `"auto"`
-#'   (default) to detect format from file extension, `"newick"` to force Newick
-#'   parsing, or `"nexus"` to force
-#'   NEXUS parsing.
-#' @param verbose Logical. If `TRUE` (default), prints a message reporting how
-#'   many trees were read successfully. Set to `FALSE` for silent operation
-#'   inside pipelines or loops.
+#' @param format A character string specifying file format of the phylogenetic
+#'  trees. Use `"auto"` (default) to detect format from file content, `"newick"`
+#'  to force Newick parsing, or `"nexus"` to force NEXUS parsing.
 #'
-#' @return A named list of objects of class `"phylo"`. List names are the
-#'  filenames the trees were read from. Elements for files that could not be
-#'  read are set to `NULL`.
+#' @param verbose Logical. If `TRUE` (default), prints a message reporting
+#'  the number of trees that were read successfully. Set to `FALSE` for silent
+#'  operation.
+#'
+#' @return A named list of class `"phylo"` objects. List elements are named
+#'  after the filenames of the original phylogenetic tree files. Elements for
+#'  files that could not be read are set to `NULL`.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' # Simplest usage -- auto-detects format from file content
+#' trees <- read_trees_from_dir("path/to/your/trees")
+#'
+#' # Specify extension explicitly
+#' trees <- read_trees_from_dir(
+#'   dir = "path/to/your/trees",
+#'   ext = "nex"
+#' )
+#'
+#' # Force Newick parsing
 #' trees <- read_trees_from_dir(
 #'   dir    = "path/to/your/trees",
-#'   ext    = "tre",
 #'   format = "newick"
 #' )
 #' }
@@ -42,14 +52,24 @@ read_trees_from_dir <- function(dir,
   }
 
   # List matching files
+  ext_pattern <- paste0(
+    "\\.(", paste(ext, collapse = "|"), ")$"
+  )
+
   files <- list.files(
     dir,
-    pattern    = paste0("\\.", ext, "$"),
-    full.names = TRUE
+    pattern     = ext_pattern,
+    full.names  = TRUE,
+    ignore.case = TRUE
   )
 
   if (length(files) == 0) {
-    stop("No .", ext, " files found in: ", dir, call. = FALSE)
+    stop(
+      "No files matching extensions (",
+      paste(ext, collapse = ", "),
+      ") found in: ", dir,
+      call. = FALSE
+    )
   }
 
   # Read each file -- detect format per file when auto
@@ -89,12 +109,14 @@ read_trees_from_dir <- function(dir,
     )
   }
 
-  # Report how many files failed to read
-  failed <- sum(vapply(trees, is.null, logical(1)))
+  # Reports which files failed to read
+  failed      <- sum(vapply(trees, is.null, logical(1)))
+  failed_names <- names(trees)[vapply(trees, is.null, logical(1))]
+
   if (failed > 0) {
-    warning(
-      failed, " file(s) could not be read and were set to NULL. ",
-      "Run check_same_taxa() before proceeding.",
+    stop(
+      failed, " file(s) could not be read: ",
+      paste(failed_names, collapse = ", "),
       call. = FALSE
     )
   }

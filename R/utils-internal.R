@@ -13,12 +13,10 @@ detect_format <- function(path) {
     return("nexus")
   }
 
-  # NHX -- contains [&&NHX: marker anywhere in first 5 lines
-  # Still read with ape::read.tree() since NHX is Newick superset
   if (any(grepl("[&&NHX:", lines, fixed = TRUE))) {
     return("newick")
   }
 
-  # Default -- standard Newick
+  # Default - Newick
   "newick"
 }
