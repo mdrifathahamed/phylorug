@@ -1,4 +1,4 @@
-#detect Format automatically
+#detect Format automatically _used in read_trees_from_dir()
 detect_format <- function(path) {
   lines <- readLines(path, n = 5, warn = FALSE)
 
@@ -13,7 +13,7 @@ detect_format <- function(path) {
     return("nexus")
   }
 
-  if (any(grepl("[&&NHX:", lines, fixed = TRUE))) {
+  if (any(grepl("[&&NHX:", lines, ignore.case = TRUE))) {
     return("newick")
   }
 
