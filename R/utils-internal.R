@@ -1,11 +1,12 @@
-#detect Format automatically _used in read_trees_from_dir()
+# detect Format automatically _used in read_trees_from_dir()
 detect_format <- function(path) {
   lines <- readLines(path, n = 5, warn = FALSE)
 
   # Empty file check
   if (length(lines) == 0 || all(!nzchar(trimws(lines)))) {
     stop("File appears to be empty: ", basename(path),
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # NEXUS -- always starts with #NEXUS
@@ -13,7 +14,7 @@ detect_format <- function(path) {
     return("nexus")
   }
 
-  if (any(grepl("[&&NHX:", lines, ignore.case = TRUE))) {
+  if (any(grepl("\\[&&NHX:", lines, ignore.case = TRUE))) {
     return("newick")
   }
 
