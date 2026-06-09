@@ -3,7 +3,7 @@
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 make_tree_list <- function(n_trees = 3, n_tips = 5) {
-  tips  <- paste0("Sp_", seq_len(n_tips))
+  tips <- paste0("Sp_", seq_len(n_tips))
   trees <- replicate(
     n_trees,
     ape::rtree(n_tips, tip.label = tips),
@@ -13,7 +13,7 @@ make_tree_list <- function(n_trees = 3, n_tips = 5) {
   trees
 }
 make_compressed_multiphylo <- function(n_trees = 3, n_tips = 5) {
-  tips  <- paste0("Sp_", seq_len(n_tips))
+  tips <- paste0("Sp_", seq_len(n_tips))
   trees <- replicate(
     n_trees,
     ape::rtree(n_tips, tip.label = tips),
@@ -28,10 +28,7 @@ make_compressed_multiphylo <- function(n_trees = 3, n_tips = 5) {
 test_that("stops when trees is not a list or multiPhylo", {
   mock_tree <- list(tip.label = c("A", "B", "C"))
   class(mock_tree) <- "phylo"
-  expect_error(
-    check_taxa(mock_tree),
-    "must be a list"
-  )
+  expect_error(check_taxa(mock_tree), "must be a list")
 })
 
 test_that("stops when trees is an empty list", {
@@ -42,7 +39,7 @@ test_that("stops when trees is an empty list", {
 })
 
 test_that("stops when trees contains NULL elements", {
-  trees    <- make_tree_list()
+  trees <- make_tree_list()
   bad_list <- list(
     tree1 = trees[[1]],
     tree2 = NULL,
@@ -65,35 +62,29 @@ test_that("stops when trees is a compressed multiPhylo", {
 # ── correct behaviour ─────────────────────────────────────────────────────────
 
 test_that("returns TRUE when all trees have identical taxa", {
-  trees  <- make_tree_list()
-  result <- check_taxa(trees, verbose = FALSE)
-  expect_true(result)
+  expect_true(check_taxa(make_tree_list(), verbose = FALSE))
 })
 
 test_that("returns FALSE when one tree is missing a taxon", {
-  trees    <- make_tree_list()
+  trees <- make_tree_list()
   bad_tree <- trees[[1]]
   bad_tree$tip.label <- bad_tree$tip.label[-1]
   bad_list <- list(tree1 = trees[[1]], tree2 = bad_tree)
-  result   <- check_taxa(bad_list, verbose = FALSE)
-  expect_false(result)
+  expect_false(check_taxa(bad_list, verbose = FALSE))
 })
 
 test_that("returns FALSE when one tree has an extra taxon", {
-  trees    <- make_tree_list(n_tips = 5)
+  trees <- make_tree_list(n_tips = 5)
   bad_tree <- trees[[1]]
   bad_tree$tip.label[1] <- "Sp_EXTRA"
   bad_list <- list(tree1 = trees[[1]], tree2 = bad_tree)
-  result   <- check_taxa(bad_list, verbose = FALSE)
-  expect_false(result)
+  expect_false(check_taxa(bad_list, verbose = FALSE))
 })
 
 test_that("accepts an uncompressed multiPhylo object", {
-  tips    <- paste0("Sp_", seq_len(5))
-  raw     <- replicate(3, ape::rtree(5, tip.label = tips), simplify = FALSE)
+  raw <- make_tree_list()
   class(raw) <- "multiPhylo"
-  result  <- check_taxa(raw, verbose = FALSE)
-  expect_true(result)
+  expect_true(check_taxa(raw, verbose = FALSE))
 })
 
 # ── verbose output ────────────────────────────────────────────────────────────
@@ -106,7 +97,7 @@ test_that("verbose = TRUE produces a message on success", {
 })
 
 test_that("verbose = TRUE produces a message on mismatch", {
-  trees    <- make_tree_list()
+  trees <- make_tree_list()
   bad_tree <- trees[[1]]
   bad_tree$tip.label <- bad_tree$tip.label[-1]
   bad_list <- list(tree1 = trees[[1]], tree2 = bad_tree)
@@ -126,7 +117,7 @@ test_that("verbose = FALSE suppresses all messages", {
 # ── return type ───────────────────────────────────────────────────────────────
 
 test_that("always returns a single logical value", {
-  trees  <- make_tree_list()
+  trees <- make_tree_list()
   result <- check_taxa(trees, verbose = FALSE)
   expect_type(result, "logical")
   expect_length(result, 1)
