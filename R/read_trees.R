@@ -2,25 +2,26 @@
 #'
 #' Looks for phylogenetic tree files with a matching formats and extension
 #' inside the assigned directory. Once found, returns them as a named list of
-#' `"phylo"` objects. Supports both Newick and NEXUS formats.
+#' \code{phylo} objects. Supports both Newick and NEXUS formats.
 #'
 #' @param dir A character string specifying the target directory containing the
 #'  phylogenetic tree files.
 #'
 #' @param ext A character string specifying file extension to look for. Defaults
-#'  to `"tre"`.
+#'  to \code{tre}.
 #'
 #' @param format A character string specifying file format of the phylogenetic
-#'  trees. Use `"auto"` (default) to detect format from file content, `"newick"`
-#'  to force Newick parsing, or `"nexus"` to force NEXUS parsing.
+#'  trees. Use \code{auto} (default) to detect format from file content,
+#'  \code{newick} to force Newick parsing, or \code{nexus} to force NEXUS
+#'  parsing.
 #'
-#' @param verbose Logical. If `TRUE` (default), prints a message reporting
-#'  the number of trees that were read successfully. Set to `FALSE` for silent
-#'  operation.
+#' @param verbose Logical. If \code{TRUE} (default), prints a message reporting
+#'  the number of trees that were read successfully. Set to \code{FALSE} for
+#'  silent operation.
 #'
-#' @return A named list of `"phylo"` objects. List elements are named after the
-#'  filenames of the original phylogenetic tree files. Elements for files that
-#'  could not be read are set to `NULL`.
+#' @return A named list of \code{phylo} objects. List elements are named after
+#'  the filenames of the original phylogenetic tree files. Elements for files
+#'  that could not be read are set to \code{NULL}.
 #'
 #' @export
 #'

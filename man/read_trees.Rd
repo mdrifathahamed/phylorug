@@ -16,25 +16,26 @@ read_trees(
 phylogenetic tree files.}
 
 \item{ext}{A character string specifying file extension to look for. Defaults
-to \code{"tre"}.}
+to \code{tre}.}
 
 \item{format}{A character string specifying file format of the phylogenetic
-trees. Use \code{"auto"} (default) to detect format from file content, \code{"newick"}
-to force Newick parsing, or \code{"nexus"} to force NEXUS parsing.}
+trees. Use \code{auto} (default) to detect format from file content,
+\code{newick} to force Newick parsing, or \code{nexus} to force NEXUS
+parsing.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints a message reporting
-the number of trees that were read successfully. Set to \code{FALSE} for silent
-operation.}
+the number of trees that were read successfully. Set to \code{FALSE} for
+silent operation.}
 }
 \value{
-A named list of \code{"phylo"} objects. List elements are named after the
-filenames of the original phylogenetic tree files. Elements for files that
-could not be read are set to \code{NULL}.
+A named list of \code{phylo} objects. List elements are named after
+the filenames of the original phylogenetic tree files. Elements for files
+that could not be read are set to \code{NULL}.
 }
 \description{
 Looks for phylogenetic tree files with a matching formats and extension
 inside the assigned directory. Once found, returns them as a named list of
-\code{"phylo"} objects. Supports both Newick and NEXUS formats.
+\code{phylo} objects. Supports both Newick and NEXUS formats.
 }
 \examples{
 \dontrun{

@@ -2,3 +2,4 @@
 
 export(check_taxa)
 export(read_trees)
+export(translate_tips)

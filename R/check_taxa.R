@@ -5,15 +5,15 @@
 #' set of taxa (tip labels). If discrepancies are found, detailed diagnostic
 #' reports listing missing and extra taxa are provided.
 #'
-#' @param trees A list containing multiple `"phylo"` objects, or a
+#' @param trees A list containing multiple \code{phylo} objects, or a
 #'   uncompressed multiPhylo object containing the trees to be compared.
 #'
-#' @param verbose Logical. If `"TRUE"` (default), detailed status messages
+#' @param verbose Logical. If \code{TRUE} (default), detailed status messages
 #'   and diagnostic reports for mismatched trees are printed to the console.
 #'
 #'
-#' @return A single logical value. `"TRUE"` if all trees contain
-#'   identical taxa. `"FALSE"` if any tree differs, in which case
+#' @return A single logical value. \code{TRUE} if all trees contain
+#'   identical taxa. \code{FALSE} if any tree differs, in which case
 #'   the pipeline should not proceed.
 #'
 #' @export

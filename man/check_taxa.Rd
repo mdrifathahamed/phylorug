@@ -7,15 +7,15 @@
 check_taxa(trees, verbose = TRUE)
 }
 \arguments{
-\item{trees}{A list containing multiple \code{"phylo"} objects, or a
+\item{trees}{A list containing multiple \code{phylo} objects, or a
 uncompressed multiPhylo object containing the trees to be compared.}
 
-\item{verbose}{Logical. If \code{"TRUE"} (default), detailed status messages
+\item{verbose}{Logical. If \code{TRUE} (default), detailed status messages
 and diagnostic reports for mismatched trees are printed to the console.}
 }
 \value{
-A single logical value. \code{"TRUE"} if all trees contain
-identical taxa. \code{"FALSE"} if any tree differs, in which case
+A single logical value. \code{TRUE} if all trees contain
+identical taxa. \code{FALSE} if any tree differs, in which case
 the pipeline should not proceed.
 }
 \description{
