@@ -28,17 +28,17 @@ A named list of \code{"phylo"} objects identical in structure to
 Tree topology and edge lengths remain unchanged.
 }
 \description{
-Renames the tip labels of each tree in a list using a lookup table supplied
-as a data frame. This function is optional in the phylorug workflow — use it
-only if your tip labels are specimen codes, accession numbers, or any other
-identifiers that need converting to a different format, such as scientific
-species names. If your tip labels are already in the correct format, skip
-this step and proceed directly to \code{\link{node_presence_matrix}}.
-}
-\details{
-Only tips with a matching entry in \code{from_col} are renamed. Unmatched
-tips are left unchanged. Both \code{from_col} and \code{to_col} must be
-character columns, not factors.
+Translates tip labels of each tree in a list using a lookup table supplied
+as a data frame. This function is optional in the phylorug workflow , use it
+only if your tip labels are in  specimen codes, accession numbers, or any
+other identifiers that need converting to a different format, such as
+scientific species names.
+If your tip labels are already in the correc format, skip this step and
+proceed directly to \code{node_presence_matrix()}. Only tips with a
+matching entry in \code{from_col} re replaced with the corresponding value in
+\code{to_col}. Unmatched tips are left unchanged.This function modifies only
+the tip.label field of each tree. Tree topology, branch lengths, and node
+labels are unaffected.
 }
 \examples{
 \dontrun{

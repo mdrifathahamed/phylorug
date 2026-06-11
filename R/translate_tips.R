@@ -1,15 +1,16 @@
 #' Translate tip labels across a list of phylogenetic trees
 #'
-#' Renames the tip labels of each tree in a list using a lookup table supplied
-#' as a data frame. This function is optional in the phylorug workflow — use it
-#' only if your tip labels are specimen codes, accession numbers, or any other
-#' identifiers that need converting to a different format, such as scientific
-#' species names. If your tip labels are already in the correct format, skip
-#' this step and proceed directly to \code{\link{node_presence_matrix}}.
-#'
-#' Only tips with a matching entry in \code{from_col} are renamed. Unmatched
-#' tips are left unchanged. Both \code{from_col} and \code{to_col} must be
-#' character columns, not factors.
+#' Translates tip labels of each tree in a list using a lookup table supplied
+#' as a data frame. This function is optional in the phylorug workflow , use it
+#' only if your tip labels are in  specimen codes, accession numbers, or any
+#' other identifiers that need converting to a different format, such as
+#' scientific species names.
+#' If your tip labels are already in the correc format, skip this step and
+#' proceed directly to \code{node_presence_matrix()}. Only tips with a
+#' matching entry in \code{from_col} re replaced with the corresponding value in
+#' \code{to_col}. Unmatched tips are left unchanged.This function modifies only
+#' the tip.label field of each tree. Tree topology, branch lengths, and node
+#' labels are unaffected.
 #'
 #' @param trees A named list of \code{"phylo"} objects, as returned by
 #'   \code{\link{read_trees}}.
@@ -53,8 +54,8 @@
 translate_tips <- function(trees,
                            data,
                            from_col = "from",
-                           to_col   = "to",
-                           verbose  = TRUE) {
+                           to_col = "to",
+                           verbose = TRUE) {
   # Validate inputs
   if (!inherits(trees, c("list", "multiPhylo"))) {
     stop(
@@ -75,8 +76,13 @@ translate_tips <- function(trees,
       call. = FALSE
     )
   }
+  if (anyDuplicated(data[[from_col]])) {
+    stop(
+      "Values in `from_col` must be unique.",
+      call. = FALSE
+    )
+  }
   # Build translation dictionary
-  # as.character() protects against factor columns
   trans_dict <- stats::setNames(
     as.character(data[[to_col]]),
     as.character(data[[from_col]])
@@ -84,8 +90,13 @@ translate_tips <- function(trees,
   # Translate each tree in the list
   trees <- lapply(trees, function(tr) {
     tips_to_translate <- tr$tip.label %in% names(trans_dict)
-    tr$tip.label[tips_to_translate] <-
-      trans_dict[tr$tip.label[tips_to_translate]]
+
+    for (i in seq_along(tr$tip.label)) {
+      if (tr$tip.label[i] %in% names(trans_dict)) {
+        tr$tip.label[i] <- trans_dict[tr$tip.label[i]]
+      }
+    }
+
     if (verbose) {
       message("Tips translated : ", sum(tips_to_translate))
       message("Tips unchanged  : ", sum(!tips_to_translate))
