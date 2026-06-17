@@ -24,9 +24,13 @@ presence: \code{1} if the backbone clade is found in the comparison tree,
 \code{NA} if it is not. If \code{TRUE}, cells record the extracted support
 value for matching clades, and \code{NA} for clades that are absent.}
 
-\item{support_col}{Integer, \code{1} or \code{2}. Selects which support
-column to read from \code{node_support()}. Used only when \code{use_support
-= TRUE}. Defaults to \code{1}.}
+\item{support_col}{Integer, \code{1} or \code{2}. Selects which support value
+to read. Column 1 is the primary support metric for all standard methods
+(bootstrap, posterior probability, or ASTRAL local posterior) and is the
+right choice in almost all cases. Column 2 holds the optional second value
+that tools such as ASTRAL write (for example quartet support); methods that
+write only one value have \code{NA} there. Used only when
+\code{use_support = TRUE}. Defaults to \code{1}.}
 
 \item{round_support}{Integer or \code{NULL}. If supplied, support values are
 rounded to this many decimal places. Defaults to \code{NULL}.}
@@ -40,9 +44,9 @@ was found, and \code{NA} where it was not.
 }
 \description{
 Compares a list of phylogenetic trees against a reference tree topology set
-as a backbone.For each internal node of the backbone, the function checks
-whether the same clade (the same set of tip labels) appears in each
-comparison tree and records either binary presence value or the extracts the
+as a backbone. For each internal node of the backbone, the function checks
+whether the same clade (the same set of tip labels) appears in other trees in
+comparison and records either binary presence value or the extracts the
 support values.
 }
 \examples{
