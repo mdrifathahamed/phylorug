@@ -2,5 +2,6 @@
 
 export(check_taxa)
 export(node_presence_matrix)
+export(plot_phylorug)
 export(read_trees)
 export(translate_tips)
