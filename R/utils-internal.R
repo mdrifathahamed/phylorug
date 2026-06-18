@@ -1,4 +1,4 @@
-# detect Format automatically _used in read_trees_from_dir()
+# detect Format automatically _used in read_trees()
 detect_format <- function(path) {
   lines <- readLines(path, n = 5, warn = FALSE)
 
@@ -36,4 +36,39 @@ normalize_support <- function(x) {
   } else {
     x
   }
+}
+
+# choose_grid()
+# Pick a roughly square grid that holds a given number of cells.
+# Columns are the ceiling of the square root; rows are then whatever
+# is needed to fit all cells. Keeps the rug compact rather than a long
+# thin strip. Used by plot_phylorug() when the user does not set a grid.
+choose_grid <- function(n_cells) {
+  n_cols <- ceiling(sqrt(n_cells))
+  n_rows <- ceiling(n_cells / n_cols)
+  list(n_rows = n_rows, n_cols = n_cols)
+}
+
+# cell_color()
+# Choose a cell's fill colour. The analysis's base hue sets the colour;
+# the normalised support value (0-1) sets how deep it is, from near-white
+# at 0 to the full hue at 1. An absent clade (NA) is white. Used by
+# plot_node_rug() so each analysis keeps its own hue while intensity
+# tracks support strength.
+cell_color <- function(value, hue) {
+  if (is.na(value)) {
+    return("white")
+  }
+  value <- max(0, min(1, value))
+  ramp <- grDevices::colorRampPalette(c("white", hue))
+  ramp(101)[round(value * 100) + 1]
+}
+# contrast_text_color()
+# Pick black or white text so a value printed on a coloured cell stays
+# readable. Uses perceptual luminance: light fills get black text, dark
+# fills get white. Used by plot_node_rug() when show_values is TRUE.
+contrast_text_color <- function(fill) {
+  rgb_val <- grDevices::col2rgb(fill)
+  lum <- (0.299 * rgb_val[1] + 0.587 * rgb_val[2] + 0.114 * rgb_val[3]) / 255
+  if (lum > 0.6) "black" else "white"
 }

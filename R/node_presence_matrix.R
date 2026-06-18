@@ -130,5 +130,8 @@ node_presence_matrix <- function(backbone,
     colnames(node_matrix) <- paste0("tree_", seq_along(trees))
   }
   # Prepend the backbone node ids
-  cbind(node_id = bb_nodes, node_matrix)
+  result <- cbind(node_id = bb_nodes, node_matrix)
+  # Tag the matrix with its mode so the plotting function knows how to behave
+  attr(result, "phylorug_mode") <- if (use_support) "support" else "presence"
+  result
 }
