@@ -4,9 +4,11 @@
 #' coloured cells summarising how several analyses support that node's clade.
 #' Each analysis is given its own hue, so a cell's colour tells you which
 #' analysis it is; the support value sets how deep that hue is, so a darker
-#' cell means stronger support. An absent clade is drawn white. A legend maps
-#' each hue to its analysis, and the support value can be printed inside each
-#' cell for an exact read.
+#' cell means stronger support. An absent clade is drawn white. Nodes where
+#' every analysis agrees can be marked with a single dot instead of a full
+#' grid, keeping the figure clean and drawing the eye to conflict. A legend
+#' maps each hue to its analysis, and the support value can be printed inside
+#' each cell for an exact read.
 #'
 #' This is the main user-facing plotting function. It draws the tree, works out
 #' the cell geometry, chooses a grid that fits the analyses, and draws the rug.
@@ -25,7 +27,15 @@
 #' @param legend Logical. If \code{TRUE} (default), draw a legend mapping hues
 #'   to analyses.
 #' @param cell_scale Numeric. Multiplier on the automatic cell height, for
-#'   tuning density on crowded trees. Default \code{0.3}.
+#'   tuning cell size on crowded trees. Default \code{0.3}.
+#' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
+#'   as a fraction of the tree's width and height. Default \code{0} (centred on
+#'   the node).
+#' @param dot_unanimous Logical. If \code{TRUE} (default), nodes where every
+#'   analysis recovered the clade are marked with a single dot instead of a
+#'   full grid. Set \code{FALSE} to draw a grid at every node.
+#' @param dot_col Colour of the unanimous-node dot. Default \code{"black"}.
+#' @param dot_cex Size of the unanimous-node dot. Default \code{0.6}.
 #' @param ... Passed to \code{ape::plot.phylo()}.
 #'
 #' @return Invisibly \code{NULL}; called for its plotting side effect.
@@ -36,20 +46,25 @@
 #' \dontrun{
 #' backbone <- ape::rtree(6)
 #' trees <- list(
-#'   IQTREE = ape::rtree(6),
-#'   ASTRAL = ape::rtree(6),
+#'   IQTREE  = ape::rtree(6),
+#'   ASTRAL  = ape::rtree(6),
 #'   MrBayes = ape::rtree(6)
 #' )
 #' mat <- node_presence_matrix(backbone, trees)
 #' plot_phylorug(backbone, mat)
 #' }
 plot_phylorug <- function(backbone, rug_mt,
-                          hues        = NULL,
-                          n_rows      = NULL,
-                          n_cols      = NULL,
-                          show_values = FALSE,
-                          legend      = TRUE,
-                          cell_scale  = 0.3,
+                          hues          = NULL,
+                          n_rows        = NULL,
+                          n_cols        = NULL,
+                          show_values   = FALSE,
+                          legend        = TRUE,
+                          cell_scale    = 0.3,
+                          x_offset      = 0,
+                          y_offset      = 0,
+                          dot_unanimous = TRUE,
+                          dot_col       = "black",
+                          dot_cex       = 0.6,
                           ...) {
   if (!inherits(backbone, "phylo")) {
     stop("`backbone` must be a phylogenetic tree of class \"phylo\".",
@@ -104,10 +119,10 @@ plot_phylorug <- function(backbone, rug_mt,
 
   cell_h <- dy * cell_scale
   cell_w <- cell_h * (x_per_inch / y_per_inch)
-  # Split nodes into unanimous (all analyses present) and variable
-  cells     <- rug_mt[, -1, drop = FALSE]
-  all_present <- apply(cells, 1, function(x) all(!is.na(x)))
 
+  # Split nodes: unanimous (all analyses present) vs variable
+  cells        <- rug_mt[, -1, drop = FALSE]
+  all_present  <- apply(cells, 1, function(x) all(!is.na(x)))
   unanimous_mt <- rug_mt[all_present, , drop = FALSE]
   variable_mt  <- rug_mt[!all_present, , drop = FALSE]
 
@@ -145,6 +160,5 @@ plot_phylorug <- function(backbone, rug_mt,
       cex    = 0.8
     )
   }
-
   invisible(NULL)
 }

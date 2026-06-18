@@ -72,3 +72,4 @@ contrast_text_color <- function(fill) {
   lum <- (0.299 * rgb_val[1] + 0.587 * rgb_val[2] + 0.114 * rgb_val[3]) / 255
   if (lum > 0.6) "black" else "white"
 }
+

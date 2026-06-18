@@ -13,6 +13,11 @@ plot_phylorug(
   show_values = FALSE,
   legend = TRUE,
   cell_scale = 0.3,
+  x_offset = 0,
+  y_offset = 0,
+  dot_unanimous = TRUE,
+  dot_col = "black",
+  dot_cex = 0.6,
   ...
 )
 }
@@ -37,7 +42,19 @@ its cell. Has no effect on a presence matrix. Default \code{FALSE}.}
 to analyses.}
 
 \item{cell_scale}{Numeric. Multiplier on the automatic cell height, for
-tuning density on crowded trees. Default \code{0.3}.}
+tuning cell size on crowded trees. Default \code{0.3}.}
+
+\item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node,
+as a fraction of the tree's width and height. Default \code{0} (centred on
+the node).}
+
+\item{dot_unanimous}{Logical. If \code{TRUE} (default), nodes where every
+analysis recovered the clade are marked with a single dot instead of a
+full grid. Set \code{FALSE} to draw a grid at every node.}
+
+\item{dot_col}{Colour of the unanimous-node dot. Default \code{"black"}.}
+
+\item{dot_cex}{Size of the unanimous-node dot. Default \code{0.6}.}
 
 \item{...}{Passed to \code{ape::plot.phylo()}.}
 }
@@ -49,9 +66,11 @@ Draws a backbone tree and overlays, at each internal node, a small grid of
 coloured cells summarising how several analyses support that node's clade.
 Each analysis is given its own hue, so a cell's colour tells you which
 analysis it is; the support value sets how deep that hue is, so a darker
-cell means stronger support. An absent clade is drawn white. A legend maps
-each hue to its analysis, and the support value can be printed inside each
-cell for an exact read.
+cell means stronger support. An absent clade is drawn white. Nodes where
+every analysis agrees can be marked with a single dot instead of a full
+grid, keeping the figure clean and drawing the eye to conflict. A legend
+maps each hue to its analysis, and the support value can be printed inside
+each cell for an exact read.
 }
 \details{
 This is the main user-facing plotting function. It draws the tree, works out
@@ -61,8 +80,8 @@ the cell geometry, chooses a grid that fits the analyses, and draws the rug.
 \dontrun{
 backbone <- ape::rtree(6)
 trees <- list(
-  IQTREE = ape::rtree(6),
-  ASTRAL = ape::rtree(6),
+  IQTREE  = ape::rtree(6),
+  ASTRAL  = ape::rtree(6),
   MrBayes = ape::rtree(6)
 )
 mat <- node_presence_matrix(backbone, trees)

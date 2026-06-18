@@ -73,7 +73,7 @@ plot_node_rug <- function(rug_mt,
     x_center <- last_pp$xx[node_id] + dx_offset
     y_center <- last_pp$yy[node_id] + dy_offset
 
-    x0 <- x_center - total_w / 2
+    x0 <- x_center
     y0 <- y_center + total_h / 2
 
     for (k in seq_len(n_an)) {
@@ -93,15 +93,15 @@ plot_node_rug <- function(rug_mt,
       graphics::rect(xleft, ybottom, xright, ytop,
                      col    = fill,
                      border = "black",
-                     lwd    = 0.4
+                     lwd    = 0.2
       )
 
       if (show_values && !is.na(raw)) {
         graphics::text(
           x      = (xleft + xright) / 2,
           y      = (ytop + ybottom) / 2,
-          labels = format(raw, digits = 2),
-          cex    = cell_h * 4,
+          labels = format(nrm, digits = 2),
+          cex = cell_h * 0.33,
           col    = contrast_text_color(fill)
         )
       }
