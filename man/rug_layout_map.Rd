@@ -2,41 +2,51 @@
 % Please edit documentation in R/rug_layout_map.R
 \name{rug_layout_map}
 \alias{rug_layout_map}
-\title{Makes a layout for the comparison trees as a grid of cells at each node}
+\title{Map each comparison tree to a row and column in the node grid}
 \usage{
-rug_layout_map(rug_mt, n_rows = 2, n_cols = 3)
+rug_layout_map(rug_mt, n_rows = NULL, n_cols = NULL)
 }
 \arguments{
-\item{rug_mt}{The support matrix from \code{node_presence_matrix()}: a matrix
-or data frame whose first column is \code{node_id} and whose remaining
-columns are the comparison trees.}
+\item{rug_mt}{The support matrix from \code{node_presence_matrix()}. It is a
+matrix whose first column is \code{node_id} and whose remaining columns are
+the comparison trees. Each cell holds that tree's value for that node's
+clade, either a binary presence flag (\code{1} or \code{NA}) or a support
+value (\code{0}-\code{1} or \code{NA}), depending on how the matrix was
+built.}
 
-\item{n_rows}{Integer. The number of rows in the grid at each node. Together
-with \code{n_cols} this sets how many cells are available; there must be at
-least as many cells as trees. Default \code{2}.}
-
-\item{n_cols}{Integer. The number of columns in the grid at each node.
-Default \code{3}.}
+\item{n_rows, n_cols}{Optional. The grid shape at each node. Leave both
+\code{NULL} (default) to size the grid automatically to the number of
+trees, choosing a roughly square shape. Set one or both to fix the grid
+yourself; if you set only one, the other is derived to fit. There must be
+at least as many cells as trees.}
 }
 \value{
-A long-format data frame with one row for every node-and-tree pair
-and five columns: \code{node_id} (the backbone node), \code{tree_name} (the
-comparison tree), \code{row} (its grid row, 1 = top), \code{col} (its grid
-column, 1 = left), and \code{cell_index} (its position in sequence). The
-plotting functions use these positions to place each cell.
+A long data frame, one row per node-and-tree combination. For a tree
+with 50 nodes and 4 analyses, that is 200 rows. Each row places one
+analysis's cell in the grid at one node, using five columns: \code{node_id}
+the backbone node the cell belongs to; \code{tree_name} which analysis the
+cell is for; \code{row} and \code{col} where the cell sits in that node's
+grid (\code{row} 1 is the top, \code{col} 1 is the left); and
+\code{cell_index} the analysis's order in the sequence (1, 2, 3 ...). The
+drawing function reads this table to know where to paint each cell.
 }
 \description{
-When several analyses are compared on one tree, each backbone node ends up
-carrying a small block of cells, one for every comparison tree. Before
-those cells can be drawn, this function decides their arrangement. Given the
-support matrix and a grid shape, it returns the row and column each tree
-occupies at every node, filling the grid from left to right and top to
-bottom. It computes positions only.
+Each backbone node carries a clade, and every analysis either recovered that
+clade or did not, with some level of support. To show all analyses at once,
+phylorug draws a small grid of cells at each node, one cell per analysis. The
+grid is what makes the comparison readable. Instead of laying the analyses
+out as a single long strip beside each node, which would run off the page
+when there are several, they wrap into a compact block of rows and columns.
 }
 \details{
-Users do not normally call this themselves. \code{plot_phylorug()} calls it,
-having first chosen a grid shape that fits the number of trees. It is
-documented here so the arrangement of cells in the final figure can be traced
-and, if needed, adjusted.
+This function builds that block. Given the support matrix and the chosen
+grid shape, it assigns every analysis a fixed row and column, filling left to
+right and top to bottom, and returns those positions for every node. It does
+not draw anything and does not touch colour, it only decides where each cell
+goes, so the drawing step has an explicit map to follow.
+
+\code{plot_phylorug()} calls this after choosing a grid shape that fits the
+number of analyses. It is internal, but documented here because the cell
+arrangement in the figure comes directly from these positions.
 }
 \keyword{internal}
