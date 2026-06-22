@@ -26,6 +26,9 @@
 #'   its cell. Has no effect on a presence matrix. Default \code{FALSE}.
 #' @param legend Logical. If \code{TRUE} (default), draw a legend mapping hues
 #'   to analyses.
+#' @param gradient_legend Logical. If \code{TRUE} (default), draw a small
+#'   greyscale bar under the legend showing that darker cells mean stronger
+#'   support. Set \code{FALSE} to hide it.
 #' @param cell_scale Numeric. Multiplier on the automatic cell height, for
 #'   tuning cell size on crowded trees. Default \code{0.3}.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
@@ -54,21 +57,22 @@
 #' plot_phylorug(backbone, mat)
 #' }
 plot_phylorug <- function(backbone, rug_mt,
-                          hues          = NULL,
-                          n_rows        = NULL,
-                          n_cols        = NULL,
-                          show_values   = FALSE,
-                          legend        = TRUE,
-                          cell_scale    = 0.3,
-                          x_offset      = 0,
-                          y_offset      = 0,
+                          hues = NULL,
+                          n_rows = NULL,
+                          n_cols = NULL,
+                          show_values = FALSE,
+                          legend = TRUE,
+                          gradient_legend = TRUE,
+                          cell_scale = 0.3,
+                          x_offset = 0,
+                          y_offset = 0,
                           dot_unanimous = TRUE,
-                          dot_col       = "black",
-                          dot_cex       = 0.6,
+                          dot_col = "black",
+                          dot_cex = 0.6,
                           ...) {
   if (!inherits(backbone, "phylo")) {
     stop("`backbone` must be a phylogenetic tree of class \"phylo\".",
-         call. = FALSE
+      call. = FALSE
     )
   }
   if (!is.matrix(rug_mt) && !is.data.frame(rug_mt)) {
@@ -76,22 +80,24 @@ plot_phylorug <- function(backbone, rug_mt,
   }
   if (ncol(rug_mt) < 2) {
     stop("`rug_mt` must have a node_id column and at least one analysis.",
-         call. = FALSE
+      call. = FALSE
     )
   }
 
   analyses <- colnames(rug_mt)[-1]
-  n_an     <- length(analyses)
+  n_an <- length(analyses)
 
   # Default hue palette, recycled if there are more analyses than colours
   if (is.null(hues)) {
-    base_hues <- c("#D85A30", "#185FA5", "#1D9E75", "#993556",
-                   "#854F0B", "#534AB7", "#3B6D11", "#A32D2D")
+    base_hues <- c(
+      "#D85A30", "#185FA5", "#1D9E75", "#993556",
+      "#854F0B", "#534AB7", "#3B6D11", "#A32D2D"
+    )
     hues <- base_hues[((seq_len(n_an) - 1) %% length(base_hues)) + 1]
   }
   if (length(hues) != n_an) {
     stop("`hues` must have one colour per analysis (", n_an, ").",
-         call. = FALSE
+      call. = FALSE
     )
   }
 
@@ -100,7 +106,8 @@ plot_phylorug <- function(backbone, rug_mt,
   if (is.null(n_rows)) n_rows <- ceiling(n_an / n_cols)
   if (n_rows * n_cols < n_an) {
     stop("A grid of ", n_rows, " by ", n_cols, " cannot hold ", n_an,
-         " analyses. Increase `n_rows` or `n_cols`.", call. = FALSE
+      " analyses. Increase `n_rows` or `n_cols`.",
+      call. = FALSE
     )
   }
 
@@ -109,11 +116,11 @@ plot_phylorug <- function(backbone, rug_mt,
   last_pp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
 
   # Cell size from tip spacing, corrected for canvas aspect ratio
-  ntip   <- ape::Ntip(backbone)
+  ntip <- ape::Ntip(backbone)
   yy_tip <- sort(last_pp$yy[seq_len(ntip)])
-  dy     <- stats::median(diff(yy_tip))
+  dy <- stats::median(diff(yy_tip))
 
-  pin        <- graphics::par("pin")
+  pin <- graphics::par("pin")
   x_per_inch <- diff(last_pp$x.lim) / pin[1]
   y_per_inch <- diff(last_pp$y.lim) / pin[2]
 
@@ -121,10 +128,10 @@ plot_phylorug <- function(backbone, rug_mt,
   cell_w <- cell_h * (x_per_inch / y_per_inch)
 
   # Split nodes: unanimous (all analyses present) vs variable
-  cells        <- rug_mt[, -1, drop = FALSE]
-  all_present  <- apply(cells, 1, function(x) all(!is.na(x)))
+  cells <- rug_mt[, -1, drop = FALSE]
+  all_present <- apply(cells, 1, function(x) all(!is.na(x)))
   unanimous_mt <- rug_mt[all_present, , drop = FALSE]
-  variable_mt  <- rug_mt[!all_present, , drop = FALSE]
+  variable_mt <- rug_mt[!all_present, , drop = FALSE]
 
   # Unanimous nodes: a single dot
   if (dot_unanimous && nrow(unanimous_mt) > 0) {
@@ -152,13 +159,21 @@ plot_phylorug <- function(backbone, rug_mt,
 
   # Legend mapping hue to analysis
   if (legend) {
-    graphics::legend(
-      "topleft",
+    usr     <- graphics::par("usr")
+    inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])   # margin from the left
+    inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])   # was 0.06 — bring the block up
+
+    leg <- graphics::legend(
+      x      = inset_x,
+      y      = inset_y,
       legend = analyses,
       fill   = hues,
       bty    = "n",
       cex    = 0.8
     )
+    if (gradient_legend) {
+      draw_support_gradient(above = leg)
+    }
   }
   invisible(NULL)
 }

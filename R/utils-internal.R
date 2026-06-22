@@ -72,4 +72,35 @@ contrast_text_color <- function(fill) {
   lum <- (0.299 * rgb_val[1] + 0.587 * rgb_val[2] + 0.114 * rgb_val[3]) / 255
   if (lum > 0.6) "black" else "white"
 }
+# draw_support_gradient()
+# Draw one small greyscale bar showing that cell darkness tracks support:
+# light at 0, dark at 1. Drawn in the tree's own coordinate space, just below
+# the swatch legend. Called by plot_phylorug() when gradient_legend = TRUE.
+draw_support_gradient <- function(above, label = "Support value", n_steps = 60) {
+  span_x <- graphics::par("usr")[2] - graphics::par("usr")[1]
+  line_h <- graphics::strheight("M", cex = 0.8)
 
+  x0    <- above$rect$left
+  bar_w <- 0.045 * span_x
+  bar_h <- line_h * 0.6
+
+  # bar sits above the legend's top edge, leaving room for its "0/1" line and label
+  y_bar_top <- above$rect$top + line_h * 2.2
+
+  # label above the bar
+  graphics::text(x0, y_bar_top + line_h * 0.4, label, adj = 0, cex = 0.6)
+
+  ramp  <- grDevices::colorRampPalette(c("grey90", "grey10"))(n_steps)
+  seg_w <- bar_w / n_steps
+  for (s in seq_len(n_steps)) {
+    graphics::rect(x0 + (s - 1) * seg_w, y_bar_top - bar_h,
+                   x0 + s * seg_w, y_bar_top, col = ramp[s], border = NA)
+  }
+  graphics::rect(x0, y_bar_top - bar_h, x0 + bar_w, y_bar_top,
+                 border = "black", lwd = 0.3)
+
+  # 0 and 1 just under the bar (sits between bar and legend)
+  graphics::text(x0, y_bar_top - bar_h - line_h * 0.4, "0", adj = 0, cex = 0.55)
+  graphics::text(x0 + bar_w, y_bar_top - bar_h - line_h * 0.4, "1", adj = 1, cex = 0.55)
+  invisible(NULL)
+}
