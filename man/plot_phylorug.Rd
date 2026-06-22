@@ -12,6 +12,7 @@ plot_phylorug(
   n_cols = NULL,
   show_values = FALSE,
   legend = TRUE,
+  gradient_legend = TRUE,
   cell_scale = 0.3,
   x_offset = 0,
   y_offset = 0,
@@ -40,6 +41,10 @@ its cell. Has no effect on a presence matrix. Default \code{FALSE}.}
 
 \item{legend}{Logical. If \code{TRUE} (default), draw a legend mapping hues
 to analyses.}
+
+\item{gradient_legend}{Logical. If \code{TRUE} (default), displays a
+colour gradient legend showing the mapping from support values to
+colours. Set to \code{FALSE} to suppress.}
 
 \item{cell_scale}{Numeric. Multiplier on the automatic cell height, for
 tuning cell size on crowded trees. Default \code{0.3}.}

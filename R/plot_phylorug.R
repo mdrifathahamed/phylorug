@@ -26,9 +26,9 @@
 #'   its cell. Has no effect on a presence matrix. Default \code{FALSE}.
 #' @param legend Logical. If \code{TRUE} (default), draw a legend mapping hues
 #'   to analyses.
-#' @param gradient_legend Logical. If \code{TRUE} (default), draw a small
-#'   greyscale bar under the legend showing that darker cells mean stronger
-#'   support. Set \code{FALSE} to hide it.
+#' @param gradient_legend Logical. If \code{TRUE} (default), displays a
+#'   colour gradient legend showing the mapping from support values to
+#'   colours. Set to \code{FALSE} to suppress.
 #' @param cell_scale Numeric. Multiplier on the automatic cell height, for
 #'   tuning cell size on crowded trees. Default \code{0.3}.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
