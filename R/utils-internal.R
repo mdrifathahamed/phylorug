@@ -104,3 +104,20 @@ draw_support_gradient <- function(above, label = "Support value", n_steps = 60) 
   graphics::text(x0 + bar_w, y_bar_top - bar_h - line_h * 0.4, "1", adj = 1, cex = 0.55)
   invisible(NULL)
 }
+# get_palette()
+# Return n distinct colours for n analyses. Uses a curated 12-colour set
+# first (each chosen to be easy to tell apart), and falls back to R's
+# Polychrome palette for larger n so colours stay distinguishable.
+# Categorical, not a gradient: adjacent colours should look different.
+get_palette <- function(n) {
+  curated <- c(
+    "#D85A30", "#185FA5", "#1D9E75", "#993556",
+    "#854F0B", "#534AB7", "#3B6D11", "#A32D2D",
+    "#2C8C9C", "#B5651D", "#6B4C9A", "#557A2F"
+  )
+  if (n <= length(curated)) {
+    curated[seq_len(n)]
+  } else {
+    grDevices::palette.colors(n, palette = "Polychrome 36")
+  }
+}

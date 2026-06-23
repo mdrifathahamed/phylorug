@@ -87,17 +87,13 @@ plot_phylorug <- function(backbone, rug_mt,
   analyses <- colnames(rug_mt)[-1]
   n_an <- length(analyses)
 
-  # Default hue palette, recycled if there are more analyses than colours
+  # Default palette: distinct colours, one per analysis
   if (is.null(hues)) {
-    base_hues <- c(
-      "#D85A30", "#185FA5", "#1D9E75", "#993556",
-      "#854F0B", "#534AB7", "#3B6D11", "#A32D2D"
-    )
-    hues <- base_hues[((seq_len(n_an) - 1) %% length(base_hues)) + 1]
+    hues <- get_palette(n_an)
   }
   if (length(hues) != n_an) {
     stop("`hues` must have one colour per analysis (", n_an, ").",
-      call. = FALSE
+         call. = FALSE
     )
   }
 
@@ -159,9 +155,9 @@ plot_phylorug <- function(backbone, rug_mt,
 
   # Legend mapping hue to analysis
   if (legend) {
-    usr     <- graphics::par("usr")
-    inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])   # margin from the left
-    inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])   # was 0.06 — bring the block up
+    usr <- graphics::par("usr")
+    inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])
+    inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])
 
     leg <- graphics::legend(
       x      = inset_x,
