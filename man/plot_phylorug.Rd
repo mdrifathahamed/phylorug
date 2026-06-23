@@ -13,6 +13,7 @@ plot_phylorug(
   show_values = FALSE,
   legend = TRUE,
   gradient_legend = TRUE,
+  colour = FALSE,
   cell_scale = 0.3,
   x_offset = 0,
   y_offset = 0,
@@ -29,8 +30,8 @@ plot_phylorug(
 column \code{node_id}, remaining columns the analyses.}
 
 \item{hues}{Character vector of base colours, one per analysis, in the same
-order as the matrix columns. If \code{NULL} (default), a built-in palette
-is used.}
+order as the matrix columns. Used only in colour mode. If \code{NULL}
+(default), a built-in colour-blind-safe palette is used.}
 
 \item{n_rows, n_cols}{Optional grid shape. Leave \code{NULL} (default) to
 choose automatically a roughly square grid that fits the analyses. Set one
@@ -39,12 +40,17 @@ or both to fix it; if only one is set, the other is chosen to fit.}
 \item{show_values}{Logical. If \code{TRUE}, print each support value inside
 its cell. Has no effect on a presence matrix. Default \code{FALSE}.}
 
-\item{legend}{Logical. If \code{TRUE} (default), draw a legend mapping hues
-to analyses.}
+\item{legend}{Logical. If \code{TRUE} (default), draw a legend: a numbered
+position grid in black-and-white mode, or colour swatches in colour mode.}
 
-\item{gradient_legend}{Logical. If \code{TRUE} (default), displays a
-colour gradient legend showing the mapping from support values to
-colours. Set to \code{FALSE} to suppress.}
+\item{gradient_legend}{Logical. If \code{TRUE} (default), in colour mode
+displays a greyscale bar showing the mapping from support values to cell
+darkness. Set to \code{FALSE} to suppress.}
+
+\item{colour}{Logical. If \code{FALSE} (default), cells are greyscale with
+darkness showing support, and each analysis is identified by its position
+in the grid (see the position legend). If \code{TRUE}, each analysis is
+given its own colour-blind-safe hue. Default \code{FALSE}.}
 
 \item{cell_scale}{Numeric. Multiplier on the automatic cell height, for
 tuning cell size on crowded trees. Default \code{0.3}.}
@@ -68,14 +74,15 @@ Invisibly \code{NULL}; called for its plotting side effect.
 }
 \description{
 Draws a backbone tree and overlays, at each internal node, a small grid of
-coloured cells summarising how several analyses support that node's clade.
-Each analysis is given its own hue, so a cell's colour tells you which
-analysis it is; the support value sets how deep that hue is, so a darker
-cell means stronger support. An absent clade is drawn white. Nodes where
-every analysis agrees can be marked with a single dot instead of a full
-grid, keeping the figure clean and drawing the eye to conflict. A legend
-maps each hue to its analysis, and the support value can be printed inside
-each cell for an exact read.
+cells summarising how several analyses support that node's clade. By default
+the cells are greyscale and a darker cell means stronger support, so each
+analysis is identified by its position in the grid rather than its colour; a
+numbered position legend shows which slot belongs to which analysis. In
+colour mode each analysis is instead given its own colour-blind-safe hue. An
+absent clade is drawn white. Nodes where every analysis agrees can be marked
+with a single dot instead of a full grid, keeping the figure clean and
+drawing the eye to conflict. The support value can be printed inside each
+cell for an exact read.
 }
 \details{
 This is the main user-facing plotting function. It draws the tree, works out

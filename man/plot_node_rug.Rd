@@ -13,6 +13,7 @@ plot_node_rug(
   x_offset = -0.0095,
   y_offset = 0.0023,
   show_values = FALSE,
+  bw = TRUE,
   last_pp = NULL
 )
 }
@@ -21,7 +22,7 @@ plot_node_rug(
 column \code{node_id}, remaining columns the analyses, holding raw values.}
 
 \item{hues}{Character vector of base colours, one per analysis, in column
-order.}
+order. Ignored when \code{bw = TRUE}.}
 
 \item{cell_h, cell_w}{Numeric. Height and width of one cell, in the tree's
 plotting coordinates.}
@@ -31,8 +32,13 @@ plotting coordinates.}
 \item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node,
 as a fraction of the tree's width and height.}
 
-\item{show_values}{Logical. If \code{TRUE}, print the raw support value
+\item{show_values}{Logical. If \code{TRUE}, print the support value
 inside each cell. Ignored in presence mode. Default \code{FALSE}.}
+
+\item{bw}{Logical. If \code{TRUE} (default), cells are greyscale and the
+support value sets how dark each cell is, so analysis identity comes from
+the cell's position in the grid rather than its colour. If \code{FALSE},
+each analysis is given its own hue. Default \code{TRUE}.}
 
 \item{last_pp}{The stored \code{plot.phylo} coordinates, passed in by
 \code{plot_phylorug()}. If \code{NULL}, they are fetched from the active
@@ -42,13 +48,13 @@ device.}
 Invisibly \code{NULL}; called for its drawing side effect.
 }
 \description{
-A phylogenetic tree must already be drawn on the active graphics device.
-For each internal node, this function paints a small grid of coloured
-rectangles, one per analysis, where the colour shows how strongly that
-analysis supports the node's clade. Each analysis keeps its own hue, and
-the support value sets how deep that hue is; an absent clade is drawn white.
-Together these grids are the rug. When values are shown, the support number
-is printed inside each cell in a contrasting colour.
+For each internal node, this function paints a small grid of rectangles,
+one per analysis, where the shade shows how strongly that analysis supports
+the node's clade. By default the cells are greyscale and a darker cell means
+stronger support, so each analysis is identified by its position in the grid.
+In colour mode each analysis keeps its own hue instead. An absent clade is
+drawn white. Together these grids are the rug. When values are shown, the
+support number is printed inside each cell in a contrasting colour.
 }
 \details{
 Users do not call this directly; \code{plot_phylorug()} calls it after

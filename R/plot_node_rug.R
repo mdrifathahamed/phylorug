@@ -1,12 +1,12 @@
 #' Draw the support cells at every node of a plotted tree
 #'
-#' A phylogenetic tree must already be drawn on the active graphics device.
-#' For each internal node, this function paints a small grid of coloured
-#' rectangles, one per analysis, where the colour shows how strongly that
-#' analysis supports the node's clade. Each analysis keeps its own hue, and
-#' the support value sets how deep that hue is; an absent clade is drawn white.
-#' Together these grids are the rug. When values are shown, the support number
-#' is printed inside each cell in a contrasting colour.
+#' For each internal node, this function paints a small grid of rectangles,
+#' one per analysis, where the shade shows how strongly that analysis supports
+#' the node's clade. By default the cells are greyscale and a darker cell means
+#' stronger support, so each analysis is identified by its position in the grid.
+#' In colour mode each analysis keeps its own hue instead. An absent clade is
+#' drawn white. Together these grids are the rug. When values are shown, the
+#' support number is printed inside each cell in a contrasting colour.
 #'
 #' Users do not call this directly; \code{plot_phylorug()} calls it after
 #' drawing the tree and working out the cell geometry.
@@ -14,14 +14,18 @@
 #' @param rug_mt The support matrix from \code{node_presence_matrix()}: first
 #'   column \code{node_id}, remaining columns the analyses, holding raw values.
 #' @param hues Character vector of base colours, one per analysis, in column
-#'   order.
+#'   order. Ignored when \code{bw = TRUE}.
 #' @param cell_h,cell_w Numeric. Height and width of one cell, in the tree's
 #'   plotting coordinates.
 #' @param n_cols Integer. Columns in each node's grid.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
 #'   as a fraction of the tree's width and height.
-#' @param show_values Logical. If \code{TRUE}, print the raw support value
+#' @param show_values Logical. If \code{TRUE}, print the support value
 #'   inside each cell. Ignored in presence mode. Default \code{FALSE}.
+#' @param bw Logical. If \code{TRUE} (default), cells are greyscale and the
+#'   support value sets how dark each cell is, so analysis identity comes from
+#'   the cell's position in the grid rather than its colour. If \code{FALSE},
+#'   each analysis is given its own hue. Default \code{TRUE}.
 #' @param last_pp The stored \code{plot.phylo} coordinates, passed in by
 #'   \code{plot_phylorug()}. If \code{NULL}, they are fetched from the active
 #'   device.
@@ -37,6 +41,7 @@ plot_node_rug <- function(rug_mt,
                           x_offset    = -0.0095,
                           y_offset    = 0.0023,
                           show_values = FALSE,
+                          bw          = TRUE,
                           last_pp     = NULL) {
   if (!is.matrix(rug_mt) && !is.data.frame(rug_mt)) {
     stop("`rug_mt` must be a matrix or data frame.", call. = FALSE)
@@ -70,6 +75,9 @@ plot_node_rug <- function(rug_mt,
     raw_vals <- as.numeric(raw_mat[i, ])
     nrm_vals <- as.numeric(norm_mat[i, ])
 
+    # Skip this node entirely if every analysis is absent (all-white rug)
+    if (all(is.na(raw_vals))) next
+
     x_center <- last_pp$xx[node_id] + dx_offset
     y_center <- last_pp$yy[node_id] + dy_offset
 
@@ -88,20 +96,19 @@ plot_node_rug <- function(rug_mt,
       ytop    <- y0 - (row_idx - 1) * cell_h
       ybottom <- ytop - cell_h
 
-      fill <- cell_color(nrm, hues[k])
-
+      fill <- cell_color(nrm, hues[k], bw = bw)
       graphics::rect(xleft, ybottom, xright, ytop,
                      col    = fill,
-                     border = "black",
+                     border = "grey40",,
                      lwd    = 0.2
       )
-
       if (show_values && !is.na(raw)) {
         graphics::text(
           x      = (xleft + xright) / 2,
           y      = (ytop + ybottom) / 2,
           labels = format(nrm, digits = 2),
-          cex = cell_h * 0.33,
+          cex    = cell_h * 0.35,
+          font   = 2,
           col    = contrast_text_color(fill)
         )
       }

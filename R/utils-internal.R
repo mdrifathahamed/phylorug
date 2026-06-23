@@ -49,20 +49,7 @@ choose_grid <- function(n_cells) {
   list(n_rows = n_rows, n_cols = n_cols)
 }
 
-# cell_color()
-# Choose a cell's fill colour. The analysis's base hue sets the colour;
-# the normalised support value (0-1) sets how deep it is, from near-white
-# at 0 to the full hue at 1. An absent clade (NA) is white. Used by
-# plot_node_rug() so each analysis keeps its own hue while intensity
-# tracks support strength.
-cell_color <- function(value, hue) {
-  if (is.na(value)) {
-    return("white")
-  }
-  value <- max(0, min(1, value))
-  ramp <- grDevices::colorRampPalette(c("white", hue))
-  ramp(101)[round(value * 100) + 1]
-}
+
 # contrast_text_color()
 # Pick black or white text so a value printed on a coloured cell stays
 # readable. Uses perceptual luminance: light fills get black text, dark
@@ -84,7 +71,8 @@ draw_support_gradient <- function(above, label = "Support value", n_steps = 60) 
   bar_w <- 0.045 * span_x
   bar_h <- line_h * 0.6
 
-  # bar sits above the legend's top edge, leaving room for its "0/1" line and label
+  # bar sits above the legend's top edge, leaving room for its "0/1" line and
+  #label
   y_bar_top <- above$rect$top + line_h * 2.2
 
   # label above the bar
@@ -104,20 +92,83 @@ draw_support_gradient <- function(above, label = "Support value", n_steps = 60) 
   graphics::text(x0 + bar_w, y_bar_top - bar_h - line_h * 0.4, "1", adj = 1, cex = 0.55)
   invisible(NULL)
 }
-# get_palette()
-# Return n distinct colours for n analyses. Uses a curated 12-colour set
-# first (each chosen to be easy to tell apart), and falls back to R's
-# Polychrome palette for larger n so colours stay distinguishable.
-# Categorical, not a gradient: adjacent colours should look different.
-get_palette <- function(n) {
-  curated <- c(
-    "#D85A30", "#185FA5", "#1D9E75", "#993556",
-    "#854F0B", "#534AB7", "#3B6D11", "#A32D2D",
-    "#2C8C9C", "#B5651D", "#6B4C9A", "#557A2F"
-  )
-  if (n <= length(curated)) {
-    curated[seq_len(n)]
-  } else {
-    grDevices::palette.colors(n, palette = "Polychrome 36")
+
+# cell_color()
+# Pick a cell's fill from its (normalised) support value.
+# bw = TRUE : greyscale ramp, white (low) to black (high). Identity comes
+#             from the cell's position, not its colour.
+# bw = FALSE: white-to-hue ramp, so each analysis keeps its own colour.
+# An absent value (NA) is always white, so an absent clade reads as blank.
+cell_color <- function(value, hue, bw = FALSE) {
+  if (is.na(value)) {
+    return("white")
   }
+  v <- max(0, min(1, value))
+  if (bw) {
+    grey_level <- 1 - v
+    grDevices::rgb(grey_level, grey_level, grey_level)
+  } else {
+    rgb_hue <- grDevices::col2rgb(hue) / 255
+    mixed <- (1 - v) * c(1, 1, 1) + v * rgb_hue[, 1]
+    grDevices::rgb(mixed[1], mixed[2], mixed[3])
+  }
+}
+# get_palette()
+# Return n distinct colours for colour mode. Uses the colour-blind-safe
+# Okabe-Ito palette first (up to 8), then falls back to the larger
+# Polychrome set so colours stay distinguishable. Categorical, not a ramp.
+get_palette <- function(n) {
+  okabe_ito <- grDevices::palette.colors(palette = "Okabe-Ito")
+  okabe_ito <- okabe_ito[okabe_ito != "#000000"]
+  if (n <= length(okabe_ito)) {
+    unname(okabe_ito[seq_len(n)])
+  } else {
+    unname(grDevices::palette.colors(n, palette = "Polychrome 36"))
+  }
+}
+# draw_position_legend()
+# The legend for black-and-white mode. Identity comes from a cell's position
+# in the grid, not its colour, so this draws a small reference grid with each
+# slot numbered 1..n_an, and beside it a key listing which analysis each
+# number is. Laid out like the rugs (same n_cols, same fill order) so a reader
+# can match a cell's position on the tree to a number here.
+#
+# cell_w and cell_h should be the rug's own cell width and height (from
+# plot_phylorug), so the legend boxes are the same shape as the rug cells.
+# Both are needed because on a tall canvas the x and y scales differ, so a
+# single size would collapse the boxes into a thin line.
+draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
+                                 x0 = NULL, y0 = NULL) {
+  n_an   <- length(analyses)
+  n_rows <- ceiling(n_an / n_cols)
+
+  usr <- graphics::par("usr")
+  if (is.null(x0)) x0 <- usr[1] + 0.02 * (usr[2] - usr[1])
+  if (is.null(y0)) y0 <- usr[4] - 0.02 * (usr[4] - usr[3])
+
+  for (k in seq_len(n_an)) {
+    row_idx <- ceiling(k / n_cols)
+    col_idx <- ((k - 1) %% n_cols) + 1
+    xleft   <- x0 + (col_idx - 1) * cell_w
+    xright  <- xleft + cell_w
+    ytop    <- y0 - (row_idx - 1) * cell_h
+    ybottom <- ytop - cell_h
+    graphics::rect(xleft, ybottom, xright, ytop,
+                   col = "white", border = "black", lwd = 0.5
+    )
+    graphics::text((xleft + xright) / 2, (ytop + ybottom) / 2,
+                   labels = k, cex = 0.5
+    )
+  }
+
+  grid_right <- x0 + n_cols * cell_w
+  key_x      <- grid_right + 0.5 * cell_w
+  key_lines  <- paste0(seq_len(n_an), " - ", analyses)
+  graphics::text(
+    x = key_x, y = y0,
+    labels = paste(key_lines, collapse = "\n"),
+    adj = c(0, 1), cex = 0.6
+  )
+
+  invisible(NULL)
 }

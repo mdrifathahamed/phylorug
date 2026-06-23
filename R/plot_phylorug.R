@@ -1,14 +1,15 @@
 #' Draw a phylorug: a tree with node-support cells
 #'
 #' Draws a backbone tree and overlays, at each internal node, a small grid of
-#' coloured cells summarising how several analyses support that node's clade.
-#' Each analysis is given its own hue, so a cell's colour tells you which
-#' analysis it is; the support value sets how deep that hue is, so a darker
-#' cell means stronger support. An absent clade is drawn white. Nodes where
-#' every analysis agrees can be marked with a single dot instead of a full
-#' grid, keeping the figure clean and drawing the eye to conflict. A legend
-#' maps each hue to its analysis, and the support value can be printed inside
-#' each cell for an exact read.
+#' cells summarising how several analyses support that node's clade. By default
+#' the cells are greyscale and a darker cell means stronger support, so each
+#' analysis is identified by its position in the grid rather than its colour; a
+#' numbered position legend shows which slot belongs to which analysis. In
+#' colour mode each analysis is instead given its own colour-blind-safe hue. An
+#' absent clade is drawn white. Nodes where every analysis agrees can be marked
+#' with a single dot instead of a full grid, keeping the figure clean and
+#' drawing the eye to conflict. The support value can be printed inside each
+#' cell for an exact read.
 #'
 #' This is the main user-facing plotting function. It draws the tree, works out
 #' the cell geometry, chooses a grid that fits the analyses, and draws the rug.
@@ -17,18 +18,22 @@
 #' @param rug_mt The support matrix from \code{node_presence_matrix()}: first
 #'   column \code{node_id}, remaining columns the analyses.
 #' @param hues Character vector of base colours, one per analysis, in the same
-#'   order as the matrix columns. If \code{NULL} (default), a built-in palette
-#'   is used.
+#'   order as the matrix columns. Used only in colour mode. If \code{NULL}
+#'   (default), a built-in colour-blind-safe palette is used.
 #' @param n_rows,n_cols Optional grid shape. Leave \code{NULL} (default) to
 #'   choose automatically a roughly square grid that fits the analyses. Set one
 #'   or both to fix it; if only one is set, the other is chosen to fit.
 #' @param show_values Logical. If \code{TRUE}, print each support value inside
 #'   its cell. Has no effect on a presence matrix. Default \code{FALSE}.
-#' @param legend Logical. If \code{TRUE} (default), draw a legend mapping hues
-#'   to analyses.
-#' @param gradient_legend Logical. If \code{TRUE} (default), displays a
-#'   colour gradient legend showing the mapping from support values to
-#'   colours. Set to \code{FALSE} to suppress.
+#' @param legend Logical. If \code{TRUE} (default), draw a legend: a numbered
+#'   position grid in black-and-white mode, or colour swatches in colour mode.
+#' @param gradient_legend Logical. If \code{TRUE} (default), in colour mode
+#'   displays a greyscale bar showing the mapping from support values to cell
+#'   darkness. Set to \code{FALSE} to suppress.
+#' @param colour Logical. If \code{FALSE} (default), cells are greyscale with
+#'   darkness showing support, and each analysis is identified by its position
+#'   in the grid (see the position legend). If \code{TRUE}, each analysis is
+#'   given its own colour-blind-safe hue. Default \code{FALSE}.
 #' @param cell_scale Numeric. Multiplier on the automatic cell height, for
 #'   tuning cell size on crowded trees. Default \code{0.3}.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
@@ -63,6 +68,7 @@ plot_phylorug <- function(backbone, rug_mt,
                           show_values = FALSE,
                           legend = TRUE,
                           gradient_legend = TRUE,
+                          colour = FALSE,
                           cell_scale = 0.3,
                           x_offset = 0,
                           y_offset = 0,
@@ -72,7 +78,7 @@ plot_phylorug <- function(backbone, rug_mt,
                           ...) {
   if (!inherits(backbone, "phylo")) {
     stop("`backbone` must be a phylogenetic tree of class \"phylo\".",
-      call. = FALSE
+         call. = FALSE
     )
   }
   if (!is.matrix(rug_mt) && !is.data.frame(rug_mt)) {
@@ -80,21 +86,24 @@ plot_phylorug <- function(backbone, rug_mt,
   }
   if (ncol(rug_mt) < 2) {
     stop("`rug_mt` must have a node_id column and at least one analysis.",
-      call. = FALSE
+         call. = FALSE
     )
   }
 
   analyses <- colnames(rug_mt)[-1]
   n_an <- length(analyses)
 
-  # Default palette: distinct colours, one per analysis
-  if (is.null(hues)) {
-    hues <- get_palette(n_an)
-  }
-  if (length(hues) != n_an) {
-    stop("`hues` must have one colour per analysis (", n_an, ").",
-         call. = FALSE
-    )
+  # Colours: black-and-white by default (identity comes from position).
+  # Colour mode is opt-in and uses a colour-blind-safe palette.
+  if (colour) {
+    if (is.null(hues)) hues <- get_palette(n_an)
+    if (length(hues) != n_an) {
+      stop("`hues` must have one colour per analysis (", n_an, ").",
+           call. = FALSE
+      )
+    }
+  } else {
+    hues <- rep("black", n_an)
   }
 
   # Resolve the grid: automatic unless the user fixed it
@@ -102,8 +111,8 @@ plot_phylorug <- function(backbone, rug_mt,
   if (is.null(n_rows)) n_rows <- ceiling(n_an / n_cols)
   if (n_rows * n_cols < n_an) {
     stop("A grid of ", n_rows, " by ", n_cols, " cannot hold ", n_an,
-      " analyses. Increase `n_rows` or `n_cols`.",
-      call. = FALSE
+         " analyses. Increase `n_rows` or `n_cols`.",
+         call. = FALSE
     )
   }
 
@@ -149,26 +158,31 @@ plot_phylorug <- function(backbone, rug_mt,
       x_offset    = x_offset,
       y_offset    = y_offset,
       show_values = show_values,
+      bw          = !colour,
       last_pp     = last_pp
     )
   }
 
-  # Legend mapping hue to analysis
+  # Legend: a numbered position grid in B&W mode, colour swatches in colour mode
   if (legend) {
-    usr <- graphics::par("usr")
-    inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])
-    inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])
-
-    leg <- graphics::legend(
-      x      = inset_x,
-      y      = inset_y,
-      legend = analyses,
-      fill   = hues,
-      bty    = "n",
-      cex    = 0.8
-    )
-    if (gradient_legend) {
-      draw_support_gradient(above = leg)
+    if (colour) {
+      usr <- graphics::par("usr")
+      inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])
+      inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])
+      leg <- graphics::legend(
+        x      = inset_x,
+        y      = inset_y,
+        legend = analyses,
+        fill   = hues,
+        bty    = "n",
+        cex    = 0.8
+      )
+      if (gradient_legend) {
+        draw_support_gradient(above = leg)
+      }
+    } else {
+      draw_position_legend(analyses, n_cols,
+                           cell_w = cell_w * 3, cell_h = cell_h * 3)
     }
   }
   invisible(NULL)

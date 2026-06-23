@@ -91,7 +91,9 @@ test_that("stops when hues count does not match the analyses", {
   tree   <- make_test_tree()
   rug_mt <- make_support_mt(tree)
   expect_error(
-    on_null_device(plot_phylorug(tree, rug_mt, hues = c("red", "blue", "green"))),
+    on_null_device(
+      plot_phylorug(tree, rug_mt, colour = TRUE, hues = c("red", "blue", "green"))
+    ),
     "one colour per analysis"
   )
 })
