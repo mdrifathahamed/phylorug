@@ -20,6 +20,9 @@
 #' @param n_cols Integer. Columns in each node's grid.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
 #'   as a fraction of the tree's width and height.
+#' @param rug_position One of \code{"outside"} (default) or \code{"inside"}.
+#'   \code{"outside"} centres each rug on its node; \code{"inside"} shifts it
+#'   left toward the root and up, into the angle where the branch splits.
 #' @param show_values Logical. If \code{TRUE}, print the support value
 #'   inside each cell. Ignored in presence mode. Default \code{FALSE}.
 #' @param bw Logical. If \code{TRUE} (default), cells are greyscale and the
@@ -38,14 +41,17 @@ plot_node_rug <- function(rug_mt,
                           cell_h,
                           cell_w,
                           n_cols,
-                          x_offset    = -0.0095,
-                          y_offset    = 0.0023,
-                          show_values = FALSE,
-                          bw          = TRUE,
-                          last_pp     = NULL) {
+                          x_offset     = -0.0095,
+                          y_offset     = 0.0023,
+                          rug_position = c("outside", "inside"),
+                          show_values  = FALSE,
+                          bw           = TRUE,
+                          last_pp      = NULL) {
   if (!is.matrix(rug_mt) && !is.data.frame(rug_mt)) {
     stop("`rug_mt` must be a matrix or data frame.", call. = FALSE)
   }
+  rug_position <- match.arg(rug_position)
+
   if (is.null(last_pp)) {
     last_pp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
   }
@@ -81,8 +87,18 @@ plot_node_rug <- function(rug_mt,
     x_center <- last_pp$xx[node_id] + dx_offset
     y_center <- last_pp$yy[node_id] + dy_offset
 
-    x0 <- x_center
-    y0 <- y_center + total_h / 2
+    # outside: centred on the node (the default).
+    # inside: tucked into the crook, just left of the branch with a small gap,
+    # lifted up above the node.
+    if (rug_position == "inside") {
+      gap_x <- cell_w * 0.5
+      gap_y <- cell_h * 0.23
+      x0    <- x_center - total_w - gap_x
+      y0    <- y_center + total_h + gap_y
+    } else {
+      x0 <- x_center
+      y0 <- y_center + total_h / 2
+    }
 
     for (k in seq_len(n_an)) {
       raw <- raw_vals[k]
@@ -99,7 +115,7 @@ plot_node_rug <- function(rug_mt,
       fill <- cell_color(nrm, hues[k], bw = bw)
       graphics::rect(xleft, ybottom, xright, ytop,
                      col    = fill,
-                     border = "grey40",,
+                     border = "grey40",
                      lwd    = 0.2
       )
       if (show_values && !is.na(raw)) {

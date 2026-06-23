@@ -15,35 +15,53 @@
 #' the cell geometry, chooses a grid that fits the analyses, and draws the rug.
 #'
 #' @param backbone The reference tree of class \code{"phylo"}.
+#'
 #' @param rug_mt The support matrix from \code{node_presence_matrix()}: first
 #'   column \code{node_id}, remaining columns the analyses.
+#'
 #' @param hues Character vector of base colours, one per analysis, in the same
 #'   order as the matrix columns. Used only in colour mode. If \code{NULL}
 #'   (default), a built-in colour-blind-safe palette is used.
+#'
 #' @param n_rows,n_cols Optional grid shape. Leave \code{NULL} (default) to
 #'   choose automatically a roughly square grid that fits the analyses. Set one
 #'   or both to fix it; if only one is set, the other is chosen to fit.
+#'
 #' @param show_values Logical. If \code{TRUE}, print each support value inside
 #'   its cell. Has no effect on a presence matrix. Default \code{FALSE}.
+#'
 #' @param legend Logical. If \code{TRUE} (default), draw a legend: a numbered
 #'   position grid in black-and-white mode, or colour swatches in colour mode.
+#'
 #' @param gradient_legend Logical. If \code{TRUE} (default), in colour mode
 #'   displays a greyscale bar showing the mapping from support values to cell
 #'   darkness. Set to \code{FALSE} to suppress.
+#'
 #' @param colour Logical. If \code{FALSE} (default), cells are greyscale with
 #'   darkness showing support, and each analysis is identified by its position
 #'   in the grid (see the position legend). If \code{TRUE}, each analysis is
 #'   given its own colour-blind-safe hue. Default \code{FALSE}.
+#'
 #' @param cell_scale Numeric. Multiplier on the automatic cell height, for
 #'   tuning cell size on crowded trees. Default \code{0.3}.
+#'
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
 #'   as a fraction of the tree's width and height. Default \code{0} (centred on
 #'   the node).
+#'
+#' @param rug_position One of \code{"outside"} (default) or \code{"inside"}.
+#'   \code{"outside"} centres each rug on its node; \code{"inside"} shifts it
+#'   toward the root, into the angle where the branch splits. Fine adjustments
+#'   are still made with \code{x_offset} and \code{y_offset}.
+#'
 #' @param dot_unanimous Logical. If \code{TRUE} (default), nodes where every
 #'   analysis recovered the clade are marked with a single dot instead of a
 #'   full grid. Set \code{FALSE} to draw a grid at every node.
+#'
 #' @param dot_col Colour of the unanimous-node dot. Default \code{"black"}.
+#'
 #' @param dot_cex Size of the unanimous-node dot. Default \code{0.6}.
+#'
 #' @param ... Passed to \code{ape::plot.phylo()}.
 #'
 #' @return Invisibly \code{NULL}; called for its plotting side effect.
@@ -72,6 +90,7 @@ plot_phylorug <- function(backbone, rug_mt,
                           cell_scale = 0.3,
                           x_offset = 0,
                           y_offset = 0,
+                          rug_position = c("outside", "inside"),
                           dot_unanimous = TRUE,
                           dot_col = "black",
                           dot_cex = 0.6,
@@ -89,6 +108,8 @@ plot_phylorug <- function(backbone, rug_mt,
          call. = FALSE
     )
   }
+
+  rug_position <- match.arg(rug_position)
 
   analyses <- colnames(rug_mt)[-1]
   n_an <- length(analyses)
@@ -150,16 +171,17 @@ plot_phylorug <- function(backbone, rug_mt,
   # Variable nodes: the full rug
   if (nrow(variable_mt) > 0) {
     plot_node_rug(
-      rug_mt      = variable_mt,
-      hues        = hues,
-      cell_h      = cell_h,
-      cell_w      = cell_w,
-      n_cols      = n_cols,
-      x_offset    = x_offset,
-      y_offset    = y_offset,
-      show_values = show_values,
-      bw          = !colour,
-      last_pp     = last_pp
+      rug_mt       = variable_mt,
+      hues         = hues,
+      cell_h       = cell_h,
+      cell_w       = cell_w,
+      n_cols       = n_cols,
+      x_offset     = x_offset,
+      y_offset     = y_offset,
+      rug_position = rug_position,
+      show_values  = show_values,
+      bw           = !colour,
+      last_pp      = last_pp
     )
   }
 

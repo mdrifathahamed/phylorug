@@ -12,6 +12,7 @@ plot_node_rug(
   n_cols,
   x_offset = -0.0095,
   y_offset = 0.0023,
+  rug_position = c("outside", "inside"),
   show_values = FALSE,
   bw = TRUE,
   last_pp = NULL
@@ -31,6 +32,10 @@ plotting coordinates.}
 
 \item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node,
 as a fraction of the tree's width and height.}
+
+\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.
+\code{"outside"} centres each rug on its node; \code{"inside"} shifts it
+toward the root, into the angle where the branch splits.}
 
 \item{show_values}{Logical. If \code{TRUE}, print the support value
 inside each cell. Ignored in presence mode. Default \code{FALSE}.}
