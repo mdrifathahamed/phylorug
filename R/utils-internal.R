@@ -1,26 +1,4 @@
-# detect Format automatically _used in read_trees()
-detect_format <- function(path) {
-  lines <- readLines(path, n = 5, warn = FALSE)
 
-  # Empty file check
-  if (length(lines) == 0 || all(!nzchar(trimws(lines)))) {
-    stop("File appears to be empty: ", basename(path),
-      call. = FALSE
-    )
-  }
-
-  # NEXUS -- always starts with #NEXUS
-  if (grepl("^\\s*#NEXUS", lines[1], ignore.case = TRUE)) {
-    return("nexus")
-  }
-
-  if (any(grepl("\\[&&NHX:", lines, ignore.case = TRUE))) {
-    return("newick")
-  }
-
-  # Default - Newick
-  "newick"
-}
 # normalize_support()
 # Rescale a vector of support values to the 0-1 range.
 # Bootstrap-style values (0-100) are divided by 100; values already on a

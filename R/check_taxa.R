@@ -1,102 +1,185 @@
-#' Check tip label consistency across a set of phylogenetic trees
+#' Check tip label consistency between backbone and a set of trees
 #'
-#' Compares a list of phylogenetic trees against a reference tree
-#' (the first tree in the list) to ensure that all trees contain the exact same
-#' set of taxa (tip labels). If discrepancies are found, detailed diagnostic
-#' reports listing missing and extra taxa are provided.
+#' Compares each comparison tree against the backbone to confirm that all
+#' analyses were run on the same set of taxa. A clade cannot be evaluated in an
+#' analysis that lacks its taxa, so this check should be run before a rug is
+#' built.
 #'
-#' @param trees A list containing multiple \code{phylo} objects, or a
-#'   uncompressed multiPhylo object containing the trees to be compared.
+#' @param backbone The reference tree, a \code{phylo} object. The rug is
+#'   drawn on this tree, and clades are searched with the reference  with this
+#'   backbone and compared with other trees.
 #'
-#' @param verbose Logical. If \code{TRUE} (default), detailed status messages
-#'   and diagnostic reports for mismatched trees are printed to the console.
+#' @param trees A named list of \code{phylo} or \code{multiPhylo} objects
+#'   returned by \code{\link{read_trees}}, one per tree.
 #'
+#' @param verbose Logical. If \code{TRUE} (default), reports the outcome and
+#'   names any mismatched analyses.
 #'
-#' @return A single logical value. \code{TRUE} if all trees contain
-#'   identical taxa. \code{FALSE} if any tree differs, in which case
-#'   the pipeline should not proceed.
+#' @return A single logical value: \code{TRUE} if every analysis shares the
+#'   backbone's taxa exactly. The value carries a \code{"diagnostics"}
+#'   attribute, a data frame with one row per tree giving its status
+#'   (\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
+#'   missing from, or extra to, the backbone. Diagnostics are attached whatever
+#'   \code{verbose} is set to.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' trees    <- read_trees("path/to/your/trees")
+#' backbone <- trees[["iqtree"]]
 #'
-#' # Assuming 'my_trees' is a named list of phylo objects loaded into R:
-#' trees <- read_trees("path/to/your/trees")
-#' result <- check_taxa(trees)
+#' ok <- check_taxa(backbone, trees)
 #'
-#' # Check if it's safe to proceed:
-#' if (result) {
-#'   message("Safe to proceed.")
+#' # The full report, whether or not anything went wrong
+#' report <- attr(ok, "diagnostics")
+#' report
+#'
+#' # Which analyses cannot evaluate every backbone clade?
+#' report[report$status == "missing", ]
 #' }
-#' }
-check_taxa <- function(trees, verbose = TRUE) {
-  # Validate input
+check_taxa <- function(backbone, trees, verbose = TRUE) {
 
+  if (!inherits(backbone, "phylo") && !inherits(backbone, "multiPhylo")) {
+    stop(
+      "`backbone` must be a `phylo` object, not ",
+      paste(class(backbone), collapse = "/"), ".",
+      call. = FALSE
+    )
+  }
   if (!inherits(trees, c("list", "multiPhylo"))) {
     stop(
-      "`trees` must be a list of phylo objects or a multiPhylo object.",
+      "`trees` must be a list of trees, as returned by `read_trees()`.",
+      call. = FALSE
+    )
+  }
+  if (length(trees) == 0L) {
+    stop("`trees` is empty. Supply at least one analysis to compare.",
+         call. = FALSE)
+  }
+  if (any(vapply(trees, is.null, logical(1)))) {
+    stop(
+      "`trees` contains NULL elements. Ensure every tree was read successfully.",
       call. = FALSE
     )
   }
   if (inherits(trees, "multiPhylo") && !is.null(attr(trees, "TipLabel"))) {
     stop(
-      "`trees` appears to be a compressed multiPhylo object ",
-      "(tip labels stored as an attribute, not per-tree). ",
-      "Decompress it first with `ape::uncompressTipLabel(trees)`.",
-      call. = FALSE
-    )
-  }
-  if (length(trees) == 0) {
-    stop(
-      "`trees` is empty. Supply at least two trees.",
+      "`trees` is a compressed multiPhylo object (tip labels stored as an ",
+      "attribute, not per tree). Decompress it first with ",
+      "`ape::uncompressTipLabel(trees)`.",
       call. = FALSE
     )
   }
 
-  if (any(vapply(trees, is.null, logical(1)))) {
-    stop(
-      "`trees` contains NULL elements. ",
-      "Ensure all tree files or objects were loaded successfully.",
-      call. = FALSE
-    )
+  bb_taxa <- pool_taxa(backbone, name = "backbone")
+
+  nm <- names(trees)
+  if (is.null(nm)) {
+    nm <- paste0("tree_", seq_along(trees))
   }
 
-  # Extract and sort tip labels from each tree
-  taxa_list <- lapply(trees, function(tr) sort(tr$tip.label))
+  status <- character(length(trees))
+  miss   <- character(length(trees))
+  extra  <- character(length(trees))
+  n_taxa <- integer(length(trees))
 
-  # Use first tree as reference
-  ref <- taxa_list[[1]]
+  for (i in seq_along(trees)) {
+    taxa <- pool_taxa(trees[[i]], name = nm[i])
 
-  # Compare all trees to reference
-  same <- vapply(taxa_list, function(x) identical(x, ref), logical(1))
+    m <- setdiff(bb_taxa, taxa)   # in backbone, absent from this analysis
+    e <- setdiff(taxa, bb_taxa)   # in this analysis, absent from backbone
 
-  # Report results if verbose
-  if (verbose) {
-    if (all(same)) {
-      message("\u2705 All trees contain the same set of taxa.")
+    status[i] <- if (length(m) == 0L && length(e) == 0L) {
+      "identical"
+    } else if (length(m) == 0L) {
+      # Every backbone taxon is present, so every backbone clade can still be
+      # evaluated. The extra taxa are irrelevant to the comparison.
+      "superset"
     } else {
-      bad <- which(!same)
+      # A backbone taxon is absent. Clades containing it cannot be evaluated
+      # here, and must not be scored as absent.
+      "missing"
+    }
 
-      # 1. Quietly compile data logs for programmatic backup
-      full_diagnostics <- lapply(bad, function(i) {
-        list(
-          tree_index = i,
-          missing    = setdiff(ref, taxa_list[[i]]),
-          extra      = setdiff(taxa_list[[i]], ref)
-        )
-      })
-      names(full_diagnostics) <- paste0("tree_", bad)
-      options(phylorug_diagnostics = full_diagnostics)
+    miss[i]   <- paste(m, collapse = ", ")
+    extra[i]  <- paste(e, collapse = ", ")
+    n_taxa[i] <- length(taxa)
+  }
 
-      # 2. Strict, elegant, ONE-line status report
+  diagnostics <- data.frame(
+    analysis = nm,
+    status   = status,
+    n_taxa   = n_taxa,
+    missing  = miss,
+    extra    = extra,
+    stringsAsFactors = FALSE,
+    row.names        = NULL
+  )
+
+  ok <- all(status == "identical")
+
+  if (verbose) {
+    if (ok) {
       message(
-        "\u274c Taxa mismatch detected in ", length(bad), " tree(s). ",
-        "Run `getOption('phylorug_diagnostics')` to view the full, detailed report."
+        "All ", length(trees), " analyses share the same ", length(bb_taxa),
+        " taxa as the backbone."
+      )
+    } else {
+      is_superset <- status == "superset"
+      is_missing  <- status == "missing"
+
+      if (any(is_superset)) {
+        message(
+          sum(is_superset), " analysis(es) contain taxa not in the backbone: ",
+          paste(nm[is_superset], collapse = ", "),
+          ". Every backbone clade can still be evaluated, so no action is ",
+          "needed; the extra taxa are ignored."
+        )
+      }
+      if (any(is_missing)) {
+        message(
+          sum(is_missing), " analysis(es) are MISSING backbone taxa: ",
+          paste(nm[is_missing], collapse = ", "),
+          ". Any backbone clade containing a missing taxon cannot be evaluated ",
+          "in those analyses, and must not be scored as absent. Either prune ",
+          "the backbone to the shared taxa, which narrows the question being ",
+          "asked, or mark the affected cells as not evaluable. See ",
+          "`attr(result, \"diagnostics\")` for the taxa involved."
+        )
+      }
+    }
+  }
+
+  attr(ok, "diagnostics") <- diagnostics
+  ok
+}
+
+
+#' Tip labels of one analysis
+#'
+#' Internal. Returns the sorted tip labels of an analysis, whether it holds one
+#' tree or a pool of several. Every tree in a pool must carry the same taxa: a
+#' pool whose trees disagree about their own taxon set is a data problem, not a
+#' phylogenetic result, and is therefore an error rather than a mismatch.
+#'
+#' @noRd
+pool_taxa <- function(x, name = "analysis") {
+  pool <- as_pool(x)
+
+  taxa <- lapply(pool, function(tr) sort(tr$tip.label))
+
+  if (length(taxa) > 1L) {
+    same <- vapply(taxa, identical, logical(1), taxa[[1L]])
+    if (!all(same)) {
+      stop(
+        "The trees within analysis \"", name, "\" do not share the same taxa. ",
+        "A pool must be the equally optimal trees from one search, all run on ",
+        "the same data.",
+        call. = FALSE
       )
     }
   }
 
-  # Return single logical
-  all(same)
+  taxa[[1L]]
 }

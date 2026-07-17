@@ -35,7 +35,7 @@ as a fraction of the tree's width and height.}
 
 \item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.
 \code{"outside"} centres each rug on its node; \code{"inside"} shifts it
-toward the root, into the angle where the branch splits.}
+left toward the root and up, into the angle where the branch splits.}
 
 \item{show_values}{Logical. If \code{TRUE}, print the support value
 inside each cell. Ignored in presence mode. Default \code{FALSE}.}
