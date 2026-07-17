@@ -2,25 +2,53 @@
 #'
 #' Compares each comparison tree against the backbone to confirm that all
 #' analyses were run on the same set of taxa. A clade cannot be evaluated in an
-#' analysis that lacks its taxa, so this check should be run before a rug is
-#' built.
+#' analysis that lacks its taxa, so this check should be run before a phylorug
+#' is built.
 #'
-#' @param backbone The reference tree, a \code{phylo} object. The rug is
-#'   drawn on this tree, and clades are searched with the reference  with this
-#'   backbone and compared with other trees.
+#' @details
+#' This function reports; it does not modify the trees. If the backbone is
+#' present in \code{trees} it is silently removed before comparison. Three
+#' outcomes are
 #'
-#' @param trees A named list of \code{phylo} or \code{multiPhylo} objects
-#'   returned by \code{\link{read_trees}}, one per tree.
+#' \describe{
+#'   \item{identical}{The comparison tree shares the backbone's taxa exactly.}
+#'   \item{superset}{The comparison tree contains every backbone taxon, plus
+#'     some others.
+#'   \item{superset}{The comparison trees contains every backbone taxon, plus
+#'     some extra. Every backbone clade can still be evaluated, so no action is
+#'     needed; the extra taxa are ignored.}
+#'   \item{missing}{The comparison trees lacks one or more backbone taxa. Any
+#'     backbone clade containing a missing taxon \emph{might produce false
+#'     absence} in that tree. Scoring such a clade as absent would report a
+#'     rejection where no question was ever put. Use [prune_to_shared()] to
+#'     reduce the backbone and the comparison trees to their common taxa.}
+#' }
+#'
+#' Where a comparison tree is a pool of several equally optimal trees, every
+#' tree in the pool is checked. A pool whose trees disagree about their own taxa
+#' is a data problem, and is an error.
+#'
+#' @param backbone The reference tree, as a \code{phylo} object. The rug is
+#'   drawn on this tree, and its clades are searched for in each comparison
+#'   tree.
+#'
+#' @param trees A named list of \code{phylo} or \code{multiPhylo} objects, one
+#'   per comparison, as returned by [read_trees()].If the backbone is present in the
+#'   list it is removed automatically before comparison, so you can pass the
+#'   full list from [read_trees()] without subsetting first.
 #'
 #' @param verbose Logical. If \code{TRUE} (default), reports the outcome and
-#'   names any mismatched analyses.
+#'   names any mismatched comparison trees.
 #'
-#' @return A single logical value: \code{TRUE} if every analysis shares the
-#'   backbone's taxa exactly. The value carries a \code{"diagnostics"}
-#'   attribute, a data frame with one row per tree giving its status
+#' @return A single logical value: \code{TRUE} if every comparison tree shares
+#'   the backbone's taxa exactly. The value carries a \code{"diagnostics"}
+#'   attribute, a data frame with one row per comparison tree giving its status
 #'   (\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
 #'   missing from, or extra to, the backbone. Diagnostics are attached whatever
 #'   \code{verbose} is set to.
+#'
+#' @seealso \code{\link{read_trees}} to load the trees;
+#'   \code{\link{prune_to_shared}} to reduce them to a common taxon set.
 #'
 #' @export
 #'
@@ -31,11 +59,12 @@
 #'
 #' ok <- check_taxa(backbone, trees)
 #'
+#'
 #' # The full report, whether or not anything went wrong
 #' report <- attr(ok, "diagnostics")
 #' report
 #'
-#' # Which analyses cannot evaluate every backbone clade?
+#' # Which comparison trees cannot evaluate every backbone clade?
 #' report[report$status == "missing", ]
 #' }
 check_taxa <- function(backbone, trees, verbose = TRUE) {
@@ -54,7 +83,7 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
     )
   }
   if (length(trees) == 0L) {
-    stop("`trees` is empty. Supply at least one analysis to compare.",
+    stop("`trees` is empty. Supply at least one comparison tree.",
          call. = FALSE)
   }
   if (any(vapply(trees, is.null, logical(1)))) {
@@ -63,6 +92,9 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
       call. = FALSE
     )
   }
+
+  # A compressed multiPhylo stores tip labels once, as an attribute, rather than
+  # per tree. Taxon sets cannot be compared until it is decompressed.
   if (inherits(trees, "multiPhylo") && !is.null(attr(trees, "TipLabel"))) {
     stop(
       "`trees` is a compressed multiPhylo object (tip labels stored as an ",
@@ -72,8 +104,21 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
     )
   }
 
-  bb_taxa <- pool_taxa(backbone, name = "backbone")
+  # Remove the backbone from `trees` if it was passed in, identified by
+  # object identity. This lets the user pass the full read_trees() output
+  # without subsetting first.
+  is_backbone <- vapply(trees, identical, logical(1L), backbone)
+  if (any(is_backbone)) {
+    trees <- trees[!is_backbone]
+  }
+  if (length(trees) == 0L) {
+    stop(
+      "`trees` contains only the backbone. Supply at least one comparison tree.",
+      call. = FALSE
+    )
+  }
 
+  bb_taxa <- pool_taxa(backbone, name = "backbone")
   nm <- names(trees)
   if (is.null(nm)) {
     nm <- paste0("tree_", seq_along(trees))
@@ -87,18 +132,14 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   for (i in seq_along(trees)) {
     taxa <- pool_taxa(trees[[i]], name = nm[i])
 
-    m <- setdiff(bb_taxa, taxa)   # in backbone, absent from this analysis
-    e <- setdiff(taxa, bb_taxa)   # in this analysis, absent from backbone
+    m <- setdiff(bb_taxa, taxa)   # in backbone, absent from this comparison
+    e <- setdiff(taxa, bb_taxa)   # in this comparison, absent from backbone
 
     status[i] <- if (length(m) == 0L && length(e) == 0L) {
       "identical"
     } else if (length(m) == 0L) {
-      # Every backbone taxon is present, so every backbone clade can still be
-      # evaluated. The extra taxa are irrelevant to the comparison.
       "superset"
     } else {
-      # A backbone taxon is absent. Clades containing it cannot be evaluated
-      # here, and must not be scored as absent.
       "missing"
     }
 
@@ -108,11 +149,11 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   }
 
   diagnostics <- data.frame(
-    analysis = nm,
-    status   = status,
-    n_taxa   = n_taxa,
-    missing  = miss,
-    extra    = extra,
+    comparison = nm,
+    status     = status,
+    n_taxa     = n_taxa,
+    missing    = miss,
+    extra      = extra,
     stringsAsFactors = FALSE,
     row.names        = NULL
   )
@@ -122,8 +163,8 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   if (verbose) {
     if (ok) {
       message(
-        "All ", length(trees), " analyses share the same ", length(bb_taxa),
-        " taxa as the backbone."
+        "All ", length(trees), " comparison trees share the same ",
+        length(bb_taxa), " taxa as the backbone."
       )
     } else {
       is_superset <- status == "superset"
@@ -131,20 +172,19 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
 
       if (any(is_superset)) {
         message(
-          sum(is_superset), " analysis(es) contain taxa not in the backbone: ",
-          paste(nm[is_superset], collapse = ", "),
+          sum(is_superset), " comparison tree(s) contain taxa not in the ",
+          "backbone: ", paste(nm[is_superset], collapse = ", "),
           ". Every backbone clade can still be evaluated, so no action is ",
           "needed; the extra taxa are ignored."
         )
       }
       if (any(is_missing)) {
         message(
-          sum(is_missing), " analysis(es) are MISSING backbone taxa: ",
+          sum(is_missing), " comparison tree(s) are MISSING backbone taxa: ",
           paste(nm[is_missing], collapse = ", "),
           ". Any backbone clade containing a missing taxon cannot be evaluated ",
-          "in those analyses, and must not be scored as absent. Either prune ",
-          "the backbone to the shared taxa, which narrows the question being ",
-          "asked, or mark the affected cells as not evaluable. See ",
+          "in those trees. Use `prune_to_shared()` to reduce the backbone and ",
+          "the comparison trees to their common taxa. See ",
           "`attr(result, \"diagnostics\")` for the taxa involved."
         )
       }
@@ -156,15 +196,15 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
 }
 
 
-#' Tip labels of one analysis
+#' Tip labels of one comparison tree
 #'
-#' Internal. Returns the sorted tip labels of an analysis, whether it holds one
+#' Internal. Returns the sorted tip labels of a comparison, whether it holds one
 #' tree or a pool of several. Every tree in a pool must carry the same taxa: a
 #' pool whose trees disagree about their own taxon set is a data problem, not a
 #' phylogenetic result, and is therefore an error rather than a mismatch.
 #'
 #' @noRd
-pool_taxa <- function(x, name = "analysis") {
+pool_taxa <- function(x, name = "comparison") {
   pool <- as_pool(x)
 
   taxa <- lapply(pool, function(tr) sort(tr$tip.label))
@@ -173,9 +213,9 @@ pool_taxa <- function(x, name = "analysis") {
     same <- vapply(taxa, identical, logical(1), taxa[[1L]])
     if (!all(same)) {
       stop(
-        "The trees within analysis \"", name, "\" do not share the same taxa. ",
-        "A pool must be the equally optimal trees from one search, all run on ",
-        "the same data.",
+        "The trees within \"", name, "\" do not share the same taxa. A pool ",
+        "must be the equally optimal trees from one search, all run on the ",
+        "same data.",
         call. = FALSE
       )
     }

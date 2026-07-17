@@ -104,5 +104,5 @@ test_that("returns a data frame with the two expected columns", {
   tree   <- make_labeled_tree(c("95", "88"))
   result <- node_support(tree)
   expect_s3_class(result, "data.frame")
-  expect_named(result, c("support_1", "support_2"))
+  expect_named(result, c("support_1", "support_2", "support_3"))
 })

@@ -2,56 +2,78 @@
 % Please edit documentation in R/read_trees.R
 \name{read_trees}
 \alias{read_trees}
-\title{Read phylogenetic trees from a directory}
+\title{Import phylogenetic trees from a directory}
 \usage{
 read_trees(
-  dir,
-  ext = "tre",
+  dir = ".",
+  ext = c("tre", "tree", "treefile", "nwk", "newick", "nex", "nexus", "contree"),
   format = c("auto", "newick", "nexus"),
   verbose = TRUE
 )
 }
 \arguments{
-\item{dir}{A character string specifying the target directory containing the
-phylogenetic tree files.}
+\item{dir}{Path to the directory containing the tree files. Defaults to the
+working directory.}
 
-\item{ext}{A character string specifying file extension to look for. Defaults
-to \code{tre}.}
+\item{ext}{Character vector of file extensions to search for, without the
+leading dot. Matching is case-insensitive. You may supply your own, for
+example \code{ext = "treefile"} to read only IQ-TREE output. If you do not,
+the default filters the directory to the common tree file extensions, so
+that alignments, log files and configuration files sitting beside the trees
+are not read. Files with no extension, such as classic RAxML output, cannot
+be matched.}
 
-\item{format}{A character string specifying file format of the phylogenetic
-trees. Use \code{auto} (default) to detect format from file content,
-\code{newick} to force Newick parsing, or \code{nexus} to force NEXUS
-parsing.}
+\item{format}{The parsing strategy to use. Defaults to \code{"auto"}, which
+detects the format of each file individually, so a directory may mix
+formats. Use \code{"newick"} or \code{"nexus"} to force one parser for all
+files.}
 
-\item{verbose}{Logical. If \code{TRUE} (default), prints a message reporting
-the number of trees that were read successfully. Set to \code{FALSE} for
-silent operation.}
+\item{verbose}{Logical. If \code{TRUE} (default), reports trees read, files
+skipped, and pooled analyses. Errors are always reported.}
 }
 \value{
-A named list of \code{phylo} objects. List elements are named after
-the filenames of the original phylogenetic tree files. Elements for files
-that could not be read are set to \code{NULL}.
+A named list, one element per tree file, named after the filenames
+with extensions removed. Single-tree files yield \code{phylo} objects;
+multi-tree files yield \code{multiPhylo}. Carries a \code{"pool_sizes"}
+attribute giving the number of trees per analysis.
 }
 \description{
-Looks for phylogenetic tree files with a matching formats and extension
-inside the assigned directory. Once found, returns them as a named list of
-\code{phylo} objects. Supports both Newick and NEXUS formats.
+Scans a directory for phylogenetic tree files, parses each one, and returns
+them as a named list. Format is detected from file content, so a directory
+may mix Newick and NEXUS files.
+}
+\details{
+Each file is one analysis. A file holding a single tree is returned as a
+\code{phylo}; a file holding several equally optimal trees from one search
+(as POY, TNT and PAUP* write them) is returned as a \code{multiPhylo} and is
+scored as a pool, the clade presence being the proportion of trees in that
+file recovering it.
+
+Do not supply posterior samples, bootstrap replicates, or sets of gene trees.
+These are distributions rather than analyses and must be summarised before
+use. A file holding more than 100 trees is an error.
+
+Support values written as Newick node labels are read normally. BEAST-style
+bracket annotations (\code{[&posterior=0.98]}) are discarded by \pkg{ape};
+the topology is unaffected, and a message is emitted.
+
+Files matching \code{ext} that contain no tree, such as a NEXUS character
+matrix, are skipped with a message. A tree file that fails to parse is an
+error.
 }
 \examples{
 \dontrun{
-# Simplest usage -- auto-detects format from file content
+# One tree per analysis. Each element is a `phylo`.
 trees <- read_trees("path/to/your/trees")
+ape::plot.phylo(trees[[1]])
 
-# Specify extension explicitly
-trees <- read_trees(
-  dir = "path/to/your/trees",
-  ext = "nex"
-)
+# Trees per analysis
+attr(trees, "pool_sizes")
+
+# Restrict to one extension
+trees <- read_trees("path/to/your/trees", ext = "treefile")
 
 # Force Newick parsing
-trees <- read_trees(
-  dir    = "path/to/your/trees",
-  format = "newick"
-)
+trees <- read_trees("path/to/your/trees", format = "newick")
 }
 }

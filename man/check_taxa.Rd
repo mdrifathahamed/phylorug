@@ -2,38 +2,47 @@
 % Please edit documentation in R/check_taxa.R
 \name{check_taxa}
 \alias{check_taxa}
-\title{Check tip label consistency across a set of phylogenetic trees}
+\title{Check tip label consistency between backbone and a set of trees}
 \usage{
-check_taxa(trees, verbose = TRUE)
+check_taxa(backbone, trees, verbose = TRUE)
 }
 \arguments{
-\item{trees}{A list containing multiple \code{phylo} objects, or a
-uncompressed multiPhylo object containing the trees to be compared.}
+\item{backbone}{The reference tree, a \code{phylo} object. The rug is
+drawn on this tree, and clades are searched with the reference  with this
+backbone and compared with other trees.}
 
-\item{verbose}{Logical. If \code{TRUE} (default), detailed status messages
-and diagnostic reports for mismatched trees are printed to the console.}
+\item{trees}{A named list of \code{phylo} or \code{multiPhylo} objects
+returned by \code{\link{read_trees}}, one per tree.}
+
+\item{verbose}{Logical. If \code{TRUE} (default), reports the outcome and
+names any mismatched analyses.}
 }
 \value{
-A single logical value. \code{TRUE} if all trees contain
-identical taxa. \code{FALSE} if any tree differs, in which case
-the pipeline should not proceed.
+A single logical value: \code{TRUE} if every analysis shares the
+backbone's taxa exactly. The value carries a \code{"diagnostics"}
+attribute, a data frame with one row per tree giving its status
+(\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
+missing from, or extra to, the backbone. Diagnostics are attached whatever
+\code{verbose} is set to.
 }
 \description{
-Compares a list of phylogenetic trees against a reference tree
-(the first tree in the list) to ensure that all trees contain the exact same
-set of taxa (tip labels). If discrepancies are found, detailed diagnostic
-reports listing missing and extra taxa are provided.
+Compares each comparison tree against the backbone to confirm that all
+analyses were run on the same set of taxa. A clade cannot be evaluated in an
+analysis that lacks its taxa, so this check should be run before a rug is
+built.
 }
 \examples{
 \dontrun{
+trees    <- read_trees("path/to/your/trees")
+backbone <- trees[["iqtree"]]
 
-# Assuming 'my_trees' is a named list of phylo objects loaded into R:
-trees <- read_trees("path/to/your/trees")
-result <- check_taxa(trees)
+ok <- check_taxa(backbone, trees)
 
-# Check if it's safe to proceed:
-if (result) {
-  message("Safe to proceed.")
-}
+# The full report, whether or not anything went wrong
+report <- attr(ok, "diagnostics")
+report
+
+# Which analyses cannot evaluate every backbone clade?
+report[report$status == "missing", ]
 }
 }

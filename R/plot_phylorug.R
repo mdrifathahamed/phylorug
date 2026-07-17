@@ -1,62 +1,59 @@
-#' Draw a phylorug: a tree with node-support cells
+#' Draw a phylorug: a backbone tree with node rugs
 #'
 #' Draws a backbone tree and overlays, at each internal node, a small grid of
-#' cells summarising how several analyses support that node's clade. By default
-#' the cells are greyscale and a darker cell means stronger support, so each
-#' analysis is identified by its position in the grid rather than its colour; a
-#' numbered position legend shows which slot belongs to which analysis. In
-#' colour mode each analysis is instead given its own colour-blind-safe hue. An
-#' absent clade is drawn white. Nodes where every analysis agrees can be marked
-#' with a single dot instead of a full grid, keeping the figure clean and
-#' drawing the eye to conflict. The support value can be printed inside each
-#' cell for an exact read.
+#' cells (a rug) summarising how several comparison trees treat that node's
+#' clade. The appearance is set by \code{mode}:
 #'
-#' This is the main user-facing plotting function. It draws the tree, works out
-#' the cell geometry, chooses a grid that fits the analyses, and draws the rug.
+#' \itemize{
+#'   \item \code{"presence"} (default): each cell is black (clade recovered),
+#'     white (rejected), or grey (recovered in part of a pool). This is the
+#'     simplest, most robust view and needs no support values.
+#'   \item \code{"support"}: present cells are shaded by binned support, using
+#'     thresholds appropriate to each comparison tree's support measure. Absent
+#'     cells are marked distinctly and clades that could not be evaluated are
+#'     hatched. Requires \code{support_type}.
+#' }
+#'
+#' Nodes where every comparison tree recovered the clade can be marked with a
+#' single dot instead of a full grid, keeping the figure clean and drawing the
+#' eye to conflict.
 #'
 #' @param backbone The reference tree of class \code{"phylo"}.
 #'
-#' @param rug_mt The support matrix from \code{node_presence_matrix()}: first
-#'   column \code{node_id}, remaining columns the analyses.
+#' @param npm The list returned by \code{\link{node_presence_matrix}}, with a
+#'   \code{presence} element and one or more \code{support_1}, \code{support_2},
+#'   \code{support_3} elements.
 #'
-#' @param hues Character vector of base colours, one per analysis, in the same
-#'   order as the matrix columns. Used only in colour mode. If \code{NULL}
-#'   (default), a built-in colour-blind-safe palette is used.
+#' @param mode One of \code{"presence"} (default) or \code{"support"}.
 #'
-#' @param n_rows,n_cols Optional grid shape. Leave \code{NULL} (default) to
-#'   choose automatically a roughly square grid that fits the analyses. Set one
-#'   or both to fix it; if only one is set, the other is chosen to fit.
+#' @param support_col Integer 1-3. Which support matrix to shade by, when
+#'   \code{mode = "support"}. Selects \code{npm$support_1},
+#'   \code{npm$support_2}, or \code{npm$support_3}. Default \code{1}.
 #'
-#' @param show_values Logical. If \code{TRUE}, print each support value inside
-#'   its cell. Has no effect on a presence matrix. Default \code{FALSE}.
+#' @param support_type Named character vector mapping each comparison tree to
+#'   its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
+#'   \code{"posterior"}). Required when \code{mode = "support"}.
 #'
-#' @param legend Logical. If \code{TRUE} (default), draw a legend: a numbered
-#'   position grid in black-and-white mode, or colour swatches in colour mode.
+#' @param thresholds Optional list overriding the built-in bin thresholds, keyed
+#'   by support type. \code{NULL} uses the literature defaults.
 #'
-#' @param gradient_legend Logical. If \code{TRUE} (default), in colour mode
-#'   displays a greyscale bar showing the mapping from support values to cell
-#'   darkness. Set to \code{FALSE} to suppress.
+#' @param n_rows,n_cols Optional grid shape at each node. Leave \code{NULL}
+#'   (default) to choose a roughly square grid automatically.
 #'
-#' @param colour Logical. If \code{FALSE} (default), cells are greyscale with
-#'   darkness showing support, and each analysis is identified by its position
-#'   in the grid (see the position legend). If \code{TRUE}, each analysis is
-#'   given its own colour-blind-safe hue. Default \code{FALSE}.
+#' @param legend Logical. If \code{TRUE} (default), draw the legend: a numbered
+#'   position grid in presence mode, or a threshold block in support mode.
 #'
-#' @param cell_scale Numeric. Multiplier on the automatic cell height, for
-#'   tuning cell size on crowded trees. Default \code{0.3}.
+#' @param cell_scale Numeric. Multiplier on the automatic cell height. Default
+#'   \code{0.3}.
 #'
-#' @param x_offset,y_offset Numeric. Shift the whole grid away from the node,
-#'   as a fraction of the tree's width and height. Default \code{0} (centred on
-#'   the node).
+#' @param x_offset,y_offset Numeric. Shift the whole grid away from the node, as
+#'   a fraction of the tree's width and height. Default \code{0}.
 #'
 #' @param rug_position One of \code{"outside"} (default) or \code{"inside"}.
-#'   \code{"outside"} centres each rug on its node; \code{"inside"} shifts it
-#'   toward the root, into the angle where the branch splits. Fine adjustments
-#'   are still made with \code{x_offset} and \code{y_offset}.
 #'
 #' @param dot_unanimous Logical. If \code{TRUE} (default), nodes where every
-#'   analysis recovered the clade are marked with a single dot instead of a
-#'   full grid. Set \code{FALSE} to draw a grid at every node.
+#'   comparison tree recovered the clade are marked with a single dot instead of
+#'   a full grid.
 #'
 #' @param dot_col Colour of the unanimous-node dot. Default \code{"black"}.
 #'
@@ -70,142 +67,137 @@
 #'
 #' @examples
 #' \dontrun{
-#' backbone <- ape::rtree(6)
-#' trees <- list(
-#'   IQTREE  = ape::rtree(6),
-#'   ASTRAL  = ape::rtree(6),
-#'   MrBayes = ape::rtree(6)
+#' backbone <- trees[["iqtree"]]
+#' others   <- trees[names(trees) != "iqtree"]
+#' npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+#'
+#' # Presence mode (default)
+#' plot_phylorug(backbone, npm)
+#'
+#' # Support mode, shading by the first support column
+#' plot_phylorug(
+#'   backbone, npm,
+#'   mode         = "support",
+#'   support_col  = 1,
+#'   support_type = c(astral = "lpp", raxml = "ufboot")
 #' )
-#' mat <- node_presence_matrix(backbone, trees)
-#' plot_phylorug(backbone, mat)
 #' }
-plot_phylorug <- function(backbone, rug_mt,
-                          hues = NULL,
-                          n_rows = NULL,
-                          n_cols = NULL,
-                          show_values = FALSE,
-                          legend = TRUE,
-                          gradient_legend = TRUE,
-                          colour = FALSE,
-                          cell_scale = 0.3,
-                          x_offset = 0,
-                          y_offset = 0,
-                          rug_position = c("outside", "inside"),
+plot_phylorug <- function(backbone, npm,
+                          mode          = c("presence", "support"),
+                          support_col   = 1,
+                          support_type  = NULL,
+                          thresholds    = NULL,
+                          n_rows        = NULL,
+                          n_cols        = NULL,
+                          legend        = TRUE,
+                          cell_scale    = 0.3,
+                          x_offset      = 0,
+                          y_offset      = 0,
+                          rug_position  = c("outside", "inside"),
                           dot_unanimous = TRUE,
-                          dot_col = "black",
-                          dot_cex = 0.6,
+                          dot_col       = "black",
+                          dot_cex       = 0.6,
                           ...) {
+
   if (!inherits(backbone, "phylo")) {
     stop("`backbone` must be a phylogenetic tree of class \"phylo\".",
-         call. = FALSE
-    )
+         call. = FALSE)
   }
-  if (!is.matrix(rug_mt) && !is.data.frame(rug_mt)) {
-    stop("`rug_mt` must be a matrix or data frame.", call. = FALSE)
-  }
-  if (ncol(rug_mt) < 2) {
-    stop("`rug_mt` must have a node_id column and at least one analysis.",
-         call. = FALSE
-    )
+  if (!is.list(npm) || !("presence" %in% names(npm))) {
+    stop("`npm` must be the list returned by `node_presence_matrix()`, with a ",
+         "`presence` element.", call. = FALSE)
   }
 
+  mode         <- match.arg(mode)
   rug_position <- match.arg(rug_position)
 
-  analyses <- colnames(rug_mt)[-1]
-  n_an <- length(analyses)
+  presence <- npm$presence
 
-  # Colours: black-and-white by default (identity comes from position).
-  # Colour mode is opt-in and uses a colour-blind-safe palette.
-  if (colour) {
-    if (is.null(hues)) hues <- get_palette(n_an)
-    if (length(hues) != n_an) {
-      stop("`hues` must have one colour per analysis (", n_an, ").",
-           call. = FALSE
-      )
+  if (ncol(presence) < 1L) {
+    stop("`npm` has no comparison trees to plot.", call. = FALSE)
+  }
+
+  # Select the support matrix only in support mode. node_presence_matrix()
+  # stores support columns as support_1, support_2, support_3; support_col picks
+  # which one drives the shading.
+  support <- NULL
+  if (mode == "support") {
+    if (is.null(support_type)) {
+      stop("`mode = \"support\"` requires `support_type`, naming each ",
+           "comparison tree's support measure (e.g. c(astral = \"lpp\")).",
+           call. = FALSE)
     }
-  } else {
-    hues <- rep("black", n_an)
+    support_name <- paste0("support_", support_col)
+    if (!support_name %in% names(npm)) {
+      stop("`npm` has no `", support_name, "`. Rebuild the matrix with a ",
+           "matching `support_col`, or choose a lower `support_col`.",
+           call. = FALSE)
+    }
+    support <- npm[[support_name]]
   }
 
-  # Resolve the grid: automatic unless the user fixed it
-  if (is.null(n_cols)) n_cols <- choose_grid(n_an)$n_cols
-  if (is.null(n_rows)) n_rows <- ceiling(n_an / n_cols)
-  if (n_rows * n_cols < n_an) {
-    stop("A grid of ", n_rows, " by ", n_cols, " cannot hold ", n_an,
-         " analyses. Increase `n_rows` or `n_cols`.",
-         call. = FALSE
-    )
+  tree_names <- colnames(presence)
+  n_tree     <- length(tree_names)
+
+  # Resolve the grid shape.
+  if (is.null(n_cols)) n_cols <- choose_grid(n_tree)$n_cols
+  if (is.null(n_rows)) n_rows <- ceiling(n_tree / n_cols)
+  if (n_rows * n_cols < n_tree) {
+    stop("A grid of ", n_rows, " by ", n_cols, " cannot hold ", n_tree,
+         " comparison trees. Increase `n_rows` or `n_cols`.", call. = FALSE)
   }
 
-  # Draw the tree, then read back where each node landed
+  # Draw the tree, then read back where each node landed.
   ape::plot.phylo(backbone, ...)
   last_pp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
 
-  # Cell size from tip spacing, corrected for canvas aspect ratio
-  ntip <- ape::Ntip(backbone)
+  # Cell size from tip spacing, corrected for canvas aspect ratio.
+  ntip   <- ape::Ntip(backbone)
   yy_tip <- sort(last_pp$yy[seq_len(ntip)])
-  dy <- stats::median(diff(yy_tip))
+  dy     <- stats::median(diff(yy_tip))
 
-  pin <- graphics::par("pin")
+  pin        <- graphics::par("pin")
   x_per_inch <- diff(last_pp$x.lim) / pin[1]
   y_per_inch <- diff(last_pp$y.lim) / pin[2]
 
   cell_h <- dy * cell_scale
   cell_w <- cell_h * (x_per_inch / y_per_inch)
 
-  # Split nodes: unanimous (all analyses present) vs variable
-  cells <- rug_mt[, -1, drop = FALSE]
-  all_present <- apply(cells, 1, function(x) all(!is.na(x)))
-  unanimous_mt <- rug_mt[all_present, , drop = FALSE]
-  variable_mt <- rug_mt[!all_present, , drop = FALSE]
+  # Split nodes: unanimous (every tree recovered the clade) vs variable.
+  unanimous <- apply(presence, 1, function(p) all(p == 1))
 
-  # Unanimous nodes: a single dot
-  if (dot_unanimous && nrow(unanimous_mt) > 0) {
-    node_ids <- unanimous_mt[, 1]
+  # Unanimous nodes: a single dot.
+  if (dot_unanimous && any(unanimous)) {
+    ids <- as.integer(rownames(presence)[unanimous])
     graphics::points(
-      last_pp$xx[node_ids], last_pp$yy[node_ids],
+      last_pp$xx[ids], last_pp$yy[ids],
       pch = 16, cex = dot_cex, col = dot_col
     )
   }
 
-  # Variable nodes: the full rug
-  if (nrow(variable_mt) > 0) {
+  # Variable nodes: the full rug.
+  variable <- if (dot_unanimous) !unanimous else rep(TRUE, nrow(presence))
+  if (any(variable)) {
     plot_node_rug(
-      rug_mt       = variable_mt,
-      hues         = hues,
+      presence     = presence[variable, , drop = FALSE],
+      support      = if (is.null(support)) NULL else support[variable, , drop = FALSE],
+      support_type = support_type,
+      thresholds   = thresholds,
       cell_h       = cell_h,
       cell_w       = cell_w,
       n_cols       = n_cols,
       x_offset     = x_offset,
       y_offset     = y_offset,
       rug_position = rug_position,
-      show_values  = show_values,
-      bw           = !colour,
       last_pp      = last_pp
     )
   }
 
-  # Legend: a numbered position grid in B&W mode, colour swatches in colour mode
+  # Legend.
   if (legend) {
-    if (colour) {
-      usr <- graphics::par("usr")
-      inset_x <- usr[1] + 0.03 * (usr[2] - usr[1])
-      inset_y <- usr[4] - 0.01 * (usr[4] - usr[3])
-      leg <- graphics::legend(
-        x      = inset_x,
-        y      = inset_y,
-        legend = analyses,
-        fill   = hues,
-        bty    = "n",
-        cex    = 0.8
-      )
-      if (gradient_legend) {
-        draw_support_gradient(above = leg)
-      }
-    } else {
-      draw_position_legend(analyses, n_cols,
-                           cell_w = cell_w * 3, cell_h = cell_h * 3)
-    }
+    draw_position_legend(tree_names, n_cols,
+                         cell_w = cell_w * 3, cell_h = cell_h * 3)
   }
+
   invisible(NULL)
 }

@@ -4,70 +4,81 @@
 \alias{node_presence_matrix}
 \title{Construct a node presence/support matrix for multiple phylogenetic trees}
 \usage{
-node_presence_matrix(
-  backbone,
-  trees,
-  use_support = FALSE,
-  support_col = 1,
-  round_support = NULL
-)
+node_presence_matrix(backbone, trees, support_col = 1)
 }
 \arguments{
 \item{backbone}{A phylogenetic tree of class \code{"phylo"}. Each of its
 internal nodes becomes one row of the output matrix.}
 
 \item{trees}{A named list of \code{"phylo"} objects, or a \code{"multiPhylo"}
-object. Each tree becomes one column of the output matrix.}
+object. Each object becomes one column of the output matrix. An object
+holding several trees is scored as a pool.}
 
-\item{use_support}{Logical. If \code{FALSE} (default), cells record binary
-presence: \code{1} if the backbone clade is found in the comparison tree,
-\code{NA} if it is not. If \code{TRUE}, cells record the extracted support
-value for matching clades, and \code{NA} for clades that are absent.}
-
-\item{support_col}{Integer, \code{1} or \code{2}. Selects which support value
-to read. Column 1 is the primary support metric for all standard methods
-(bootstrap, posterior probability, or ASTRAL local posterior) and is the
-right choice in almost all cases. Column 2 holds the optional second value
-that tools such as ASTRAL write (for example quartet support); methods that
-write only one value have \code{NA} there. Used only when
-\code{use_support = TRUE}. Defaults to \code{1}.}
-
-\item{round_support}{Integer or \code{NULL}. If supplied, support values are
-rounded to this many decimal places. Defaults to \code{NULL}.}
+\item{support_col}{Integer from 1 to 3. Selects which support value to read
+when a tree carries compound node labels separated by \code{/}. Column 1 is
+the primary metric (bootstrap, posterior, or ASTRAL local posterior).
+Column 2 is the second value (UFBoot2 from IQ-TREE, or ASTRAL pp2).
+Column 3 is the third, if present (aBayes from IQ-TREE, or ASTRAL pp3).
+Used only when \code{use_support = TRUE}. Defaults to \code{1}.}
 }
 \value{
-A numeric matrix. The first column, \code{node_id}, holds the
-backbone node numbers. Each following column is one comparison tree, named
-after the list element (or \code{tree_1}, \code{tree_2} and so on if the
-list has no names). A cell is \code{1} or a support value where the clade
-was found, and \code{NA} where it was not.
+A named list with two numeric matrices, each with one row per
+internal backbone node and one column per comparison tree:
+\describe{
+\item{presence}{Clade presence: \code{1} where recovered, \code{0}
+where absent, or the proportion of pool trees recovering the clade.}
+\item{support}{Raw support values where the clade was recovered,
+\code{NA} where absent. Values are unrounded; apply rounding in
+the plotting function if needed.}
+}
+Both matrices carry a \code{"node_id"} attribute (backbone node
+numbers) and a \code{"pool_sizes"} attribute (trees per comparison).
 }
 \description{
-Compares a list of phylogenetic trees against a reference tree topology set
-as a backbone. For each internal node of the backbone, the function checks
-whether the same clade (the same set of tip labels) appears in other trees in
-comparison and records either binary presence value or the extracts the
-support values.
+Compares a set of phylogenetic trees against a reference topology, the
+\code{"backbone"}. For each internal node of the backbone, the function asks
+whether the same clade (the same set of tips) appears in each tree, and
+records either its presence or its support value.
+}
+\details{
+Every tree must include the complete set of backbone taxa. Because an
+tree lacking a backbone taxon cannot assess the presence of a clade
+containing that taxon,scoring such a clade as 'absent' would introduce a
+false negative.The function therefore enforces strict taxon matching. Use
+\code{\link[=check_taxa]{check_taxa()}} to diagnose the discrepancies and \code{\link[=prune_to_shared]{prune_to_shared()}} to
+harmonize the backbone and comapring tree taxa.
+
+The function always computes both a presence matrix and a support matrix
+in a single pass. The plotting function \code{plot_phylorug} decide which to
+use based on the visualisation context.
+
+In presence matrix (\code{use_support = FALSE}),For multiple equally most
+parsimonious trees (MPTs) the cell records the clade frequency among MPTs
+and, for a single-tree this is 1 for presence  or 0 for absence.
+
+In support matrix (\code{use_support = TRUE}), the cell records the support
+value from the tree that recovered the clade, such as bootstrap or posterior
+probability. For MPTs, support values are averaged across the trees that
+recovered the clade; trees that did not recover it contribute nothing. For a
+single tree this is the support value where the clade is present, or
+\code{NA} where it is absent, since a clade that is not in the tree has no
+node to carry a support value.
 }
 \examples{
 \dontrun{
-shared_backbone <- ape::rtree(5, tip.label = c("A", "B", "C", "D", "E"))
-alternative_trees <- list(
-  UCE_partition  = ape::rtree(5, tip.label = c("A", "B", "C", "D", "E")),
-  Mito_partition = ape::rtree(5, tip.label = c("A", "B", "C", "D", "E"))
-)
+trees    <- read_trees("path/to/your/trees")
+backbone <- trees[["iqtree"]]
+others   <- trees[names(trees) != "iqtree"]
 
-presence <- node_presence_matrix(
-  backbone    = shared_backbone,
-  trees       = alternative_trees,
-  use_support = FALSE
-)
+check_taxa(backbone, others)
 
-support <- node_presence_matrix(
-  backbone    = shared_backbone,
-  trees       = alternative_trees,
-  use_support = TRUE,
-  support_col = 1
-)
+npmatrix <- node_presence_matrix(backbone, others)
+
+# Access individual matrices
+npmatrix$presence   # clade presence/absence
+npmatrix$support    # raw support values
+
+# With ASTRAL second column
+result <- node_presence_matrix(backbone, others, support_col = 2)
 }
 }

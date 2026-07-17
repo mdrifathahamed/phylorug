@@ -17,6 +17,7 @@ plot_phylorug(
   cell_scale = 0.3,
   x_offset = 0,
   y_offset = 0,
+  rug_position = c("outside", "inside"),
   dot_unanimous = TRUE,
   dot_col = "black",
   dot_cex = 0.6,
@@ -58,6 +59,11 @@ tuning cell size on crowded trees. Default \code{0.3}.}
 \item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node,
 as a fraction of the tree's width and height. Default \code{0} (centred on
 the node).}
+
+\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.
+\code{"outside"} centres each rug on its node; \code{"inside"} shifts it
+toward the root, into the angle where the branch splits. Fine adjustments
+are still made with \code{x_offset} and \code{y_offset}.}
 
 \item{dot_unanimous}{Logical. If \code{TRUE} (default), nodes where every
 analysis recovered the clade are marked with a single dot instead of a
