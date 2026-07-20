@@ -3,5 +3,6 @@
 export(check_taxa)
 export(node_presence_matrix)
 export(plot_phylorug)
+export(prune_to_shared)
 export(read_trees)
 export(translate_tips)

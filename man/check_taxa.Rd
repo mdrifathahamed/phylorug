@@ -7,20 +7,22 @@
 check_taxa(backbone, trees, verbose = TRUE)
 }
 \arguments{
-\item{backbone}{The reference tree, a \code{phylo} object. The rug is
-drawn on this tree, and clades are searched with the reference  with this
-backbone and compared with other trees.}
+\item{backbone}{The reference tree, as a \code{phylo} object. The rug is
+drawn on this tree, and its clades are searched for in each comparison
+tree.}
 
-\item{trees}{A named list of \code{phylo} or \code{multiPhylo} objects
-returned by \code{\link{read_trees}}, one per tree.}
+\item{trees}{A named list of \code{phylo} or \code{multiPhylo} objects, one
+per comparison, as returned by \code{\link[=read_trees]{read_trees()}}.If the backbone is present in the
+list it is removed automatically before comparison, so you can pass the
+full list from \code{\link[=read_trees]{read_trees()}} without subsetting first.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), reports the outcome and
-names any mismatched analyses.}
+names any mismatched comparison trees.}
 }
 \value{
-A single logical value: \code{TRUE} if every analysis shares the
-backbone's taxa exactly. The value carries a \code{"diagnostics"}
-attribute, a data frame with one row per tree giving its status
+A single logical value: \code{TRUE} if every comparison tree shares
+the backbone's taxa exactly. The value carries a \code{"diagnostics"}
+attribute, a data frame with one row per comparison tree giving its status
 (\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
 missing from, or extra to, the backbone. Diagnostics are attached whatever
 \code{verbose} is set to.
@@ -28,8 +30,11 @@ missing from, or extra to, the backbone. Diagnostics are attached whatever
 \description{
 Compares each comparison tree against the backbone to confirm that all
 analyses were run on the same set of taxa. A clade cannot be evaluated in an
-analysis that lacks its taxa, so this check should be run before a rug is
-built.
+analysis that lacks its taxa, so this check should be run before a phylorug
+is built.
+}
+\details{
+
 }
 \examples{
 \dontrun{
@@ -38,11 +43,16 @@ backbone <- trees[["iqtree"]]
 
 ok <- check_taxa(backbone, trees)
 
+
 # The full report, whether or not anything went wrong
 report <- attr(ok, "diagnostics")
 report
 
-# Which analyses cannot evaluate every backbone clade?
+# Which comparison trees cannot evaluate every backbone clade?
 report[report$status == "missing", ]
 }
+}
+\seealso{
+\code{\link{read_trees}} to load the trees;
+\code{\link{prune_to_shared}} to reduce them to a common taxon set.
 }

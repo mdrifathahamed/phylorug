@@ -40,8 +40,14 @@
 #' @param n_rows,n_cols Optional grid shape at each node. Leave \code{NULL}
 #'   (default) to choose a roughly square grid automatically.
 #'
-#' @param legend Logical. If \code{TRUE} (default), draw the legend: a numbered
-#'   position grid in presence mode, or a threshold block in support mode.
+#' @param legend Logical. If \code{TRUE} (default), draw the legend.
+#'
+#' @param legend_position Where to place the legend: \code{"topleft"}
+#'   (default), \code{"bottomleft"}, \code{"topright"}, or
+#'   \code{"bottomright"}.
+#'
+#' @param show_support Logical. If \code{TRUE} (default), display the
+#'   backbone tree's own node support labels (in red) on the tree.
 #'
 #' @param cell_scale Numeric. Multiplier on the automatic cell height. Default
 #'   \code{0.3}.
@@ -90,6 +96,9 @@ plot_phylorug <- function(backbone, npm,
                           n_rows        = NULL,
                           n_cols        = NULL,
                           legend        = TRUE,
+                          legend_position = c("topleft", "bottomleft",
+                                              "topright", "bottomright"),
+                          show_support  = TRUE,
                           cell_scale    = 0.3,
                           x_offset      = 0,
                           y_offset      = 0,
@@ -99,6 +108,7 @@ plot_phylorug <- function(backbone, npm,
                           dot_cex       = 0.6,
                           ...) {
 
+  # --- Input validation ------------------------------------------------------
   if (!inherits(backbone, "phylo")) {
     stop("`backbone` must be a phylogenetic tree of class \"phylo\".",
          call. = FALSE)
@@ -108,8 +118,9 @@ plot_phylorug <- function(backbone, npm,
          "`presence` element.", call. = FALSE)
   }
 
-  mode         <- match.arg(mode)
-  rug_position <- match.arg(rug_position)
+  mode            <- match.arg(mode)
+  rug_position    <- match.arg(rug_position)
+  legend_position <- match.arg(legend_position)
 
   presence <- npm$presence
 
@@ -117,9 +128,7 @@ plot_phylorug <- function(backbone, npm,
     stop("`npm` has no comparison trees to plot.", call. = FALSE)
   }
 
-  # Select the support matrix only in support mode. node_presence_matrix()
-  # stores support columns as support_1, support_2, support_3; support_col picks
-  # which one drives the shading.
+  # --- Support matrix selection -----------------------------------------------
   support <- NULL
   if (mode == "support") {
     if (is.null(support_type)) {
@@ -139,7 +148,7 @@ plot_phylorug <- function(backbone, npm,
   tree_names <- colnames(presence)
   n_tree     <- length(tree_names)
 
-  # Resolve the grid shape.
+  # --- Grid shape -------------------------------------------------------------
   if (is.null(n_cols)) n_cols <- choose_grid(n_tree)$n_cols
   if (is.null(n_rows)) n_rows <- ceiling(n_tree / n_cols)
   if (n_rows * n_cols < n_tree) {
@@ -147,26 +156,63 @@ plot_phylorug <- function(backbone, npm,
          " comparison trees. Increase `n_rows` or `n_cols`.", call. = FALSE)
   }
 
-  # Draw the tree, then read back where each node landed.
-  ape::plot.phylo(backbone, ...)
+  # --- Auto y.lim for legend space -------------------------------------------
+  dots <- list(...)
+  ntip <- ape::Ntip(backbone)
+  if (is.null(dots$y.lim) && legend) {
+    # Scale legend space with cell_scale so larger rugs get more room.
+    # Base: position grid (~3 rows) + threshold key (~6 rows) + padding.
+    base_rows   <- if (mode == "support") 9 else 3
+    legend_rows <- ceiling(base_rows * (1 + cell_scale))
+    if (grepl("top", legend_position)) {
+      dots$y.lim <- c(0, ntip + legend_rows)
+    } else {
+      dots$y.lim <- c(-legend_rows, ntip + 1)
+    }
+  }
+
+  do.call(ape::plot.phylo, c(list(x = backbone), dots))
   last_pp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
 
-  # Cell size from tip spacing, corrected for canvas aspect ratio.
-  ntip   <- ape::Ntip(backbone)
-  yy_tip <- sort(last_pp$yy[seq_len(ntip)])
-  dy     <- stats::median(diff(yy_tip))
+  # Compute early — needed by backbone support label filtering below.
+  unanimous <- apply(presence, 1, function(p) all(p == 1))
 
+  # --- Backbone support labels ------------------------------------------------
+  if (show_support && !is.null(backbone$node.label)) {
+    labs <- backbone$node.label
+    show <- which(!is.na(labs) & nzchar(labs))
+    if (length(show) > 0) {
+      node_ids <- show + ntip
+      # Hide labels at unanimous nodes (already marked with a dot)
+      if (dot_unanimous) {
+        unanimous_ids <- as.integer(rownames(presence)[unanimous])
+        keep <- !(node_ids %in% unanimous_ids)
+        show     <- show[keep]
+        node_ids <- node_ids[keep]
+      }
+      if (length(show) > 0) {
+        ape::nodelabels(
+          text  = labs[show],
+          node  = node_ids,
+          frame = "none",
+          cex   = 0.35,
+          col   = "red",
+          adj   = c(1.1, 1.4)
+        )
+      }
+    }
+  }
+
+  # --- Cell geometry ----------------------------------------------------------
+  yy_tip     <- sort(last_pp$yy[seq_len(ntip)])
+  dy         <- stats::median(diff(yy_tip))
   pin        <- graphics::par("pin")
   x_per_inch <- diff(last_pp$x.lim) / pin[1]
   y_per_inch <- diff(last_pp$y.lim) / pin[2]
+  cell_h     <- dy * cell_scale
+  cell_w     <- cell_h * (x_per_inch / y_per_inch)
 
-  cell_h <- dy * cell_scale
-  cell_w <- cell_h * (x_per_inch / y_per_inch)
 
-  # Split nodes: unanimous (every tree recovered the clade) vs variable.
-  unanimous <- apply(presence, 1, function(p) all(p == 1))
-
-  # Unanimous nodes: a single dot.
   if (dot_unanimous && any(unanimous)) {
     ids <- as.integer(rownames(presence)[unanimous])
     graphics::points(
@@ -175,7 +221,6 @@ plot_phylorug <- function(backbone, npm,
     )
   }
 
-  # Variable nodes: the full rug.
   variable <- if (dot_unanimous) !unanimous else rep(TRUE, nrow(presence))
   if (any(variable)) {
     plot_node_rug(
@@ -193,10 +238,38 @@ plot_phylorug <- function(backbone, npm,
     )
   }
 
-  # Legend.
+  # --- Legend -----------------------------------------------------------------
   if (legend) {
-    draw_position_legend(tree_names, n_cols,
-                         cell_w = cell_w * 3, cell_h = cell_h * 3)
+    usr    <- graphics::par("usr")
+    y_inch <- graphics::yinch(1)
+    margin <- 0.02
+
+    # Horizontal anchor
+    if (grepl("left", legend_position)) {
+      leg_x0 <- usr[1] + margin * (usr[2] - usr[1])
+    } else {
+      leg_x0 <- usr[2] - margin * (usr[2] - usr[1]) - graphics::xinch(2.5)
+    }
+
+    # Vertical anchor
+    if (grepl("top", legend_position)) {
+      leg_y0 <- usr[4] - margin * (usr[4] - usr[3])
+    } else {
+      leg_y0 <- usr[3] + margin * (usr[4] - usr[3]) + y_inch * 1.5
+    }
+
+    legend_bottom <- draw_position_legend(
+      tree_names, n_cols,
+      cell_w = cell_w * 3, cell_h = cell_h * 3,
+      x0 = leg_x0, y0 = leg_y0
+    )
+
+    if (mode == "support") {
+      draw_threshold_legend(
+        x0 = leg_x0,
+        y0 = legend_bottom - y_inch * 0.14
+      )
+    }
   }
 
   invisible(NULL)

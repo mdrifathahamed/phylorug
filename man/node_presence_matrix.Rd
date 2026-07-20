@@ -14,25 +14,27 @@ internal nodes becomes one row of the output matrix.}
 object. Each object becomes one column of the output matrix. An object
 holding several trees is scored as a pool.}
 
-\item{support_col}{Integer from 1 to 3. Selects which support value to read
-when a tree carries compound node labels separated by \code{/}. Column 1 is
-the primary metric (bootstrap, posterior, or ASTRAL local posterior).
-Column 2 is the second value (UFBoot2 from IQ-TREE, or ASTRAL pp2).
-Column 3 is the third, if present (aBayes from IQ-TREE, or ASTRAL pp3).
-Used only when \code{use_support = TRUE}. Defaults to \code{1}.}
+\item{support_col}{Integer or integer vector. The column index or indices of
+the node label field(s) to extract as support values. IQ-TREE trees
+commonly store bootstrap in column 1 and SH-aLRT in column 2; ASTRAL
+stores local posterior probability in column 1. If a single value is
+given, \code{rugmt} contains one \code{support_1} matrix. If multiple
+values are given, \code{rugmt} contains one \code{support_1},
+\code{support_2}, \code{support_3} matrix per column, in the order
+requested.}
 }
 \value{
-A named list with two numeric matrices, each with one row per
-internal backbone node and one column per comparison tree:
+A named list with one row per internal backbone node and one column
+per comparison tree:
 \describe{
 \item{presence}{Clade presence: \code{1} where recovered, \code{0}
 where absent, or the proportion of pool trees recovering the clade.}
-\item{support}{Raw support values where the clade was recovered,
-\code{NA} where absent. Values are unrounded; apply rounding in
-the plotting function if needed.}
+\item{support_1, support_2, ...}{One matrix per value in
+\code{support_col}. Raw support values where the clade was recovered,
+\code{NA} where absent. Named in the order requested, so
+\code{support_col = c(1, 2)} produces \code{support_1} and
+\code{support_2}.}
 }
-Both matrices carry a \code{"node_id"} attribute (backbone node
-numbers) and a \code{"pool_sizes"} attribute (trees per comparison).
 }
 \description{
 Compares a set of phylogenetic trees against a reference topology, the
@@ -63,22 +65,4 @@ recovered the clade; trees that did not recover it contribute nothing. For a
 single tree this is the support value where the clade is present, or
 \code{NA} where it is absent, since a clade that is not in the tree has no
 node to carry a support value.
-}
-\examples{
-\dontrun{
-trees    <- read_trees("path/to/your/trees")
-backbone <- trees[["iqtree"]]
-others   <- trees[names(trees) != "iqtree"]
-
-check_taxa(backbone, others)
-
-npmatrix <- node_presence_matrix(backbone, others)
-
-# Access individual matrices
-npmatrix$presence   # clade presence/absence
-npmatrix$support    # raw support values
-
-# With ASTRAL second column
-result <- node_presence_matrix(backbone, others, support_col = 2)
-}
 }

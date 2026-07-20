@@ -94,12 +94,12 @@ plot_node_rug <- function(presence,
     # outside: centred on the node.
     # inside: tucked into the crook, left of the branch and lifted up.
     if (rug_position == "inside") {
-      gap_x <- cell_w * 0.5
+      gap_x <- cell_w * 0.25
       gap_y <- cell_h * 0.23
       x0    <- x_center - total_w - gap_x
       y0    <- y_center + total_h + gap_y
     } else {
-      x0 <- x_center
+      x0 <- x_center + cell_w * 0.25
       y0 <- y_center + total_h / 2
     }
 
@@ -157,38 +157,32 @@ resolve_tier <- function(support, support_type) {
 #' @noRd
 resolve_cell <- function(p, s, support_type, thresholds, tier) {
 
-  # Not evaluable: the clade could not be assessed (should not arise once the
-  # taxon gate has passed, but handled for safety and for future NA states).
+  # Not evaluable: cross.
   if (is.na(p)) {
-    return(list(fill = "white", hatch = TRUE, border = "grey40"))
+    return(list(fill = "white", pattern = "cross", border = "grey40"))
   }
 
-  # Absent: the clade was rejected.
+  # Absent: white, no pattern.
   if (p == 0) {
-    absent_fill <- if (tier == 3L) "#E8C547" else "white"   # yellow at tier 3
-    return(list(fill = absent_fill, hatch = FALSE, border = "grey40"))
+    return(list(fill = "white", pattern = "none", border = "grey40"))
   }
 
-  # Present. Tier 1 and 2 do not shade by support: solid black, or grey for a
-  # pool proportion below 1.
+  # Tier 1 and 2: greyscale by presence proportion.
   if (tier < 3L) {
-    grey <- 1 - p                        # p = 1 -> black, p = 0.5 -> mid grey
+    grey <- 1 - p
     fill <- grDevices::rgb(grey, grey, grey)
-    return(list(fill = fill, hatch = FALSE, border = "grey40"))
+    return(list(fill = fill, pattern = "none", border = "grey40"))
   }
 
-  # Tier 3: shade present cells by binned support.
+  # Tier 3, present but no support value.
   if (is.na(s)) {
-    # Present but no support value to read (e.g. parsimony tree). Solid black,
-    # meaning present-but-unquantified.
-    return(list(fill = "black", hatch = FALSE, border = "grey40"))
+    return(list(fill = "black", pattern = "none", border = "grey40"))
   }
 
   bin  <- bin_support(s, support_type, thresholds)
-  fill <- bin_fill(bin)
-  list(fill = fill, hatch = FALSE, border = "grey40")
+  spec <- bin_fill(bin)
+  list(fill = spec$fill, pattern = spec$pattern, border = "grey40")
 }
-
 
 #' Draw one resolved cell
 #'
@@ -200,21 +194,30 @@ draw_cell <- function(xleft, ybottom, xright, ytop, cell) {
     border = cell$border,
     lwd    = 0.2
   )
-  if (isTRUE(cell$hatch)) {
-    # Diagonal hatching marks a not-computed cell. Survives greyscale printing,
-    # unlike a colour fill.
-    graphics::rect(
-      xleft, ybottom, xright, ytop,
-      col     = NA,
-      border  = "grey40",
-      density = 18,
-      angle   = 45,
-      lwd     = 0.4
+
+  if (identical(cell$pattern, "dots")) {
+    # Fill the cell with a regular dot grid.
+    n_per_side <- 4L
+    w   <- xright - xleft
+    h   <- ytop - ybottom
+    off <- 1 / (2 * n_per_side)
+    fracs <- seq(off, 1 - off, length.out = n_per_side)
+    grid  <- expand.grid(fx = fracs, fy = fracs)
+    graphics::points(
+      xleft + grid$fx * w,
+      ybottom + grid$fy * h,
+      pch = 16, cex = 0.12, col = "black"
     )
+  } else if (identical(cell$pattern, "cross")) {
+    # Single X across the cell.
+    graphics::segments(xleft, ybottom, xright, ytop,
+                       col = "grey30", lwd = 0.5)
+    graphics::segments(xleft, ytop, xright, ybottom,
+                       col = "grey30", lwd = 0.5)
   }
+
   invisible(NULL)
 }
-
 
 #' Map a support value to an integer bin, by support type
 #'
@@ -271,21 +274,22 @@ default_thresholds <- function(support_type) {
 #' absent (yellow) and not-computed (hatch) states are handled in
 #' \code{resolve_cell()}, not here.
 #'
+#' Fill and pattern for an integer support bin
+#'
 #' @noRd
 bin_fill <- function(bin) {
   if (is.na(bin)) {
-    return("black")                 # present but unquantified
+    return(list(fill = "black", pattern = "none"))
   }
   switch(
     as.character(bin),
-    "4" = "#000000",                # very high
-    "3" = "#5F5E5A",                # high
-    "2" = "#B4B2A9",                # moderate
-    "1" = "#C1442E",                # low / rejected
-    "black"
+    "4" = list(fill = "#000000", pattern = "none"),   # very high
+    "3" = list(fill = "#5F5E5A", pattern = "none"),   # high
+    "2" = list(fill = "#B4B2A9", pattern = "none"),   # moderate
+    "1" = list(fill = "white",   pattern = "dots"),   # low (<50)
+    list(fill = "black", pattern = "none")
   )
 }
-
 
 #' Default value for NULL
 #'

@@ -2,66 +2,72 @@
 % Please edit documentation in R/plot_node_rug.R
 \name{plot_node_rug}
 \alias{plot_node_rug}
-\title{Draw the support cells at every node of a plotted tree}
+\title{Draw the rug cells at every node of a plotted tree}
 \usage{
 plot_node_rug(
-  rug_mt,
-  hues,
+  presence,
+  support = NULL,
+  support_type = NULL,
+  thresholds = NULL,
   cell_h,
   cell_w,
   n_cols,
-  x_offset = -0.0095,
-  y_offset = 0.0023,
+  x_offset = 0,
+  y_offset = 0,
   rug_position = c("outside", "inside"),
-  show_values = FALSE,
-  bw = TRUE,
   last_pp = NULL
 )
 }
 \arguments{
-\item{rug_mt}{The support matrix from \code{node_presence_matrix()}: first
-column \code{node_id}, remaining columns the analyses, holding raw values.}
+\item{presence}{Presence matrix from \code{node_presence_matrix()}: one row
+per internal backbone node (node numbers as rownames), one column per
+comparison tree. Cells are \code{1}, \code{0}, or a pool proportion.}
 
-\item{hues}{Character vector of base colours, one per analysis, in column
-order. Ignored when \code{bw = TRUE}.}
+\item{support}{Support matrix of the same shape, or \code{NULL}. When
+\code{NULL}, the rug is drawn in presence mode.}
+
+\item{support_type}{Named character vector mapping each comparison tree to
+its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
+\code{"posterior"}), or \code{NULL}. Required for binned shading.}
+
+\item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
+by support type. \code{NULL} uses the literature defaults.}
 
 \item{cell_h, cell_w}{Numeric. Height and width of one cell, in the tree's
 plotting coordinates.}
 
 \item{n_cols}{Integer. Columns in each node's grid.}
 
-\item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node,
-as a fraction of the tree's width and height.}
+\item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node, as
+a fraction of the tree's width and height.}
 
-\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.
-\code{"outside"} centres each rug on its node; \code{"inside"} shifts it
-left toward the root and up, into the angle where the branch splits.}
+\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.}
 
-\item{show_values}{Logical. If \code{TRUE}, print the support value
-inside each cell. Ignored in presence mode. Default \code{FALSE}.}
-
-\item{bw}{Logical. If \code{TRUE} (default), cells are greyscale and the
-support value sets how dark each cell is, so analysis identity comes from
-the cell's position in the grid rather than its colour. If \code{FALSE},
-each analysis is given its own hue. Default \code{TRUE}.}
-
-\item{last_pp}{The stored \code{plot.phylo} coordinates, passed in by
-\code{plot_phylorug()}. If \code{NULL}, they are fetched from the active
-device.}
+\item{last_pp}{The stored \code{plot.phylo} coordinates from
+\code{plot_phylorug()}. If \code{NULL}, fetched from the active device.}
 }
 \value{
 Invisibly \code{NULL}; called for its drawing side effect.
 }
 \description{
-For each internal node, this function paints a small grid of rectangles,
-one per analysis, where the shade shows how strongly that analysis supports
-the node's clade. By default the cells are greyscale and a darker cell means
-stronger support, so each analysis is identified by its position in the grid.
-In colour mode each analysis keeps its own hue instead. An absent clade is
-drawn white. Together these grids are the rug. When values are shown, the
-support number is printed inside each cell in a contrasting colour.
+For each internal backbone node, paints a small grid of rectangles, one per
+comparison tree, showing whether that tree recovered the node's clade and, in
+support mode, how strongly. Together these grids are the rug.
 }
 \details{
+The appearance is set by the tier, which is resolved from the arguments
+rather than named directly:
+\itemize{
+\item Presence (Tier 1): \code{support} is \code{NULL}. Black = present,
+white = absent, grey = partial recovery in a pool.
+\item Not-computed (Tier 2): \code{support} is given but
+\code{support_type} is not. Adds a hatched cell for clades that could not
+be evaluated.
+\item Four-state (Tier 3): both \code{support} and \code{support_type} are
+given. Present cells are shaded by binned support; absent cells are
+marked distinctly; not-computed cells are hatched.
+}
+
 Users do not call this directly; \code{plot_phylorug()} calls it after
 drawing the tree and working out the cell geometry.
 }
