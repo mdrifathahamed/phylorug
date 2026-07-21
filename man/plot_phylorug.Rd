@@ -14,6 +14,9 @@ plot_phylorug(
   n_rows = NULL,
   n_cols = NULL,
   legend = TRUE,
+  legend_position = c("topleft", "bottomleft", "topright", "bottomright"),
+  threshold_position = c("topright", "topleft", "bottomleft", "bottomright"),
+  show_support = TRUE,
   cell_scale = 0.3,
   x_offset = 0,
   y_offset = 0,
@@ -47,8 +50,20 @@ by support type. \code{NULL} uses the literature defaults.}
 \item{n_rows, n_cols}{Optional grid shape at each node. Leave \code{NULL}
 (default) to choose a roughly square grid automatically.}
 
-\item{legend}{Logical. If \code{TRUE} (default), draw the legend: a numbered
-position grid in presence mode, or a threshold block in support mode.}
+\item{legend}{Logical. If \code{TRUE} (default), draw the legend.}
+
+\item{legend_position}{Where to place the numbered position grid:
+\code{"topleft"} (default), \code{"bottomleft"}, \code{"topright"}, or
+\code{"bottomright"}.}
+
+\item{threshold_position}{Where to place the support-threshold key when
+\code{mode = "support"}: \code{"topright"} (default), \code{"topleft"},
+\code{"bottomleft"}, or \code{"bottomright"}. If it matches
+\code{legend_position}, the two stack in that corner.}
+
+\item{show_support}{Logical. If \code{TRUE} (default), display the
+backbone tree's own node support labels (in red) on the tree. Labels are
+suppressed at unanimous nodes, which already carry a dot.}
 
 \item{cell_scale}{Numeric. Multiplier on the automatic cell height. Default
 \code{0.3}.}
@@ -83,8 +98,8 @@ white (rejected), or grey (recovered in part of a pool). This is the
 simplest, most robust view and needs no support values.
 \item \code{"support"}: present cells are shaded by binned support, using
 thresholds appropriate to each comparison tree's support measure. Absent
-cells are marked distinctly and clades that could not be evaluated are
-hatched. Requires \code{support_type}.
+cells are white and clades that could not be evaluated are crossed.
+Requires \code{support_type}.
 }
 
 Nodes where every comparison tree recovered the clade can be marked with a
@@ -100,12 +115,14 @@ npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 # Presence mode (default)
 plot_phylorug(backbone, npm)
 
-# Support mode, shading by the first support column
+# Support mode, position grid top-left, threshold key top-right
 plot_phylorug(
   backbone, npm,
-  mode         = "support",
-  support_col  = 1,
-  support_type = c(astral = "lpp", raxml = "ufboot")
+  mode               = "support",
+  support_col        = 1,
+  support_type       = c(astral = "lpp", raxml = "ufboot"),
+  legend_position    = "topleft",
+  threshold_position = "topright"
 )
 }
 }
