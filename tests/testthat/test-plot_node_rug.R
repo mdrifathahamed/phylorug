@@ -138,9 +138,10 @@ test_that("bin_fill returns black fill for NA (present but unquantified)", {
   expect_equal(result$pattern, "none")
 })
 
-test_that("bin 1 (low support) uses dots pattern", {
+test_that("bin 1 (low support) uses yellow fill with no pattern", {
   result <- bin_fill(1L)
-  expect_equal(result$pattern, "dots")
+  expect_equal(result$fill, "#E8C547")
+  expect_equal(result$pattern, "none")
 })
 
 test_that("bins 2-4 use no pattern", {

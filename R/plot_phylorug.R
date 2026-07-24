@@ -1,31 +1,128 @@
 #' Draw a phylorug: a backbone tree with node rugs
 #'
-#' @param backbone The reference tree of class \code{"phylo"}.
-#' @param npm The list returned by \code{\link{node_presence_matrix}}.
-#' @param file Optional output file path (.pdf, .png, .jpg).
-#' @param width,height Optional canvas dimensions in inches.
-#' @param mode One of \code{"presence"} (default) or \code{"support"}.
-#' @param support_col Integer 1-3. Which support matrix to use.
-#' @param support_type Named character vector mapping trees to support measures.
-#' @param thresholds Optional list overriding built-in bin thresholds.
-#' @param n_rows,n_cols Optional grid shape at each node.
-#' @param include_backbone Logical. Include backbone as cell 1. Default FALSE.
+#'[plot_phylorug()] overlays clade stability grids (rugs) on a backbone
+#' phylogeny, comparing how multiple analyses treat each internal node.
+#' In presence mode, cells are black (recovered) or white (absent). In
+#' support mode, cells are shaded by binned support strength. The function
+#' handles canvas sizing, legend placement, and font scaling automatically.
+#'
+#' @param backbone A `phylo` object representing the backbone tree.
+#'
+#' @param npm A named list containing the `presence` and `support` matrices,
+#'  exactly as returned by [node_presence_matrix()].
+#'
+#' @param file Optional character string specifying the output file name or full
+#'  directory path. If left as `NULL` (the default), the plot renders in the
+#'  active graphics device (e.g., RStudio) for quick drafting. To avoid aspect
+#'  ratio distortion caused by GUI exports and to generate perfectly scaled,
+#'  publication-ready figures, provide a file path here (must end in `.pdf`,
+#'  `.png`, or `.jpg`) to utilize the package's internal scaling engine.
+#'
+#' @param width,height Numeric. Optional canvas dimensions in inches, applied
+#'  only when exporting to a `file`.If left as `NULL` (the default), the
+#'  package's internal engine dynamically calculates the optimal canvas
+#'  dimensions based on the tree size and legend layout. Providing values here
+#'  overrides the automatic scaling, which is useful for meeting strict journal
+#'  dimension requirements.
+#'
+#' @param mode One of `"presence"` (default) or `"support"`.
+#'
+#' @param support_idx Integer (1, 2, or 3). Default is `1`. Specifies which
+#'  single support matrix from the `npm` list to visualize when
+#'  `mode = "support"`. This corresponds directly to your extraction order in
+#'  [node_presence_matrix()]. For example, if you generated the data using
+#'  `support_col = c(1, 2)`, passing `2` here tells the plotting engine to
+#'  physically shade the grid cells using the second metric (stored in your
+#'  list as `support_2`).
+#'
+#' @param support_type Named character vector mapping comparison trees to their
+#'   support metrics (e.g., `"ufboot"`, `"sh_alrt"`, `"lpp"`). Required only
+#'   when `mode = "support"`. Names must match your comparison tree names.
+#'
+#' @param thresholds Optional list overriding built-in bin thresholds. While
+#'  default thresholds are provided based on common literature, it is highly
+#'  recommended to define your own custom thresholds to suit your specific
+#'  analytical framework.
+#'
+#' @param n_rows,n_cols Integer. Grid shape for the rug at each node. If
+#'   `NULL` (the default), a roughly square grid is chosen automatically.
+#'
+#' @param include_backbone Logical. If `TRUE`, the backbone tree occupies
+#'   cell 1 of every rug, showing its own presence (always `1`) or its own
+#'   support value. Default `FALSE`, since the backbone defines the topology
+#'   and trivially recovers every clade. Useful when the figure will be
+#'   edited in a vector editor and every analysis must appear in the grid.
+#'
 #' @param legend Logical. Draw the legend. Default TRUE.
-#' @param show_support Logical. Show backbone support labels in red.
-#' @param cell_scale Numeric multiplier on cell height. Default 0.3.
+#'
+#' @param show_support Logical or `NULL`. If `TRUE`, backbone node support
+#'   labels are drawn in red beside each node. Default `NULL` auto-resolves
+#'   to `TRUE` except when `mode = "support"` and `include_backbone = TRUE`,
+#'   where the backbone cell already carries that information.
+#'
+#' @param cell_scale Numeric multiplier on cell height. Default 0.45.
+#'
 #' @param x_offset,y_offset Numeric grid shift. Default 0.
-#' @param rug_position One of \code{"inside"} or \code{"outside"}.
-#' @param dot_unanimous Logical. Dot for unanimous nodes. Default TRUE.
-#' @param dot_col,dot_cex Dot appearance.
-#' @param ... Passed to \code{ape::plot.phylo()}.
-#' @return Invisibly the file path or NULL.
+#'
+#' @param rug_position One of `"inside"` (default) or `"outside"`. Controls
+#'  where the node rug grid is placed relative to the backbone node: `"inside"`
+#'  tucks the grid into the crook above-left (toward the root), while
+#'  `"outside"` places the grid to the right of the node (toward the tips).
+#'
+#' @param dot_identical Logical. Default `TRUE`. If `TRUE`, draws a small dot on
+#'  backbone nodes where every comparison tree is identical in recovering the
+#'  clade.
+#'
+#' @param dot_col,dot_cex Colour and size of the identical-clade dot. Defaults
+#'  are `"black"` and `0.45`.
+#'
+#' @param ... Additional arguments passed to [ape::plot.phylo()], such as
+#'   `cex`, `edge.width`, `font`, or `label.offset`. These override the
+#'   automatic scaling when provided.
+#'
+#' @param support_label_cex Numeric or `NULL`. Size of the backbone support
+#'   labels. Default `NULL` auto-scales with tree size.
+#'
+#' @param support_label_col Colour of the backbone support labels. Default
+#'   `"red"`.
+#'
+#' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
+#'   directly to the active graphics device.
+#'
+#' @seealso [node_presence_matrix()] to build the input data,
+#'   [check_taxa()] to verify taxon sets, and
+#'   [plot_node_rug()] which handles the cell-level
+#'   drawing(not used by the user).
+#'
 #' @export
+#'
+#' @examples
+#' backbone <- ape::read.tree(text = "(((A,B),C),(D,E));")
+#' npm <- list(
+#'   presence = matrix(c(1,0,1,1, 1,1,0,1), nrow = 4, ncol = 2,
+#'     dimnames = list(as.character(6:9), c("tree_1", "tree_2")))
+#' )
+#'
+#' # --- Presence mode to a temp file -----------------------------------------
+#' tmp <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm, file = tmp)
+#' unlink(tmp)
+#'
+#' # --- Support mode to a temp file ------------------------------------------
+#' npm$support_1 <- matrix(
+#'   c(99, NA, 85, 70, 0.99, 0.6, NA, 0.97), nrow = 4, ncol = 2,
+#'   dimnames = list(as.character(6:9), c("tree_1", "tree_2"))
+#' )
+#' tmp2 <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm, file = tmp2, mode = "support",
+#'   support_type = c(tree_1 = "sh_alrt", tree_2 = "lpp"))
+#' unlink(tmp2)
 plot_phylorug <- function(backbone, npm,
                           file             = NULL,
                           width            = NULL,
                           height           = NULL,
                           mode             = c("presence", "support"),
-                          support_col      = 1,
+                          support_idx      = 1,
                           support_type     = NULL,
                           thresholds       = NULL,
                           n_rows           = NULL,
@@ -37,9 +134,11 @@ plot_phylorug <- function(backbone, npm,
                           x_offset         = 0,
                           y_offset         = 0,
                           rug_position     = c("inside", "outside"),
-                          dot_unanimous    = TRUE,
+                          dot_identical    = TRUE,
                           dot_col          = "black",
-                          dot_cex          = 0.45,
+                          dot_cex           = 0.45,
+                          support_label_cex = NULL,
+                          support_label_col = "red",
                           ...) {
 
   # --- 1. Validate -----------------------------------------------------------
@@ -62,7 +161,7 @@ plot_phylorug <- function(backbone, npm,
   # --- 2. Build matrices -----------------------------------------------------
   support <- NULL
   if (mode == "support") {
-    support <- npm[[paste0("support_", support_col)]]
+    support <- npm[[paste0("support_", support_idx)]]
   }
 
   if (include_backbone) {
@@ -71,7 +170,7 @@ plot_phylorug <- function(backbone, npm,
                    dimnames = list(rownames(presence), bb_name))
     presence <- cbind(bb_p, presence)
     if (mode == "support") {
-      bb_s <- node_support(backbone)[[paste0("support_", support_col)]]
+      bb_s <- node_support(backbone)[[paste0("support_", support_idx)]]
       bb_col <- matrix(bb_s[as.integer(rownames(presence)) - ntip],
                        ncol = 1, dimnames = list(rownames(presence), bb_name))
       support <- cbind(bb_col, support)
@@ -99,30 +198,36 @@ plot_phylorug <- function(backbone, npm,
   dots <- list(...)
 
   # --- SOURCE 1: per_tip (master curve for tree elements) ---
-  per_tip <- min(0.15, max(0.03, 0.31 - 0.041 * log(ntip)))
+  per_tip <- min(0.20, max(0.18, 0.35 - 0.041 * log(ntip)))
 
   # Tree ratios (per_tip × constant)
-  R_CEX     <- 4.0                                               # ← RATIO 1
-  R_EDGE    <- 6.0                                               # ← RATIO 2
-  R_SUPPORT <- 2.3                                               # ← RATIO 3
+  R_CEX     <- 4.0
+  R_EDGE    <- 10.0
+  R_SUPPORT <- 3.0
 
   if (is.null(dots$cex))
-    dots$cex <- min(0.65, max(0.30, per_tip * R_CEX))
+    dots$cex <- min(0.80, max(0.55, per_tip * R_CEX))
   taxa_cex <- dots$cex
 
   if (is.null(dots$edge.width))
-    dots$edge.width <- min(1.3, max(0.7, per_tip * R_EDGE))
-
-  support_cex <- min(0.40, max(0.18, per_tip * R_SUPPORT))
-
-  # --- Margins ---
-  if (is.null(dots$mar)) dots$mar <- c(0.5, 0.5, 0.5, 2.5)
-  dots$family <- "Helvetica"
+    dots$edge.width <- min(2.0, max(1.5, per_tip * R_EDGE))
+ #--------------support_cex------------------------------------------------
+  support_cex <- if (is.null(support_label_cex)) {
+    min(0.60, max(0.40, per_tip * R_SUPPORT))
+  } else {
+    support_label_cex
+  }
+ #----------------------dot_cex-------------------------------------------
+  dot_scale <- if (missing(dot_cex)) {
+    min(1.2, max(0.80, per_tip * 6.0))
+  } else {
+    dot_cex
+  }
 
   # --- SOURCE 2: canvas width (for legend elements, computed after device) ---
   # Legend ratios (canvas_width × constant). These are applied later
   # in section 10 once we know par("din")[1].
-  R_LEG_CELL <- 0.011                                            # ← RATIO 4
+  R_LEG_CELL <- 0.018                                            # ← RATIO 4
   R_TH_SQ    <- 0.008                                            # ← RATIO 5
   R_LEG_TEXT <- 0.045                                             # ← RATIO 6
   R_TH_TEXT  <- 0.041                                             # ← RATIO 7
@@ -131,7 +236,8 @@ plot_phylorug <- function(backbone, npm,
   if (is.null(dots$mar)) dots$mar <- c(0.5, 0.5, 0.5, 2.5)
   dots$family <- "Helvetica"
 
-  # --- 3. Device routing -----------------------------------------------------
+  # --- 3. Device routing & Active Device Mirroring --------------------------
+  # If a file is specified, open that export device.
   if (!is.null(file)) {
     canvas <- auto_canvas(backbone = backbone, ntip = ntip,
                           n_tree = n_tree, mode = mode,
@@ -152,7 +258,6 @@ plot_phylorug <- function(backbone, npm,
     }
     on.exit(grDevices::dev.off(), add = TRUE)
   }
-
   # --- 4. Dynamic y.lim ------------------------------------------------------
   if (is.null(dots$y.lim) && legend) {
     din    <- graphics::par("din")
@@ -195,7 +300,7 @@ plot_phylorug <- function(backbone, npm,
     show <- which(!is.na(labs) & nzchar(labs))
     if (length(show) > 0) {
       node_ids <- show + ntip
-      if (dot_unanimous) {
+      if (dot_identical) {
         keep <- !(node_ids %in% as.integer(rownames(presence)[unanimous]))
         show <- show[keep]
         node_ids <- node_ids[keep]
@@ -205,21 +310,36 @@ plot_phylorug <- function(backbone, npm,
         txt <- ifelse(is.na(num), labs[show],
                       format(round(num, 2), trim = TRUE))
         ape::nodelabels(text = txt, node = node_ids, frame = "none",
-                        cex = support_cex, col = "red",
+                        cex = support_cex, col = support_label_col,
                         adj = c(1.1, 1.4))
       }
     }
   }
 
-  # --- 8. Unanimous dots -----------------------------------------------------
-  if (dot_unanimous && any(unanimous)) {
-    ids <- as.integer(rownames(presence)[unanimous])
-    graphics::points(last_pp$xx[ids], last_pp$yy[ids],
-                     pch = 16, cex = dot_cex, col = dot_col)
-  }
+  # --- 8. Unanimous dots (Robust scaling for large trees) -------------------
+  if (dot_identical && any(unanimous)) {
+    # Match the rows of presence that are unanimous
+    uni_rows <- which(unanimous)
 
+    # Map directly via the row index to the plotted internal node coordinates
+    node_ids <- as.integer(rownames(presence)[uni_rows])
+
+    # Ensure indices fall within bounds of the current plot layout
+    valid_idx <- which(node_ids > ntip & node_ids <= length(last_pp$xx))
+
+    if (length(valid_idx) > 0) {
+      plot_nodes <- node_ids[valid_idx]
+      graphics::points(
+        last_pp$xx[plot_nodes],
+        last_pp$yy[plot_nodes],
+        pch = 16,
+        cex = dot_scale,
+        col = dot_col
+      )
+    }
+  }
   # --- 9. Node rugs ----------------------------------------------------------
-  variable <- if (dot_unanimous) !unanimous else rep(TRUE, nrow(presence))
+  variable <- if (dot_identical) !unanimous else rep(TRUE, nrow(presence))
   if (any(variable)) {
     plot_node_rug(
       presence     = presence[variable, , drop = FALSE],
@@ -281,10 +401,13 @@ plot_phylorug <- function(backbone, npm,
 
     # --- Threshold legend (topright, support mode only) ---
     if (mode == "support") {
+      longest_label <- paste0(
+        ">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) ",
+        "or >=0.95-0.98 (ASTRAL)"
+      )
       th_width_in <- graphics::strwidth(
-        "\u226598 (SH-aLRT/UFBoot2) or \u22650.99 (ASTRAL)",
-        units = "inches", cex = th_text_cex
-      ) + th_sq_in + 0.1
+        longest_label, units = "inches", cex = th_text_cex
+      ) + th_sq_in + 0.2
 
       x0_right <- usr[2] - margin_x - graphics::xinch(th_width_in)
 

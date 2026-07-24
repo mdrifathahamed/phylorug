@@ -77,21 +77,21 @@ test_that("presence mode ignores support_type silently", {
 })
 
 # ---- support mode -----------------------------------------------------------
-test_that("support mode runs with support_col = 1", {
+test_that("support mode runs with support_idx = 1", {
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    mode = "support", support_col = 1,
+                    mode = "support", support_idx = 1,
                     support_type = c(iqtree = "sh_alrt", astral = "lpp"))
     )
   )
 })
 
-test_that("support mode runs with support_col = 2", {
+test_that("support mode runs with support_idx = 2", {
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    mode = "support", support_col = 2,
+                    mode = "support", support_idx = 2,
                     support_type = c(iqtree = "sh_alrt", astral = "lpp"))
     )
   )
@@ -121,10 +121,10 @@ test_that("runs with legend = FALSE", {
   )
 })
 
-test_that("runs with dot_unanimous = FALSE", {
+test_that("runs with dot_identical= FALSE", {
   expect_no_error(
     on_null_device(
-      plot_phylorug(make_backbone(), make_npm(), dot_unanimous = FALSE)
+      plot_phylorug(make_backbone(), make_npm(), dot_identical= FALSE)
     )
   )
 })

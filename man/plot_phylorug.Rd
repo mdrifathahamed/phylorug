@@ -7,122 +7,147 @@
 plot_phylorug(
   backbone,
   npm,
+  file = NULL,
+  width = NULL,
+  height = NULL,
   mode = c("presence", "support"),
-  support_col = 1,
+  support_idx = 1,
   support_type = NULL,
   thresholds = NULL,
   n_rows = NULL,
   n_cols = NULL,
+  include_backbone = FALSE,
   legend = TRUE,
-  legend_position = c("topleft", "bottomleft", "topright", "bottomright"),
-  threshold_position = c("topright", "topleft", "bottomleft", "bottomright"),
-  show_support = TRUE,
-  cell_scale = 0.3,
+  show_support = NULL,
+  cell_scale = 0.45,
   x_offset = 0,
   y_offset = 0,
-  rug_position = c("outside", "inside"),
-  dot_unanimous = TRUE,
+  rug_position = c("inside", "outside"),
+  dot_identical = TRUE,
   dot_col = "black",
-  dot_cex = 0.6,
+  dot_cex = 0.45,
+  support_label_cex = NULL,
+  support_label_col = "red",
   ...
 )
 }
 \arguments{
-\item{backbone}{The reference tree of class \code{"phylo"}.}
+\item{backbone}{A \code{phylo} object representing the backbone tree.}
 
-\item{npm}{The list returned by \code{\link{node_presence_matrix}}, with a
-\code{presence} element and one or more \code{support_1}, \code{support_2},
-\code{support_3} elements.}
+\item{npm}{A named list containing the \code{presence} and \code{support} matrices,
+exactly as returned by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.}
+
+\item{file}{Optional character string specifying the output file name or full
+directory path. If left as \code{NULL} (the default), the plot renders in the
+active graphics device (e.g., RStudio) for quick drafting. To avoid aspect
+ratio distortion caused by GUI exports and to generate perfectly scaled,
+publication-ready figures, provide a file path here (must end in \code{.pdf},
+\code{.png}, or \code{.jpg}) to utilize the package's internal scaling engine.}
+
+\item{width, height}{Numeric. Optional canvas dimensions in inches, applied
+only when exporting to a \code{file}.If left as \code{NULL} (the default), the
+package's internal engine dynamically calculates the optimal canvas
+dimensions based on the tree size and legend layout. Providing values here
+overrides the automatic scaling, which is useful for meeting strict journal
+dimension requirements.}
 
 \item{mode}{One of \code{"presence"} (default) or \code{"support"}.}
 
-\item{support_col}{Integer 1-3. Which support matrix to shade by, when
-\code{mode = "support"}. Selects \code{npm$support_1},
-\code{npm$support_2}, or \code{npm$support_3}. Default \code{1}.}
+\item{support_idx}{Integer (1, 2, or 3). Default is \code{1}. Specifies which
+single support matrix from the \code{npm} list to visualize when
+\code{mode = "support"}. This corresponds directly to your extraction order in
+\code{\link[=node_presence_matrix]{node_presence_matrix()}}. For example, if you generated the data using
+\code{support_col = c(1, 2)}, passing \code{2} here tells the plotting engine to
+physically shade the grid cells using the second metric (stored in your
+list as \code{support_2}).}
 
-\item{support_type}{Named character vector mapping each comparison tree to
-its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
-\code{"posterior"}). Required when \code{mode = "support"}.}
+\item{support_type}{Named character vector mapping comparison trees to their
+support metrics (e.g., \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}). Required only
+when \code{mode = "support"}. Names must match your comparison tree names.}
 
-\item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
-by support type. \code{NULL} uses the literature defaults.}
+\item{thresholds}{Optional list overriding built-in bin thresholds. While
+default thresholds are provided based on common literature, it is highly
+recommended to define your own custom thresholds to suit your specific
+analytical framework.}
 
-\item{n_rows, n_cols}{Optional grid shape at each node. Leave \code{NULL}
-(default) to choose a roughly square grid automatically.}
+\item{n_rows, n_cols}{Integer. Grid shape for the rug at each node. If
+\code{NULL} (the default), a roughly square grid is chosen automatically.}
 
-\item{legend}{Logical. If \code{TRUE} (default), draw the legend.}
+\item{include_backbone}{Logical. If \code{TRUE}, the backbone tree occupies
+cell 1 of every rug, showing its own presence (always \code{1}) or its own
+support value. Default \code{FALSE}, since the backbone defines the topology
+and trivially recovers every clade. Useful when the figure will be
+edited in a vector editor and every analysis must appear in the grid.}
 
-\item{legend_position}{Where to place the numbered position grid:
-\code{"topleft"} (default), \code{"bottomleft"}, \code{"topright"}, or
-\code{"bottomright"}.}
+\item{legend}{Logical. Draw the legend. Default TRUE.}
 
-\item{threshold_position}{Where to place the support-threshold key when
-\code{mode = "support"}: \code{"topright"} (default), \code{"topleft"},
-\code{"bottomleft"}, or \code{"bottomright"}. If it matches
-\code{legend_position}, the two stack in that corner.}
+\item{show_support}{Logical or \code{NULL}. If \code{TRUE}, backbone node support
+labels are drawn in red beside each node. Default \code{NULL} auto-resolves
+to \code{TRUE} except when \code{mode = "support"} and \code{include_backbone = TRUE},
+where the backbone cell already carries that information.}
 
-\item{show_support}{Logical. If \code{TRUE} (default), display the
-backbone tree's own node support labels (in red) on the tree. Labels are
-suppressed at unanimous nodes, which already carry a dot.}
+\item{cell_scale}{Numeric multiplier on cell height. Default 0.45.}
 
-\item{cell_scale}{Numeric. Multiplier on the automatic cell height. Default
-\code{0.3}.}
+\item{x_offset, y_offset}{Numeric grid shift. Default 0.}
 
-\item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node, as
-a fraction of the tree's width and height. Default \code{0}.}
+\item{rug_position}{One of \code{"inside"} (default) or \code{"outside"}. Controls
+where the node rug grid is placed relative to the backbone node: \code{"inside"}
+tucks the grid into the crook above-left (toward the root), while
+\code{"outside"} places the grid to the right of the node (toward the tips).}
 
-\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.}
+\item{dot_identical}{Logical. Default \code{TRUE}. If \code{TRUE}, draws a small dot on
+backbone nodes where every comparison tree is identical in recovering the
+clade.}
 
-\item{dot_unanimous}{Logical. If \code{TRUE} (default), nodes where every
-comparison tree recovered the clade are marked with a single dot instead of
-a full grid.}
+\item{dot_col, dot_cex}{Colour and size of the identical-clade dot. Defaults
+are \code{"black"} and \code{0.45}.}
 
-\item{dot_col}{Colour of the unanimous-node dot. Default \code{"black"}.}
+\item{support_label_cex}{Numeric or \code{NULL}. Size of the backbone support
+labels. Default \code{NULL} auto-scales with tree size.}
 
-\item{dot_cex}{Size of the unanimous-node dot. Default \code{0.6}.}
+\item{support_label_col}{Colour of the backbone support labels. Default
+\code{"red"}.}
 
-\item{...}{Passed to \code{ape::plot.phylo()}.}
+\item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}, such as
+\code{cex}, \code{edge.width}, \code{font}, or \code{label.offset}. These override the
+automatic scaling when provided.}
 }
 \value{
-Invisibly \code{NULL}; called for its plotting side effect.
+Invisibly, the file path if a file was written, or \code{NULL} if plotted
+directly to the active graphics device.
 }
 \description{
-Draws a backbone tree and overlays, at each internal node, a small grid of
-cells (a rug) summarising how several comparison trees treat that node's
-clade. The appearance is set by \code{mode}:
-}
-\details{
-\itemize{
-\item \code{"presence"} (default): each cell is black (clade recovered),
-white (rejected), or grey (recovered in part of a pool). This is the
-simplest, most robust view and needs no support values.
-\item \code{"support"}: present cells are shaded by binned support, using
-thresholds appropriate to each comparison tree's support measure. Absent
-cells are white and clades that could not be evaluated are crossed.
-Requires \code{support_type}.
-}
-
-Nodes where every comparison tree recovered the clade can be marked with a
-single dot instead of a full grid, keeping the figure clean and drawing the
-eye to conflict.
+\code{\link[=plot_phylorug]{plot_phylorug()}} overlays clade stability grids (rugs) on a backbone
+phylogeny, comparing how multiple analyses treat each internal node.
+In presence mode, cells are black (recovered) or white (absent). In
+support mode, cells are shaded by binned support strength. The function
+handles canvas sizing, legend placement, and font scaling automatically.
 }
 \examples{
-\dontrun{
-backbone <- trees[["iqtree"]]
-others   <- trees[names(trees) != "iqtree"]
-npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-
-# Presence mode (default)
-plot_phylorug(backbone, npm)
-
-# Support mode, position grid top-left, threshold key top-right
-plot_phylorug(
-  backbone, npm,
-  mode               = "support",
-  support_col        = 1,
-  support_type       = c(astral = "lpp", raxml = "ufboot"),
-  legend_position    = "topleft",
-  threshold_position = "topright"
+backbone <- ape::read.tree(text = "(((A,B),C),(D,E));")
+npm <- list(
+  presence = matrix(c(1,0,1,1, 1,1,0,1), nrow = 4, ncol = 2,
+    dimnames = list(as.character(6:9), c("tree_1", "tree_2")))
 )
+
+# --- Presence mode to a temp file -----------------------------------------
+tmp <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm, file = tmp)
+unlink(tmp)
+
+# --- Support mode to a temp file ------------------------------------------
+npm$support_1 <- matrix(
+  c(99, NA, 85, 70, 0.99, 0.6, NA, 0.97), nrow = 4, ncol = 2,
+  dimnames = list(as.character(6:9), c("tree_1", "tree_2"))
+)
+tmp2 <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm, file = tmp2, mode = "support",
+  support_type = c(tree_1 = "sh_alrt", tree_2 = "lpp"))
+unlink(tmp2)
 }
+\seealso{
+\code{\link[=node_presence_matrix]{node_presence_matrix()}} to build the input data,
+\code{\link[=check_taxa]{check_taxa()}} to verify taxon sets, and
+\code{\link[=plot_node_rug]{plot_node_rug()}} which handles the cell-level
+drawing(not used by the user).
 }

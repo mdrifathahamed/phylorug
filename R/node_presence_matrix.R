@@ -37,14 +37,13 @@
 #'   object. Each object becomes one column of the output matrix. An object
 #'   holding several trees is scored as a pool.
 #'
-#' @param support_col Integer or integer vector. The column index or indices of
-#'   the node label field(s) to extract as support values. IQ-TREE trees
-#'   commonly store bootstrap in column 1 and SH-aLRT in column 2; ASTRAL
-#'   stores local posterior probability in column 1. If a single value is
-#'   given, \code{rugmt} contains one \code{support_1} matrix. If multiple
-#'   values are given, \code{rugmt} contains one \code{support_1},
-#'   \code{support_2}, \code{support_3} matrix per column, in the order
-#'   requested.
+#' @param support_col Integer or vector of integers (max 3). Specifies which
+#'   value(s) to extract from multi-metric node labels. For example, if an
+#'   IQ-TREE tree stores SH-aLRT and UFBoot as "80/95", passing `1` extracts
+#'   only the first metric into a `support_1` matrix. Passing `c(1, 2)`
+#'   efficiently extracts both simultaneously into `support_1` and `support_2`
+#'   matrices, allowing you to easily switch between them during plotting
+#'   without recalculating. Default is `1` .
 #'
 #' @return A named list with one row per internal backbone node and one column
 #'   per comparison tree:

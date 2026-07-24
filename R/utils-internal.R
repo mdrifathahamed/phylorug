@@ -39,12 +39,12 @@ draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
 
   rows <- list(
     list(fill = "#000000", pattern = "none",
-         label = "\u226598 (SH-aLRT/UFBoot2) or \u22650.99 (ASTRAL)"),
+         label = ">=98 (SH-aLRT/UFBoot2) or >=0.99 (ASTRAL)"),
     list(fill = "#5F5E5A", pattern = "none",
-         label = "80\u201397.9 (SH-aLRT) or 95\u201397 (UFBoot2) or 0.95\u20130.98 (ASTRAL)"),
+         label = ">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) or >=0.95-0.98 (ASTRAL)"),
     list(fill = "#B4B2A9", pattern = "none",
-         label = "50\u201379.9 (SH-aLRT) or 50\u201394 (UFBoot2) or 0.5\u20130.95 (ASTRAL)"),
-    list(fill = "white",   pattern = "dots",
+         label = ">=50-79.9 (SH-aLRT) or >=50-94 (UFBoot2) or >=0.5-0.95 (ASTRAL)"),
+    list(fill = "#E8C547", pattern = "none",
          label = "<50 (SH-aLRT/UFBoot2) or <0.5 (ASTRAL)"),
     list(fill = "white",   pattern = "none",
          label = "monophyly not supported"),
