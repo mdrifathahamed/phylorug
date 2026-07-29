@@ -22,10 +22,14 @@
 #' @param support_type Named character vector mapping trees to support types.
 #' @param thresholds Optional list overriding bin thresholds.
 #' @param include_backbone Logical. Include backbone as cell 1. Default `FALSE`.
+#' @param layout Tree layout: `"phylogram"` (default, with branch lengths),
+#'   `"cladogram"` (equal spacing), `"fan"` (circular), or `"unrooted"`.
 #' @param file Output file path (`.pdf`, `.png`, `.jpg`), or `NULL` for
 #'   on-screen rendering.
 #' @param width,height Canvas dimensions in inches. `NULL` for auto.
-#' @param ... Additional arguments passed to [ape::plot.phylo()].
+#' @param ... Additional arguments passed to [ape::plot.phylo()], such as
+#'   `cex`, `font`, `edge.width`, `edge.color`, `tip.color`,
+#'   `label.offset`, or `show.tip.label`.
 #'
 #' @returns An S3 object of class `"phylorug_plot"`. Add layers with `+`.
 #'
@@ -51,6 +55,8 @@ phylorug_plot <- function(backbone, npm,
                           support_type     = NULL,
                           thresholds       = NULL,
                           include_backbone = FALSE,
+                          layout           = c("phylogram", "cladogram",
+                                               "fan", "unrooted"),
                           file             = NULL,
                           width            = NULL,
                           height           = NULL,
@@ -61,7 +67,8 @@ phylorug_plot <- function(backbone, npm,
   if (!is.list(npm) || !("presence" %in% names(npm)))
     stop("`npm` must contain a `presence` matrix.", call. = FALSE)
 
-  mode <- match.arg(mode)
+  mode   <- match.arg(mode)
+  layout <- match.arg(layout)
 
   presence <- npm$presence
   if (ncol(presence) < 1L)
@@ -103,6 +110,7 @@ phylorug_plot <- function(backbone, npm,
       tier         = tier,
       ntip         = ntip,
       unanimous    = unanimous,
+      layout       = layout,
       tree_args    = list(...),
       file         = file,
       width        = width,
@@ -162,18 +170,40 @@ render_phylorug <- function(obj) {
   ntip      <- obj$ntip
   n_tree    <- ncol(presence)
 
-  # --- Scaling (from current plot_phylorug) --------------------------------
-  per_tip  <- max(0.08, min(0.22, 0.35 - 0.001 * ntip))
-  taxa_cex <- max(0.25, min(1.0, 1.4 - 0.004 * ntip))
+  # --- Extract theme layer (applied before drawing) -------------------------
+  th <- get_layer_params(obj, "theme")
+  base_size <- if (!is.null(th$base_size)) th$base_size else 1
+
+  # --- Scaling (exact match to plot_phylorug) --------------------------------
+  per_tip <- min(0.15, max(0.03, 0.31 - 0.041 * log(ntip)))
+
+  R_CEX     <- 4.0
+  R_EDGE    <- 6.0
+  R_SUPPORT <- 2.3
+  R_LEG_CELL <- 0.011
+  R_TH_SQ    <- 0.008
+  R_LEG_TEXT <- 0.045
+  R_TH_TEXT  <- 0.041
 
   dots <- obj$tree_args
-  if (is.null(dots$cex))          dots$cex          <- taxa_cex
-  if (is.null(dots$edge.width))   dots$edge.width   <- max(0.3, 1.5 - 0.004 * ntip)
-  if (is.null(dots$label.offset)) dots$label.offset  <- 0.001
-  if (is.null(dots$show.tip.label)) dots$show.tip.label <- TRUE
-  if (is.null(dots$no.margin))    dots$no.margin    <- TRUE
-  if (is.null(dots$mar))          dots$mar          <- c(0.5, 0.5, 0.5, 2.5)
-  dots$family <- "Helvetica"
+
+  # Layout
+  dots$type <- obj$layout
+  if (obj$layout == "cladogram") dots$use.edge.length <- FALSE
+
+  # User ... args > auto defaults (scaled by base_size)
+  dots$cex            <- dots$cex            %||% (min(0.65, max(0.30, per_tip * R_CEX)) * base_size)
+  dots$edge.width     <- dots$edge.width     %||% min(1.3, max(0.7, per_tip * R_EDGE))
+  dots$label.offset   <- dots$label.offset   %||% 0.001
+  dots$show.tip.label <- dots$show.tip.label %||% TRUE
+  dots$font           <- dots$font           %||% 3
+  dots$no.margin      <- dots$no.margin      %||% TRUE
+
+  taxa_cex <- dots$cex
+
+  # Theme settings
+  dots$mar    <- dots$mar    %||% (if (!is.null(th$mar)) th$mar else c(0.5, 0.5, 0.5, 2.5))
+  dots$family <- if (!is.null(th$family)) th$family else "Helvetica"
 
   # --- Device routing ------------------------------------------------------
   if (!is.null(obj$file)) {
@@ -197,9 +227,26 @@ render_phylorug <- function(obj) {
     on.exit(grDevices::dev.off(), add = TRUE)
   }
 
-  # --- y.lim padding for legend --------------------------------------------
+  # --- Dynamic y.lim (exact copy from plot_phylorug) -----------------------
   if (is.null(dots$y.lim) && has_layer(obj, "legend")) {
-    top_pad <- ceiling(ntip * 0.12)
+    din    <- graphics::par("din")
+    mai    <- graphics::par("mai")
+    plot_h <- din[2] - mai[1] - mai[3]
+
+    w_ref        <- din[1] * 0.85 + din[2] * 0.15
+    est_pos_cex  <- min(0.55, max(0.20, w_ref * R_LEG_TEXT))
+    est_th_cex   <- min(0.50, max(0.18, w_ref * R_TH_TEXT))
+
+    pos_line_h <- 0.2 * est_pos_cex
+    th_line_h  <- 0.2 * est_th_cex
+    pos_leg_h  <- n_tree * pos_line_h
+    th_leg_h   <- if (obj$mode == "support") 6 * th_line_h else 0
+    top_leg_h  <- max(pos_leg_h, th_leg_h)
+    gap_inches <- 3 * max(pos_line_h, th_line_h)
+
+    avail   <- max(1, plot_h - top_leg_h - gap_inches)
+    top_pad <- ceiling((top_leg_h + gap_inches) * ntip / avail)
+
     dots$y.lim <- c(-1.0, ntip + top_pad)
   }
 
@@ -242,4 +289,14 @@ render_phylorug <- function(obj) {
 #' @noRd
 has_layer <- function(obj, type) {
   any(vapply(obj$layers, function(l) identical(l$type, type), logical(1)))
+}
+
+
+#' Extract params from a pre-draw layer (tree_style or theme)
+#' @noRd
+get_layer_params <- function(obj, type) {
+  for (l in obj$layers) {
+    if (identical(l$type, type)) return(l$params)
+  }
+  list()  # empty list if layer not added
 }

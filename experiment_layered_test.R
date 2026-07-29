@@ -1,151 +1,203 @@
-# experiment_layered_test.R
-# Test script for the layered phylorug plotting system
-# Run this from the phylorug project root after devtools::load_all()
-#
-# This script compares the old monolithic plot_phylorug() with the new
-# layered system side by side.
+# experiment_layered_real_data.R
+# Test the layered plotting system on real datasets
 
 library(devtools)
-load_all()  # loads phylorug from source
+load_all()
 
-# ============================================================================
-# 1. TINY TREE — smoke test
-# ============================================================================
+# =============================================================================
+# TEST 1: Culicomorpha — presence mode
+# =============================================================================
+cat("=== TEST 1: Culicomorpha ===\n")
 
-backbone <- ape::read.tree(text = "((((A:1,B:1):0.5,C:1.5):0.3,(D:1,E:1):0.8):0.2,F:2);")
-backbone$node.label <- c("", "95", "80", "100", "70")
+sample_trees <- read_trees("data/Culicomorpha")
+sample_trees <- lapply(sample_trees, function(tr) {
+  ape::root(tr, outgroup = "Pseudosmittia_sp", resolve.root = TRUE)
+})
 
-# Two fake comparison trees with different topologies
-tree_1 <- ape::read.tree(text = "((((A:1,B:1):0.5,C:1.5):0.3,(D:1,E:1):0.8):0.2,F:2);")
-tree_1$node.label <- c("", "90", "75", "100", "65")
+backbone <- sample_trees[["Matrix1-smart_partitioning"]]
+others   <- sample_trees[names(sample_trees) != "Matrix1-smart_partitioning"]
+others   <- lapply(others, function(tr) ape::keep.tip(tr, backbone$tip.label))
 
-tree_2 <- ape::read.tree(text = "(((A:1,(B:1,C:1.5):0.5):0.3,(D:1,E:1):0.8):0.2,F:2);")
-tree_2$node.label <- c("", "88", "60", "99", "55")
+check_taxa(backbone, others)
+rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 
-trees <- list(tree_1 = tree_1, tree_2 = tree_2)
+support_type <- c(
+  "Matrix1-kpi_ASTRAL"            = "lpp",
+  "Matrix1-smart_ASTRAL"          = "lpp",
+  "Matrix1-kpi_partitioning"      = "sh_alrt",
+  "Matrix1-kpi_PMSF(H1.guide)"   = "sh_alrt",
+  "Matrix1-kpi_PMSF(H2.guide)"   = "sh_alrt",
+  "Matrix1_LG_C20_F_R"           = "sh_alrt",
+  "Matrix1-smart_PMSF(H1.guide)" = "sh_alrt",
+  "Matrix1-smart_PMSF(H2.guide)" = "sh_alrt",
+  "Matrix2_partitioning"          = "sh_alrt"
+)
 
-npm <- node_presence_matrix(backbone, trees)
+# --- OLD way ---
+plot_phylorug(backbone, rugmt,
+              file = "culico_OLD_presence.pdf",
+              cell_scale = 0.45, dot_cex = 0.65, font = 3)
 
-cat("=== npm structure ===\n")
-str(npm, max.level = 1)
-cat("\n=== presence matrix ===\n")
-print(npm$presence)
+# --- NEW layered way — presence ---
+p1 <- phylorug_plot(backbone, rugmt,
+                    file = "culico_NEW_presence.pdf",
+                    font = 3) +
+  rug_layer(cell_scale = 0.45) +
+  dot_layer(col = "black", cex = 0.65) +
+  support_labels(col = "red", cex = 0.3, font = 3) +
+  legend_layer(position_pos = "topleft", text_cex = 0.35)
+print(p1)
 
-# --- Old way (monolithic) ---
-cat("\n--- Old monolithic plot_phylorug() ---\n")
-tmp_old <- tempfile(fileext = ".pdf")
-plot_phylorug(backbone, npm, file = tmp_old)
-cat("Old plot saved to:", tmp_old, "\n")
+# --- OLD support ---
+plot_phylorug(backbone, rugmt,
+              file = "culico_OLD_support.pdf",
+              width = 10, height = 10,
+              mode = "support", support_type = support_type,
+              show_support = TRUE, support_label_cex = 0.25,
+              support_label_col = "Red", cell_scale = 0.25,
+              font = 3, rug_position = "inside", edge.width = 1.5)
 
-# --- New way (layered) ---
-cat("\n--- New layered system ---\n")
-tmp_new <- tempfile(fileext = ".pdf")
+# --- NEW support ---
+p2 <- phylorug_plot(backbone, rugmt,
+                    file = "culico_NEW_support.pdf",
+                    width = 10, height = 10,
+                    mode = "support", support_type = support_type,
+                    font = 3, edge.width = 1.5) +
+  rug_layer(cell_scale = 0.25, rug_position = "inside") +
+  dot_layer(col = "black", cex = 0.65) +
+  support_labels(col = "Red", cex = 0.25, font = 3) +
+  legend_layer(text_cex = 0.3)
+print(p2)
 
-p <- phylorug_plot(backbone, npm, file = tmp_new) +
-  rug_layer() +
-  dot_layer() +
-  support_labels() +
+cat("Culicomorpha done.\n\n")
+
+
+# =============================================================================
+# TEST 2: Sample figure (70p, ~54 tips)
+# =============================================================================
+cat("=== TEST 2: Sample figure ===\n")
+
+trees_70p <- read_trees("data/sample_figure")
+trees_70p <- lapply(trees_70p, function(tr) {
+  ape::drop.tip(tr, c("Lucanus capreolus COL3897", "Xylonichus sp COL066",
+                      "Anoplostethus sp COL892", "Trichaulax sp COL1050"))
+})
+
+backbone <- trees_70p[["70p_uce"]]
+others   <- trees_70p[names(trees_70p) != "70p_uce"]
+others   <- lapply(others, function(tr) ape::keep.tip(tr, backbone$tip.label))
+
+check_taxa(backbone, others)
+rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
+
+# --- OLD ---
+plot_phylorug(backbone, rugmt,
+              file = "sample_OLD_presence.pdf",
+              cell_scale = 0.45, dot_cex = 0.65, font = 3)
+
+# --- NEW ---
+p3 <- phylorug_plot(backbone, rugmt,
+                    file = "sample_NEW_presence.pdf",
+                    font = 3) +
+  rug_layer(cell_scale = 0.45) +
+  dot_layer(cex = 0.65) +
+  support_labels(font = 3) +
   legend_layer()
+print(p3)
 
-print(p)  # this triggers rendering
-cat("Layered plot saved to:", tmp_new, "\n")
+# --- OLD support ---
+plot_phylorug(backbone, rugmt,
+              file = "sample_OLD_support.pdf",
+              mode = "support", support_type = support_type,
+              show_support = TRUE, support_label_cex = 0.39,
+              support_label_col = "black", cell_scale = 0.75,
+              dot_cex = 0.65, font = 3)
+
+# --- NEW support ---
+p4 <- phylorug_plot(backbone, rugmt,
+                    file = "sample_NEW_support.pdf",
+                    mode = "support", support_type = support_type,
+                    font = 3) +
+  rug_layer(cell_scale = 0.75) +
+  dot_layer(cex = 0.65) +
+  support_labels(col = "black", cex = 0.39, font = 3) +
+  legend_layer(position_pos = "topleft", threshold_pos = "topright")
+print(p4)
+
+cat("Sample figure done.\n\n")
 
 
-# ============================================================================
-# 2. LAYER COMBINATIONS — test composability
-# ============================================================================
+# =============================================================================
+# TEST 3: Beetles (70p, ~315 tips)
+# =============================================================================
+cat("=== TEST 3: Beetles ===\n")
 
-cat("\n--- Testing layer combinations ---\n")
+trees_b <- read_trees("data/bettles/70p")
+trees_b <- lapply(trees_b, function(tr) {
+  tr <- ape::root(tr, outgroup = c("NicorbUCE", "NicvesUCE"), resolve.root = TRUE)
+  ape::drop.tip(tr, c("NicorbUCE", "NicvesUCE"))
+})
 
-# Just tree + dots (no rugs)
-tmp_dots <- tempfile(fileext = ".pdf")
-p_dots <- phylorug_plot(backbone, npm, file = tmp_dots) +
-  dot_layer(col = "blue", cex = 1.0)
-print(p_dots)
-cat("Dots-only plot:", tmp_dots, "\n")
+biogeo  <- readxl::read_excel("data/biogeo.xlsx", sheet = "BioGeo")
+trees_b <- translate_tips(trees_b, biogeo, from = "from", to = "to")
 
-# Tree + rugs only (no dots, no labels)
-tmp_rugs <- tempfile(fileext = ".pdf")
-p_rugs <- phylorug_plot(backbone, npm, file = tmp_rugs) +
-  rug_layer(rug_position = "outside")
-print(p_rugs)
-cat("Rugs-only plot:", tmp_rugs, "\n")
+backbone <- trees_b[["70p_uce"]]
+others   <- trees_b[names(trees_b) != "70p_uce"]
+others   <- lapply(others, function(tr) ape::keep.tip(tr, backbone$tip.label))
 
-# Tree + labels only
-tmp_labs <- tempfile(fileext = ".pdf")
-p_labs <- phylorug_plot(backbone, npm, file = tmp_labs) +
-  support_labels(col = "blue", cex = 0.8)
-print(p_labs)
-cat("Labels-only plot:", tmp_labs, "\n")
+check_taxa(backbone, others)
+rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 
-# Full stack with custom settings
-tmp_full <- tempfile(fileext = ".pdf")
-p_full <- phylorug_plot(backbone, npm, file = tmp_full) +
-  rug_layer(cell_scale = 0.6, rug_position = "outside") +
-  dot_layer(col = "darkgreen") +
-  support_labels(col = "purple") +
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
+
+# --- OLD ---
+plot_phylorug(backbone, rugmt,
+              file = "beetles_OLD_presence.pdf",
+              cell_scale = 0.45, dot_cex = 0.65, font = 3)
+
+# --- NEW ---
+p5 <- phylorug_plot(backbone, rugmt,
+                    file = "beetles_NEW_presence.pdf",
+                    font = 3) +
+  rug_layer(cell_scale = 0.45) +
+  dot_layer(cex = 0.65) +
+  support_labels(font = 3) +
   legend_layer()
-print(p_full)
-cat("Full custom plot:", tmp_full, "\n")
+print(p5)
 
+# --- OLD support ---
+plot_phylorug(backbone, rugmt,
+              file = "beetles_OLD_support.pdf",
+              mode = "support", support_type = support_type,
+              show_support = TRUE, support_label_cex = 0.39,
+              support_label_col = "black", cell_scale = 0.45,
+              dot_cex = 0.65, font = 3)
 
-# ============================================================================
-# 3. ON-SCREEN RENDERING — no file, just plot
-# ============================================================================
+# --- NEW support ---
+p6 <- phylorug_plot(backbone, rugmt,
+                    file = "beetles_NEW_support.pdf",
+                    mode = "support", support_type = support_type,
+                    font = 3) +
+  rug_layer(cell_scale = 0.45) +
+  dot_layer(cex = 0.65) +
+  support_labels(col = "black", cex = 0.39, font = 3) +
+  legend_layer(text_cex = 0.35)
+print(p6)
 
-cat("\n--- On-screen rendering (if interactive) ---\n")
-if (interactive()) {
-  p_screen <- phylorug_plot(backbone, npm) +
-    rug_layer() +
-    dot_layer() +
-    support_labels()
+cat("Beetles done.\n\n")
 
-  print(p_screen)
-  cat("Check your plot window!\n")
-} else {
-  cat("Not interactive, skipping screen rendering.\n")
-}
-
-
-# ============================================================================
-# 4. THE KEY TEST — modifying after creation
-# ============================================================================
-
-cat("\n--- Modify-after-creation test ---\n")
-tmp_mod <- tempfile(fileext = ".pdf")
-
-# Create base
-p_base <- phylorug_plot(backbone, npm, file = tmp_mod)
-
-# Add layers one at a time
-p_base <- p_base + rug_layer()
-p_base <- p_base + dot_layer()
-
-# Can inspect layers before rendering
-cat("Number of layers:", length(p_base$layers), "\n")
-cat("Layer types:",
-    paste(vapply(p_base$layers, function(l) l$type, character(1)),
-          collapse = ", "), "\n")
-
-print(p_base)
-cat("Modified plot saved to:", tmp_mod, "\n")
-
-
-# ============================================================================
-# 5. COMPARISON CHECKLIST
-# ============================================================================
-
-cat("\n")
 cat("=============================================\n")
-cat("  VISUAL COMPARISON CHECKLIST\n")
-cat("=============================================\n")
-cat("Open the PDFs and check:\n")
-cat("  [ ] Rug cells render at correct nodes\n")
-cat("  [ ] Dots appear at unanimous nodes\n")
-cat("  [ ] Support labels appear at variable nodes\n")
-cat("  [ ] Legend renders in top-left\n")
-cat("  [ ] Rugs-only: no dots, no labels\n")
-cat("  [ ] Dots-only: no rugs, no labels\n")
-cat("  [ ] Labels-only: no rugs, no dots\n")
-cat("  [ ] Old vs new: identical visual output\n")
+cat("  ALL DONE — compare OLD vs NEW PDFs\n")
 cat("=============================================\n")

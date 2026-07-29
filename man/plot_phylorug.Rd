@@ -7,122 +7,68 @@
 plot_phylorug(
   backbone,
   npm,
+  file = NULL,
+  width = NULL,
+  height = NULL,
   mode = c("presence", "support"),
   support_col = 1,
   support_type = NULL,
   thresholds = NULL,
   n_rows = NULL,
   n_cols = NULL,
+  include_backbone = FALSE,
   legend = TRUE,
-  legend_position = c("topleft", "bottomleft", "topright", "bottomright"),
-  threshold_position = c("topright", "topleft", "bottomleft", "bottomright"),
-  show_support = TRUE,
-  cell_scale = 0.3,
+  show_support = NULL,
+  cell_scale = 0.45,
   x_offset = 0,
   y_offset = 0,
-  rug_position = c("outside", "inside"),
+  rug_position = c("inside", "outside"),
   dot_unanimous = TRUE,
   dot_col = "black",
-  dot_cex = 0.6,
+  dot_cex = 0.45,
   ...
 )
 }
 \arguments{
 \item{backbone}{The reference tree of class \code{"phylo"}.}
 
-\item{npm}{The list returned by \code{\link{node_presence_matrix}}, with a
-\code{presence} element and one or more \code{support_1}, \code{support_2},
-\code{support_3} elements.}
+\item{npm}{The list returned by \code{\link{node_presence_matrix}}.}
+
+\item{file}{Optional output file path (.pdf, .png, .jpg).}
+
+\item{width, height}{Optional canvas dimensions in inches.}
 
 \item{mode}{One of \code{"presence"} (default) or \code{"support"}.}
 
-\item{support_col}{Integer 1-3. Which support matrix to shade by, when
-\code{mode = "support"}. Selects \code{npm$support_1},
-\code{npm$support_2}, or \code{npm$support_3}. Default \code{1}.}
+\item{support_col}{Integer 1-3. Which support matrix to use.}
 
-\item{support_type}{Named character vector mapping each comparison tree to
-its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
-\code{"posterior"}). Required when \code{mode = "support"}.}
+\item{support_type}{Named character vector mapping trees to support measures.}
 
-\item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
-by support type. \code{NULL} uses the literature defaults.}
+\item{thresholds}{Optional list overriding built-in bin thresholds.}
 
-\item{n_rows, n_cols}{Optional grid shape at each node. Leave \code{NULL}
-(default) to choose a roughly square grid automatically.}
+\item{n_rows, n_cols}{Optional grid shape at each node.}
 
-\item{legend}{Logical. If \code{TRUE} (default), draw the legend.}
+\item{include_backbone}{Logical. Include backbone as cell 1. Default FALSE.}
 
-\item{legend_position}{Where to place the numbered position grid:
-\code{"topleft"} (default), \code{"bottomleft"}, \code{"topright"}, or
-\code{"bottomright"}.}
+\item{legend}{Logical. Draw the legend. Default TRUE.}
 
-\item{threshold_position}{Where to place the support-threshold key when
-\code{mode = "support"}: \code{"topright"} (default), \code{"topleft"},
-\code{"bottomleft"}, or \code{"bottomright"}. If it matches
-\code{legend_position}, the two stack in that corner.}
+\item{show_support}{Logical. Show backbone support labels in red.}
 
-\item{show_support}{Logical. If \code{TRUE} (default), display the
-backbone tree's own node support labels (in red) on the tree. Labels are
-suppressed at unanimous nodes, which already carry a dot.}
+\item{cell_scale}{Numeric multiplier on cell height. Default 0.3.}
 
-\item{cell_scale}{Numeric. Multiplier on the automatic cell height. Default
-\code{0.3}.}
+\item{x_offset, y_offset}{Numeric grid shift. Default 0.}
 
-\item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node, as
-a fraction of the tree's width and height. Default \code{0}.}
+\item{rug_position}{One of \code{"inside"} or \code{"outside"}.}
 
-\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.}
+\item{dot_unanimous}{Logical. Dot for unanimous nodes. Default TRUE.}
 
-\item{dot_unanimous}{Logical. If \code{TRUE} (default), nodes where every
-comparison tree recovered the clade are marked with a single dot instead of
-a full grid.}
-
-\item{dot_col}{Colour of the unanimous-node dot. Default \code{"black"}.}
-
-\item{dot_cex}{Size of the unanimous-node dot. Default \code{0.6}.}
+\item{dot_col, dot_cex}{Dot appearance.}
 
 \item{...}{Passed to \code{ape::plot.phylo()}.}
 }
 \value{
-Invisibly \code{NULL}; called for its plotting side effect.
+Invisibly the file path or NULL.
 }
 \description{
-Draws a backbone tree and overlays, at each internal node, a small grid of
-cells (a rug) summarising how several comparison trees treat that node's
-clade. The appearance is set by \code{mode}:
-}
-\details{
-\itemize{
-\item \code{"presence"} (default): each cell is black (clade recovered),
-white (rejected), or grey (recovered in part of a pool). This is the
-simplest, most robust view and needs no support values.
-\item \code{"support"}: present cells are shaded by binned support, using
-thresholds appropriate to each comparison tree's support measure. Absent
-cells are white and clades that could not be evaluated are crossed.
-Requires \code{support_type}.
-}
-
-Nodes where every comparison tree recovered the clade can be marked with a
-single dot instead of a full grid, keeping the figure clean and drawing the
-eye to conflict.
-}
-\examples{
-\dontrun{
-backbone <- trees[["iqtree"]]
-others   <- trees[names(trees) != "iqtree"]
-npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-
-# Presence mode (default)
-plot_phylorug(backbone, npm)
-
-# Support mode, position grid top-left, threshold key top-right
-plot_phylorug(
-  backbone, npm,
-  mode               = "support",
-  support_col        = 1,
-  support_type       = c(astral = "lpp", raxml = "ufboot"),
-  legend_position    = "topleft",
-  threshold_position = "topright"
-)
-}
+Draw a phylorug: a backbone tree with node rugs
 }
