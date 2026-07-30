@@ -74,7 +74,7 @@
 #'  clade.
 #'
 #' @param dot_col,dot_cex Colour and size of the identical-clade dot. Defaults
-#'  are `"black"` and `0.45`.
+#'  are `"black"` and NULL (auto-scales).
 #'
 #' @param ... Additional arguments passed to [ape::plot.phylo()], such as
 #'   `cex`, `edge.width`, `font`, or `label.offset`. These override the
@@ -136,7 +136,7 @@ plot_phylorug <- function(backbone, npm,
                           rug_position     = c("inside", "outside"),
                           dot_identical    = TRUE,
                           dot_col          = "black",
-                          dot_cex           = 0.45,
+                          dot_cex           = NULL,
                           support_label_cex = NULL,
                           support_label_col = "red",
                           ...) {
@@ -218,7 +218,7 @@ plot_phylorug <- function(backbone, npm,
     support_label_cex
   }
  #----------------------dot_cex-------------------------------------------
-  dot_scale <- if (missing(dot_cex)) {
+   dot_scale <- if (is.null(dot_cex)){
     min(1.2, max(0.80, per_tip * 6.0))
   } else {
     dot_cex
@@ -272,7 +272,7 @@ plot_phylorug <- function(backbone, npm,
     pos_line_h <- 0.2 * est_pos_cex
     th_line_h  <- 0.2 * est_th_cex
     pos_leg_h  <- n_tree * pos_line_h
-    th_leg_h   <- if (mode == "support") 6 * th_line_h else 0
+    th_leg_h   <- th_leg_h   <- 6 * th_line_h
     top_leg_h  <- max(pos_leg_h, th_leg_h)
     gap_inches <- 3 * max(pos_line_h, th_line_h)
 

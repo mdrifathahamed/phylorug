@@ -138,8 +138,7 @@ auto_canvas <- function(backbone,
   # --- Width component 4: Legend band ---
   leg_width <- 0
   if (has_legend) {
-    leg_width <- max(2.5, n_tree * 0.25 + 1.5)
-    if (mode == "support") leg_width <- leg_width + 3.5
+    leg_width <- max(2.5, n_tree * 0.25 + 1.5) + 3.5
   }
 
   # --- Total width ---
