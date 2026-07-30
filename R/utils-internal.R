@@ -60,16 +60,7 @@ draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
     xright <- x0 + sq_w
     graphics::rect(xleft, y_bot, xright, y_top,
                    col = r$fill, border = "black", lwd = 0.4)
-    if (identical(r$pattern, "dots")) {
-      n_per_side <- 4L
-      w   <- xright - xleft
-      h   <- y_top - y_bot
-      off <- 1 / (2 * n_per_side)
-      fracs <- seq(off, 1 - off, length.out = n_per_side)
-      grid  <- expand.grid(fx = fracs, fy = fracs)
-      graphics::points(xleft + grid$fx * w, y_bot + grid$fy * h,
-                       pch = 16, cex = text_cex * 0.4, col = "black")
-    } else if (identical(r$pattern, "cross")) {
+    if (identical(r$pattern, "cross"))  {
       graphics::segments(xleft, y_bot, xright, y_top, col = "grey30", lwd = 0.5)
       graphics::segments(xleft, y_top, xright, y_bot, col = "grey30", lwd = 0.5)
     }
@@ -85,14 +76,14 @@ draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
 #'
 #' Height is set by per_tip. Width is computed from three real measurements:
 #'
-#' 1. TREE DEPTH — if branch lengths exist, the max root-to-tip distance
+#' 1. TREE DEPTH - if branch lengths exist, the max root-to-tip distance
 #'    determines how much horizontal room the phylogram needs. Deeper trees
 #'    get more space (log-scaled, so it doesn't explode). If no branch
 #'    lengths, falls back to a cladogram estimate from tip count.
 #'
-#' 2. LABEL WIDTH — longest tip label × character width at taxa_cex.
+#' 2. LABEL WIDTH - longest tip label * character width at taxa_cex.
 #'
-#' 3. LEGEND BAND — scales with n_tree and mode.
+#' 3. LEGEND BAND - scales with n_tree and mode.
 #'
 #' This prevents unnecessary stretching when branches are short, and ensures
 #' deep phylograms get enough room to show branch-length variation.
@@ -130,19 +121,14 @@ auto_canvas <- function(backbone,
 
     # Convert tree depth to inches via log scale.
     # Log prevents tiny-depth trees from being too narrow and deep trees
-    # from being absurdly wide. Range: 2–8 inches for tree portion.
-    #   depth 0.01 → ~2.0″   depth 0.1 → ~4.5″
-    #   depth 0.5  → ~6.8″   depth 2.0 → ~8.0″
+
     tree_width <- max(2, min(8, 2 * log2(1 + max_depth * 50)))
   } else {
     # Cladogram: no branch lengths. Width from tip count (log-scaled).
-    # More tips = more branching levels = slightly more horizontal room.
-    #   10 tips → ~3.3″   50 tips → ~5.6″   300 tips → ~6.0″
     tree_width <- max(2, min(6, 1.5 * log2(ntip)))
   }
 
   # --- Width component 2: Label width (inches) ---
-  # Helvetica average character width ≈ 0.065 inches at cex=1
   max_nchar   <- max(nchar(backbone$tip.label))
   label_width <- max_nchar * 0.065 * taxa_cex
 

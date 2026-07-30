@@ -189,7 +189,7 @@ plot_phylorug <- function(backbone, npm,
   # TWO-SOURCE SCALING
   #
   # 1. TREE elements scale with per_tip (height-based, log curve).
-  #    Bigger trees → denser tips, thinner branches, smaller font.
+  #    Bigger trees means denser tips, thinner branches, smaller font.
   #
   # 2. LEGEND elements scale with canvas WIDTH (gentle variation).
   #    Width doesn't change as dramatically as height, so legends
@@ -200,7 +200,7 @@ plot_phylorug <- function(backbone, npm,
   # --- SOURCE 1: per_tip (master curve for tree elements) ---
   per_tip <- min(0.20, max(0.18, 0.35 - 0.041 * log(ntip)))
 
-  # Tree ratios (per_tip × constant)
+  # Tree ratios (per_tip * constant)
   R_CEX     <- 4.0
   R_EDGE    <- 10.0
   R_SUPPORT <- 3.0
@@ -225,16 +225,16 @@ plot_phylorug <- function(backbone, npm,
   }
 
   # --- SOURCE 2: canvas width (for legend elements, computed after device) ---
-  # Legend ratios (canvas_width × constant). These are applied later
+  # Legend ratios (canvas_width * constant). These are applied later
   # in section 10 once we know par("din")[1].
-  R_LEG_CELL <- 0.018                                            # ← RATIO 4
-  R_TH_SQ    <- 0.008                                            # ← RATIO 5
-  R_LEG_TEXT <- 0.045                                             # ← RATIO 6
-  R_TH_TEXT  <- 0.041                                             # ← RATIO 7
+  R_LEG_CELL <- 0.018                                            #  RATIO 4
+  R_TH_SQ    <- 0.008                                            #  RATIO 5
+  R_LEG_TEXT <- 0.045                                             #  RATIO 6
+  R_TH_TEXT  <- 0.041                                             #  RATIO 7
 
   # --- Margins ---
   if (is.null(dots$mar)) dots$mar <- c(0.5, 0.5, 0.5, 2.5)
-  dots$family <- "Helvetica"
+  dots$family <- "sans"
 
   # --- 3. Device routing & Active Device Mirroring --------------------------
   # If a file is specified, open that export device.
@@ -367,7 +367,7 @@ plot_phylorug <- function(backbone, npm,
     x0_left <- usr[1] + margin_x
 
     # Legend sizes from canvas WIDTH (gentle scaling)
-    # w_ref = 85% width + 15% height → width-dominant
+    # w_ref = 85% width + 15% height -> width-dominant
     din   <- graphics::par("din")
     w_ref <- din[1] * 0.85 + din[2] * 0.15
 
