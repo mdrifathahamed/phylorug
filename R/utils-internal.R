@@ -148,4 +148,3 @@ auto_canvas <- function(backbone,
   list(width = width, height = height)
 }
 
-`%||%` <- function(x, y) if (is.null(x)) y else x

@@ -89,17 +89,14 @@ translate_tips <- function(trees,
   )
   # Translate each tree in the list
   trees <- lapply(trees, function(tr) {
-    tips_to_translate <- tr$tip.label %in% names(trans_dict)
+    match_idx <- match(tr$tip.label, names(trans_dict))
+    matched   <- !is.na(match_idx)
 
-    for (i in seq_along(tr$tip.label)) {
-      if (tr$tip.label[i] %in% names(trans_dict)) {
-        tr$tip.label[i] <- trans_dict[tr$tip.label[i]]
-      }
-    }
+    tr$tip.label[matched] <- trans_dict[match_idx[matched]]
 
     if (verbose) {
-      message("Tips translated : ", sum(tips_to_translate))
-      message("Tips unchanged  : ", sum(!tips_to_translate))
+      message("Tips translated : ", sum(matched))
+      message("Tips unchanged  : ", sum(!matched))
     }
     tr
   })
