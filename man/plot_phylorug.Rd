@@ -25,7 +25,7 @@ plot_phylorug(
   rug_position = c("inside", "outside"),
   dot_identical = TRUE,
   dot_col = "black",
-  dot_cex = 0.45,
+  dot_cex = NULL,
   support_label_cex = NULL,
   support_label_col = "red",
   ...
@@ -100,7 +100,7 @@ backbone nodes where every comparison tree is identical in recovering the
 clade.}
 
 \item{dot_col, dot_cex}{Colour and size of the identical-clade dot. Defaults
-are \code{"black"} and \code{0.45}.}
+are \code{"black"} and NULL (auto-scales).}
 
 \item{support_label_cex}{Numeric or \code{NULL}. Size of the backbone support
 labels. Default \code{NULL} auto-scales with tree size.}

@@ -150,6 +150,30 @@ plot_phylorug <- function(backbone, npm,
   mode         <- match.arg(mode)
   rug_position <- match.arg(rug_position)
 
+  # --- Support matrix validation ---
+  if (mode == "support") {
+    support_key <- paste0("support_", support_idx)
+    if (!(support_key %in% names(npm))) {
+      available_supports <- grep("^support_", names(npm), value = TRUE)
+
+      msg <- sprintf(
+        paste0(
+          "Support matrix `%s` (`support_idx = %d`) not found in `npm`.\n",
+          "Available support matrices: %s"
+        ),
+        support_key,
+        support_idx,
+        if (length(available_supports) > 0) {
+          paste(available_supports, collapse = ", ")
+        } else {
+          "none"
+        }
+      )
+
+      stop(msg, call. = FALSE)
+    }
+  }
+  # ---------------------------------------------
   presence <- npm$presence
   if (ncol(presence) < 1L)
     stop("`npm` has no comparison trees to plot.", call. = FALSE)
