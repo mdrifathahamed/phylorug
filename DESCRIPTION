@@ -1,6 +1,6 @@
 Package: phylorug
-Title: Visualize Node Support Across Multiple Phylogenomic Analyses
-Version: 0.1.0
+Title: Visualize Clade Recovery and Support Across evolutionary trees
+Version: 1.0.0
 Authors@R: c(
     person("Md Rifath", "Ahamed",
            email   = "rifath.ahamed@helsinki.fi",
@@ -14,11 +14,13 @@ Authors@R: c(
            email   = "salvador.ariasbecerra@helsinki.fi",
            role    = "ctb",
            comment = c(ORCID = "0000-0002-3717-435X")))
-Description: Implements the rug plot method for visualizing node
-    support from multiple independent phylogenomic analyses
-    simultaneously on a single reference tree. Handles bootstrap
-    proportions, Bayesian posterior probabilities, and ASTRAL
-    local posterior formats automatically.
+Description: Implements a rug plot visualization technique that draws rug plots
+    directly on tree nodes to illustrate Clade Recovery and Support from 
+    multiple independent phylogenetic and phylogenomic analyses.As modern 
+    phylogenetic studies routinely employ diverse datasets and inference 
+    techniques producing potentially conflicting trees, phylorug simplifies the
+    comparison among these trees by consolidating clade recovery and support 
+    simultaneously on a single reference tree. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
