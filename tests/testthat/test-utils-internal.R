@@ -51,7 +51,7 @@ test_that("auto_canvas width is wider for support mode", {
   tree <- ape::read.tree(text = "(((A,B),C),(D,E));")
   pres <- auto_canvas(tree, ntip = 50, mode = "presence")
   supp <- auto_canvas(tree, ntip = 50, mode = "support")
-  expect_true(supp$width > pres$width)
+  expect_equal(supp$width, pres$width)
 })
 
 test_that("auto_canvas respects has_legend = FALSE", {

@@ -76,6 +76,7 @@
 #' rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 #' rugmt$support_1   # bootstrap
 #' rugmt$support_2   # SH-aLRT
+#' }
 node_presence_matrix <- function(backbone,
                                  trees,
                                  support_col = 1) {
@@ -200,7 +201,7 @@ node_presence_matrix <- function(backbone,
   pool_sizes <- vapply(trees, pool_size, integer(1))
 
   # Build named list: presence + support_1, support_2, ...
-  support_named <- setNames(
+  support_named <- stats::setNames(
     support_matrices,
     paste0("support_", seq_along(support_col))
   )
