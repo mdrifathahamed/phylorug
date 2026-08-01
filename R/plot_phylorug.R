@@ -85,9 +85,17 @@
 #'
 #' @param support_label_col Colour of the backbone support labels. Default
 #'   `"red"`.
+#' @param rug_on_identical Logical. Default `FALSE`. When  it and
+#'   `dot_identical`both are  `TRUE`, unanimous nodes receive both the dot and
+#'   a support rug, making per-tree support strength visible even at universally
+#'   recovered clades.
+#' @param hide_unsupported Logical. Default `FALSE`. When `TRUE`, nodes where
+#'   no comparison tree recovers the clade are left bare, no rug is drawn.
+#'   The absence of both a dot and a rug signals that the clade is unique to
+#'   the backbone topology.
 #'
 #' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
-#'   directly to the active graphics device.
+#'   directly to the active graphics device (not reconmonded).
 #'
 #' @seealso [node_presence_matrix()] to build the input data,
 #'   [check_taxa()] to verify taxon sets, and
@@ -139,6 +147,8 @@ plot_phylorug <- function(backbone, npm,
                           dot_cex           = NULL,
                           support_label_cex = NULL,
                           support_label_col = "red",
+                          rug_on_identical = FALSE,
+                          hide_unsupported = FALSE,
                           ...) {
 
   # --- 1. Validate -----------------------------------------------------------
@@ -208,6 +218,7 @@ plot_phylorug <- function(backbone, npm,
   if (is.null(n_rows)) n_rows <- ceiling(n_tree / n_cols)
 
   unanimous <- apply(presence, 1, function(row) all(row == 1, na.rm = FALSE))
+  unsupported <- apply(presence, 1, function(row) all(row == 0, na.rm = TRUE))
 
   # ===================================================================
   # TWO-SOURCE SCALING
@@ -324,7 +335,7 @@ plot_phylorug <- function(backbone, npm,
     show <- which(!is.na(labs) & nzchar(labs))
     if (length(show) > 0) {
       node_ids <- show + ntip
-      if (dot_identical) {
+      if (dot_identical && !rug_on_identical) {
         keep <- !(node_ids %in% as.integer(rownames(presence)[unanimous]))
         show <- show[keep]
         node_ids <- node_ids[keep]
@@ -363,7 +374,15 @@ plot_phylorug <- function(backbone, npm,
     }
   }
   # --- 9. Node rugs ----------------------------------------------------------
-  variable <- if (dot_identical) !unanimous else rep(TRUE, nrow(presence))
+  variable <- if (dot_identical && !rug_on_identical) {
+    !unanimous
+  } else {
+    rep(TRUE, nrow(presence))
+  }
+
+  if (hide_unsupported) {
+    variable <- variable & !unsupported
+  }
   if (any(variable)) {
     plot_node_rug(
       presence     = presence[variable, , drop = FALSE],
