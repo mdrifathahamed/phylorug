@@ -1,38 +1,34 @@
 Package: phylorug
-Title: Visualize Clade Recovery and Support Across evolutionary trees
-Version: 1.0.0
+Title: Visualize Clade Recovery and Support Across Phylogenetic Trees
+Version: 0.0.0.9000
 Authors@R: c(
-    person("Md Rifath", "Ahamed",
-           email   = "rifath.ahamed@helsinki.fi",
-           role    = c("aut", "cre"),
-           comment = c(ORCID = "0009-0005-6158-8658")),
-    person("Sergei", "Tarasov",
-           email   = "sergei.tarasov@helsinki.fi",
-           role    = "aut",
+    person("Md Rifath", "Ahamed", , "rifath.ahamed@helsinki.fi",
+            role = c("aut", "cre"),
+            comment = c(ORCID = "0009-0005-6158-8658")),
+    person("Sergei", "Tarasov", , "sergei.tarasov@helsinki.fi", role = "aut",
            comment = c(ORCID = "0000-0002-1737-9403")),
-    person("J. Salvador", "Arias",
-           email   = "salvador.ariasbecerra@helsinki.fi",
-           role    = "ctb",
-           comment = c(ORCID = "0000-0002-3717-435X")))
-Description: Implements a rug plot visualization technique that draws rug plots
-    directly on tree nodes to illustrate Clade Recovery and Support from 
-    multiple independent phylogenetic and phylogenomic analyses.As modern 
-    phylogenetic studies routinely employ diverse datasets and inference 
-    techniques producing potentially conflicting trees, phylorug simplifies the
-    comparison among these trees by consolidating clade recovery and support 
-    simultaneously on a single reference tree. 
+    person("J. Salvador", "Arias", , "salvador.ariasbecerra@helsinki.fi", 
+            role = "ctb",
+            comment = c(ORCID = "0000-0002-3717-435X"))
+            )
+Description: Generates rug plot visualizations directly on tree nodes to
+    illustrate clade recovery and support from multiple phylogenetic and
+    phylogenomic analyses. As modern studies routinely employ diverse
+    datasets and inference techniques producing potentially conflicting
+    trees, 'phylorug' simplifies the comparison among these trees by
+    consolidating clade recovery and support on a reference tree.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
 URL: https://github.com/mdrifathahamed/phylorug
 BugReports: https://github.com/mdrifathahamed/phylorug/issues
+Depends: 
+    R (>= 4.1.0)
 Imports: 
     ape,
     phangorn
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Depends: 
-    R (>= 3.5)
+Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
