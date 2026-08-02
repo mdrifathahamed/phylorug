@@ -12,6 +12,7 @@ phylorug_plot(
   support_type = NULL,
   thresholds = NULL,
   include_backbone = FALSE,
+  layout = c("phylogram", "cladogram", "fan", "unrooted"),
   file = NULL,
   width = NULL,
   height = NULL,
@@ -34,12 +35,17 @@ a \code{presence} matrix.}
 
 \item{include_backbone}{Logical. Include backbone as cell 1. Default \code{FALSE}.}
 
+\item{layout}{Tree layout: \code{"phylogram"} (default, with branch lengths),
+\code{"cladogram"} (equal spacing), \code{"fan"} (circular), or \code{"unrooted"}.}
+
 \item{file}{Output file path (\code{.pdf}, \code{.png}, \code{.jpg}), or \code{NULL} for
 on-screen rendering.}
 
 \item{width, height}{Canvas dimensions in inches. \code{NULL} for auto.}
 
-\item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}.}
+\item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}, such as
+\code{cex}, \code{font}, \code{edge.width}, \code{edge.color}, \code{tip.color},
+\code{label.offset}, or \code{show.tip.label}.}
 }
 \value{
 An S3 object of class \code{"phylorug_plot"}. Add layers with \code{+}.

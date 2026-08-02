@@ -66,3 +66,22 @@ single tree this is the support value where the clade is present, or
 \code{NA} where it is absent, since a clade that is not in the tree has no
 node to carry a support value.
 }
+\examples{
+\dontrun{
+trees    <- read_trees("path/to/your/trees")
+backbone <- trees[["iqtree"]]
+others   <- trees[names(trees) != "iqtree"]
+
+check_taxa(backbone, others)
+
+npmatrix <- node_presence_matrix(backbone, others)
+
+# Access individual matrices
+npmatrix$presence    # clade presence/absence
+npmatrix$support_1   # raw support values (column 1)
+
+# Bootstrap + SH-aLRT together
+rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+rugmt$support_1   # bootstrap
+rugmt$support_2   # SH-aLRT}
+}

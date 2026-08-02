@@ -4,17 +4,30 @@
 \alias{dot_layer}
 \title{Add dots at unanimous nodes}
 \usage{
-dot_layer(col = "black", cex = 0.45)
+dot_layer(
+  col = "black",
+  cex = 0.45,
+  pch = 16,
+  fill = "black",
+  auto_scale = TRUE
+)
 }
 \arguments{
 \item{col}{Dot colour. Default \code{"black"}.}
 
-\item{cex}{Dot size. Default \code{0.45}.}
+\item{cex}{Dot size. Default \code{0.45}. Auto-scales with tree size.}
+
+\item{pch}{Point character. Default \code{16} (solid circle). Use \code{21} for
+a filled circle with separate border (set \code{fill} for inner colour).}
+
+\item{fill}{Fill colour when using \code{pch = 21}. Default \code{"black"}.}
+
+\item{auto_scale}{Logical. Scale dot size with tree size. Default \code{TRUE}.}
 }
 \value{
 A \code{phylorug_layer} object.
 }
 \description{
-Draws a solid dot at each internal node where every comparison tree
+Draws a dot at each internal node where every comparison tree
 recovers the same clade.
 }

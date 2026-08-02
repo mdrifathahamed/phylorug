@@ -10,7 +10,9 @@ rug_layer(
   n_cols = NULL,
   x_offset = 0,
   y_offset = 0,
-  rug_position = c("inside", "outside")
+  rug_position = c("inside", "outside"),
+  border_col = "grey40",
+  border_lwd = 0.2
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ spacing. Default \code{0.45}.}
 \item{x_offset, y_offset}{Shift the grid from the node position.}
 
 \item{rug_position}{\code{"inside"} (default) or \code{"outside"}.}
+
+\item{border_col}{Cell border colour. Default \code{"grey40"}.}
+
+\item{border_lwd}{Cell border line width. Default \code{0.2}.}
 }
 \value{
 A \code{phylorug_layer} object.

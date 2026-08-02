@@ -76,7 +76,7 @@
 #' # Bootstrap + SH-aLRT together
 #' rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 #' rugmt$support_1   # bootstrap
-#' rugmt$support_2   # SH-aLRT
+#' rugmt$support_2   # SH-aLRT}
 node_presence_matrix <- function(backbone,
                                  trees,
                                  support_col = 1) {

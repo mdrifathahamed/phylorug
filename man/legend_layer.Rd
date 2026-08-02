@@ -4,7 +4,29 @@
 \alias{legend_layer}
 \title{Add position and threshold legends}
 \usage{
-legend_layer()
+legend_layer(
+  size = 1,
+  text_cex = NULL,
+  cell_size = NULL,
+  font = 1,
+  max_chars = 35L
+)
+}
+\arguments{
+\item{size}{Numeric multiplier for overall legend size. \code{1} = default,
+\code{1.5} = 50 percent larger, \code{0.7} = 30 percent smaller. Scales both
+text and cells proportionally.}
+
+\item{text_cex}{Legend text size. \code{NULL} for auto-scaling (modified by
+\code{size}).}
+
+\item{cell_size}{Legend cell size in inches. \code{NULL} for auto-scaling
+(modified by \code{size}).}
+
+\item{font}{Font style: 1 = normal, 2 = bold, 3 = italic. Default \code{1}.}
+
+\item{max_chars}{Maximum characters before truncating analysis names.
+Default \code{35}.}
 }
 \value{
 A \code{phylorug_layer} object.

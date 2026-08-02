@@ -69,8 +69,9 @@ read_trees <- function(dir     = ".",
                                    "newick", "nex", "nexus", "contree"),
                        format  = c("auto", "newick", "nexus"),
                        verbose = TRUE) {
-  format <- match.arg(format)
 
+  format <- match.arg(format)
+#..............input validation..............................
   if (!dir.exists(dir)) {
     stop("`dir` does not exist: ", dir, call. = FALSE)
   }
@@ -81,10 +82,11 @@ read_trees <- function(dir     = ".",
       call. = FALSE
     )
   }
-
+  # Sort extensions from longest to shortest to prevent regex partial-match shadowing
+  # (e.g., matching ".tre" before ".treefile"), then build the end-of-string anchor pattern
   ext         <- ext[order(nchar(ext), decreasing = TRUE)]
-  ext_pattern <- paste0("\\.(", paste(ext, collapse = "|"), ")$")
-
+  ext_pattern <- paste0("\\.", "(", paste(ext, collapse = "|"), ")", "$")
+#making a list of file paths  so that they can be feed to lapply
   files <- list.files(
     dir,
     pattern     = ext_pattern,

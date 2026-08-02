@@ -12,8 +12,6 @@
 #'
 #' \describe{
 #'   \item{identical}{The comparison tree shares the backbone's taxa exactly.}
-#'   \item{superset}{The comparison tree contains every backbone taxon, plus
-#'     some others.
 #'   \item{superset}{The comparison trees contains every backbone taxon, plus
 #'     some extra. Every backbone clade can still be evaluated, so no action is
 #'     needed; the extra taxa are ignored.}

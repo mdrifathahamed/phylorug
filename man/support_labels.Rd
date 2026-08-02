@@ -4,15 +4,30 @@
 \alias{support_labels}
 \title{Add backbone support labels}
 \usage{
-support_labels(col = "red", cex = NULL, skip_unanimous = TRUE)
+support_labels(
+  col = "red",
+  cex = NULL,
+  font = 1,
+  adj = c(1.1, 1.4),
+  skip_unanimous = TRUE,
+  round = 2
+)
 }
 \arguments{
 \item{col}{Label colour. Default \code{"red"}.}
 
-\item{cex}{Label size. \code{NULL} for auto-scaling.}
+\item{cex}{Label size. \code{NULL} for auto-scaling with tree size.}
+
+\item{font}{Font style: 1 = normal, 2 = bold, 3 = italic,
+4 = bold-italic. Default \code{1}.}
+
+\item{adj}{Numeric vector of length 2. Horizontal and vertical
+adjustment for label position. Default \code{c(1.1, 1.4)}.}
 
 \item{skip_unanimous}{Logical. Hide labels at unanimous nodes.
 Default \code{TRUE}.}
+
+\item{round}{Integer. Number of decimal places. Default \code{2}.}
 }
 \value{
 A \code{phylorug_layer} object.
