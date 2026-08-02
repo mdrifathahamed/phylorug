@@ -254,7 +254,7 @@ plot_phylorug <- function(backbone, npm,
   }
  #----------------------dot_cex-------------------------------------------
    dot_scale <- if (is.null(dot_cex)){
-    min(1.2, max(0.80, per_tip * 6.0))
+    min(1.2, max(0.80, per_tip * 4.5))
   } else {
     dot_cex
   }
@@ -272,7 +272,6 @@ plot_phylorug <- function(backbone, npm,
   dots$family <- "sans"
 
   # --- 3. Device routing & Active Device Mirroring --------------------------
-  # If a file is specified, open that export device.
   if (!is.null(file)) {
     canvas <- auto_canvas(backbone = backbone, ntip = ntip,
                           n_tree = n_tree, mode = mode,
@@ -292,6 +291,25 @@ plot_phylorug <- function(backbone, npm,
       stop("Unsupported file extension. Use .pdf, .png, or .jpg", call. = FALSE)
     }
     on.exit(grDevices::dev.off(), add = TRUE)
+  } else {
+    old_par <- graphics::par(no.readonly = TRUE)
+    on.exit(graphics::par(old_par), add = TRUE)
+
+    actual_w <- graphics::par("din")[1]
+    shrink   <- min(1.0, actual_w / 12.0)
+
+    dots$cex        <- taxa_cex * shrink
+    taxa_cex        <- dots$cex
+    support_cex     <- support_cex * shrink
+    dot_scale       <- dot_scale * shrink
+    dots$edge.width <- (dots$edge.width %||% 1.5) * max(0.5, shrink)
+
+    if (is.null(dots$label.offset))
+      dots$label.offset <- 0.001 * shrink
+
+    max_lab  <- max(nchar(backbone$tip.label))
+    r_mar    <- max(3.0, min(7.0, max_lab * 0.08))
+    dots$mar <- c(0.5, 0.5, 0.5, r_mar)
   }
   # --- 4. Dynamic y.lim ------------------------------------------------------
   if (is.null(dots$y.lim) && legend) {

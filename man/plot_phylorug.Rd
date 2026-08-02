@@ -28,6 +28,8 @@ plot_phylorug(
   dot_cex = NULL,
   support_label_cex = NULL,
   support_label_col = "red",
+  rug_on_identical = FALSE,
+  hide_unsupported = FALSE,
   ...
 )
 }
@@ -108,13 +110,23 @@ labels. Default \code{NULL} auto-scales with tree size.}
 \item{support_label_col}{Colour of the backbone support labels. Default
 \code{"red"}.}
 
+\item{rug_on_identical}{Logical. Default \code{FALSE}. When  it and
+\code{dot_identical}both are  \code{TRUE}, unanimous nodes receive both the dot and
+a support rug, making per-tree support strength visible even at universally
+recovered clades.}
+
+\item{hide_unsupported}{Logical. Default \code{FALSE}. When \code{TRUE}, nodes where
+no comparison tree recovers the clade are left bare, no rug is drawn.
+The absence of both a dot and a rug signals that the clade is unique to
+the backbone topology.}
+
 \item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}, such as
 \code{cex}, \code{edge.width}, \code{font}, or \code{label.offset}. These override the
 automatic scaling when provided.}
 }
 \value{
 Invisibly, the file path if a file was written, or \code{NULL} if plotted
-directly to the active graphics device.
+directly to the active graphics device (not reconmonded).
 }
 \description{
 \code{\link[=plot_phylorug]{plot_phylorug()}} overlays clade stability grids (rugs) on a backbone
