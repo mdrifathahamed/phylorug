@@ -1,25 +1,25 @@
-#' Parse node support values from internal nodes of a phylogenetic tree.
+#' Parse support values from internal nodes of a phylogenetic tree.
 #'
 #' Extracts up to three node support values from the node labels of a
 #' phylogenetic tree. A single value (such as an IQ-TREE bootstrap) fills the
-#' first column and leaves the rest as NA. A compound label separated by
-#' \code{sep} fills as many columns as it carries: two for IQ-TREE
-#' SH-aLRT/UFBoot2 or ASTRAL pp1/pp2, three for IQ-TREE SH-aLRT/UFBoot2/aBayes
-#' or ASTRAL pp1/pp2/pp3. Empty or non-numeric labels become NA. Trees without
-#' node labels return a data frame of NAs, one row per internal node.
+#' first column and leaves the rest as NA. A compound label separated by `sep`
+#' fills as many columns as it carries: two for IQ-TREE SH-aLRT/UFBoot2 or
+#' ASTRAL pp1/pp2, three for IQ-TREE SH-aLRT/UFBoot2/aBayes or ASTRAL
+#' pp1/pp2/pp3. Empty or non-numeric labels become NA. Trees without node labels
+#' return a data frame of NAs, one row per internal node.
 #'
-#' @param tree A phylogenetic tree of class "phylo", with node labels stored
+#' @param tree A phylogenetic tree of class `"phylo"`, with node labels stored
 #'   in tree$node.label.
 #'
 #' @param sep A single character string giving the delimiter that separates
-#'   compound support values. Defaults to "/".
+#'   compound support values. Defaults to `"/"`.
 #'
-#' @param round Integer or NULL. If supplied, support values are rounded to
-#'   this many decimal places. Defaults to NULL.
+#' @param round Integer or `NULL`. If supplied, support values are rounded to this
+#'   many decimal places. Defaults to `NULL`.
 #'
 #' @return A data frame with three columns, support_1, support_2 and support_3,
 #'   and one row per internal node of the tree. Columns not present in a given
-#'   label are NA.
+#'   label are `NA`.
 #'
 #' @noRd
 node_support <- function(tree,
@@ -83,7 +83,7 @@ node_support <- function(tree,
 
   # 9. Round if requested
   if (!is.null(round)) {
-    result[] <- lapply(result, function(v) base::round(v, round))
+    result[] <- lapply(result, function(v) round(v, round))
   }
 
   result

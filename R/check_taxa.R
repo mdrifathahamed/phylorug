@@ -1,4 +1,4 @@
-#' Check tip label consistency between backbone and a set of trees
+#' Diagnose taxon consistency between backbone and comparison trees
 #'
 #' Compares each comparison tree against the backbone to confirm that all
 #' analyses were run on the same set of taxa. A clade cannot be evaluated in an
@@ -7,7 +7,7 @@
 #'
 #' @details
 #' This function reports; it does not modify the trees. If the backbone is
-#' present in \code{trees} it is silently removed before comparison. Three
+#' present in `trees` it is silently removed before comparison. Three
 #' outcomes are
 #'
 #' \describe{
@@ -18,37 +18,37 @@
 #'     needed; the extra taxa are ignored.}
 #'
 #'   \item{missing}{The comparison trees lacks one or more backbone taxa. Any
-#'     backbone clade containing a missing taxon \emph{might produce false
-#'     absence} in that tree. Scoring such a clade as absent would report a
-#'     rejection where no question was ever put. Use [prune_to_shared()] to
-#'     reduce the backbone and the comparison trees to their common taxa.}
+#'     backbone clade containing a missing taxon might produce false absence in
+#'     that tree. Scoring such a clade as absent would report a rejection where
+#'     no question was ever put. Use [prune_to_shared()] to reduce the backbone
+#'     and the comparison trees to their common taxa.}
 #' }
 #'
 #' Where a comparison tree is a pool of several equally optimal trees, every
 #' tree in the pool is checked. A pool whose trees disagree about their own taxa
 #' is a data problem, and is an error.
 #'
-#' @param backbone The reference tree, as a \code{phylo} object. The rug is
+#' @param backbone The reference tree, as a `"phylo"` object. The rug is
 #'   drawn on this tree, and its clades are searched for in each comparison
 #'   tree.
 #'
-#' @param trees A named list of \code{phylo} or \code{multiPhylo} objects, one
-#'   per comparison, as returned by [read_trees()].If the backbone is present in the
+#' @param trees A named list of `"phylo"` or `"multiPhylo"` objects, one per
+#'   comparison, as returned by [read_trees()].If the backbone is present in the
 #'   list it is removed automatically before comparison, so you can pass the
 #'   full list from [read_trees()] without subsetting first.
 #'
-#' @param verbose Logical. If \code{TRUE} (default), reports the outcome and
+#' @param verbose Logical. If `TRUE` (default), reports the outcome and
 #'   names any mismatched comparison trees.
 #'
-#' @return A single logical value: \code{TRUE} if every comparison tree shares
-#'   the backbone's taxa exactly. The value carries a \code{"diagnostics"}
-#'   attribute, a data frame with one row per comparison tree giving its status
-#'   (\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
-#'   missing from, or extra to, the backbone. Diagnostics are attached whatever
-#'   \code{verbose} is set to.
+#' @return A single logical value: `TRUE` if every comparison tree shares the
+#'   backbone's taxa exactly. The value carries a `"diagnostics"` attribute, a
+#'   data frame with one row per comparison tree giving its status
+#'   (`"identical"`, `"superset"` or `"missing"`) and the taxa missing from, or
+#'   extra to, the backbone. Diagnostics are attached whatever `verbose` is set
+#'   to.
 #'
-#' @seealso \code{\link{read_trees}} to load the trees;
-#'   \code{\link{prune_to_shared}} to reduce them to a common taxon set.
+#' @seealso [read_trees()] to load the trees and [prune_to_shared()] to reduce
+#'   them to a common taxon set.
 #'
 #' @export
 #'

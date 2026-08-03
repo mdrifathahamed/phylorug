@@ -7,42 +7,41 @@
 #' The appearance is set by the tier, which is resolved from the arguments
 #' rather than named directly:
 #' \itemize{
-#'   \item Presence (Tier 1): \code{support} is \code{NULL}. Black = present,
+#'   \item Presence (Tier 1): `support` is `NULL`. Black = present,
 #'     white = absent, grey = partial recovery in a pool.
-#'   \item Not-computed (Tier 2): \code{support} is given but
-#'     \code{support_type} is not. Adds a hatched cell for clades that could not
-#'     be evaluated.
-#'   \item Four-state (Tier 3): both \code{support} and \code{support_type} are
-#'     given. Present cells are shaded by binned support; absent cells are
+#'   \item Not-computed (Tier 2): `support` is given but `support_type` is not.
+#'     Adds a hatched cell for clades that could not be evaluated.
+#'   \item Four-state (Tier 3): both `support` and `support_type` are given.
+#'     Present cells are shaded by binned support; absent cells are
 #'     marked distinctly; not-computed cells are hatched.
 #' }
 #'
-#' Users do not call this directly; \code{plot_phylorug()} calls it after
-#' drawing the tree and working out the cell geometry.
+#' Users do not call this directly; [plot_phylorug()] calls it after drawing the
+#' tree and working out the cell geometry.
 #'
-#' @param presence Presence matrix from \code{node_presence_matrix()}: one row
-#'   per internal backbone node (node numbers as rownames), one column per
-#'   comparison tree. Cells are \code{1}, \code{0}, or a pool proportion.
-#' @param support Support matrix of the same shape, or \code{NULL}. When
-#'   \code{NULL}, the rug is drawn in presence mode.
+#' @param npm Node presence or support matrix from [node_presence_matrix()].
+#'   one row per internal backbone node (node numbers as rownames), one column
+#'   per comparison tree. Cells are `1`, `0`, or a pool proportion.
+#' @param support Support matrix of the same shape, or `NULL`. When `NULL`, the
+#'  rug is drawn in presence mode.
 #' @param support_type Named character vector mapping each comparison tree to
-#'   its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
-#'   \code{"posterior"}), or \code{NULL}. Required for binned shading.
+#'   its support measure `"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or
+#'   `NULL`. Required for binned shading.
 #' @param thresholds Optional list overriding the built-in bin thresholds, keyed
-#'   by support type. \code{NULL} uses the literature defaults.
+#'   by support type.`NULL` uses the literature defaults.
 #' @param cell_h,cell_w Numeric. Height and width of one cell, in the tree's
 #'   plotting coordinates.
 #' @param n_cols Integer. Columns in each node's grid.
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node, as
 #'   a fraction of the tree's width and height.
-#' @param rug_position One of \code{"outside"} (default) or \code{"inside"}.
-#' @param last_pp The stored \code{plot.phylo} coordinates from
-#'   \code{plot_phylorug()}. If \code{NULL}, fetched from the active device.
+#' @param rug_position One of `"outside"` (default) or `"inside"`.
+#' @param last_pp The stored [ape::plot.phylo()] coordinates from
+#'   [plot_phylorug()]. If `NULL`, fetched from the active device.
 #'
-#' @return Invisibly \code{NULL}; called for its drawing side effect.
+#' @return Invisibly `NULL`; called for its drawing side effect.
 #'
 #' @keywords internal
-plot_node_rug <- function(presence,
+plot_node_rug <- function(npm,
                           support      = NULL,
                           support_type = NULL,
                           thresholds   = NULL,
@@ -54,11 +53,11 @@ plot_node_rug <- function(presence,
                           rug_position = c("outside", "inside"),
                           last_pp      = NULL) {
 
-  if (!is.matrix(presence)) {
-    stop("`presence` must be a matrix.", call. = FALSE)
+  if (!is.matrix(npm)) {
+    stop("`npm` must be a matrix.", call. = FALSE)
   }
-  if (!is.null(support) && !identical(dim(support), dim(presence))) {
-    stop("`support` must have the same dimensions as `presence`.", call. = FALSE)
+  if (!is.null(support) && !identical(dim(support), dim(npm))) {
+    stop("`support` must have the same dimensions as `npm`.", call. = FALSE)
   }
   rug_position <- match.arg(rug_position)
 
@@ -70,22 +69,22 @@ plot_node_rug <- function(presence,
   tier <- resolve_tier(support, support_type)
 
   # Node ids come from the rownames now, not a first column.
-  node_ids <- as.integer(rownames(presence))
+  node_ids <- as.integer(rownames(npm))
 
   dx_offset <- max(last_pp$xx) * x_offset
   dy_offset <- max(last_pp$yy) * y_offset
 
-  n_nodes <- nrow(presence)
-  n_tree  <- ncol(presence)
+  n_nodes <- nrow(npm)
+  n_tree  <- ncol(npm)
   n_rows  <- ceiling(n_tree / n_cols)
   total_w <- n_cols * cell_w
   total_h <- n_rows * cell_h
 
-  tree_names <- colnames(presence)
+  tree_names <- colnames(npm)
 
   for (i in seq_len(n_nodes)) {
     node_id <- node_ids[i]
-    p_vals  <- as.numeric(presence[i, ])
+    p_vals  <- as.numeric(npm[i, ])
     s_vals  <- if (is.null(support)) rep(NA_real_, n_tree) else as.numeric(support[i, ])
 
     x_center <- last_pp$xx[node_id] + dx_offset

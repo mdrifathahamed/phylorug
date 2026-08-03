@@ -1,7 +1,7 @@
-#' Construct a node presence/support matrix for multiple phylogenetic trees
+#' Tabulate clade recovery and support across trees
 #'
 #' Compares a set of phylogenetic trees against a reference topology, the
-#' \code{"backbone"}. For each internal node of the backbone, the function asks
+#' `"backbone"`. For each internal node of the backbone, the function asks
 #' whether the same clade (the same set of tips) appears in each tree, and
 #' records either its presence or its support value.
 #'
@@ -14,28 +14,28 @@
 #' harmonize the backbone and comapring tree taxa.
 #'
 #' The function always computes both a presence matrix and a support matrix
-#' in a single pass. The plotting function \code{plot_phylorug} decide which to
+#' in a single pass. The plotting function [plot_phylorug()] decide which to
 #' use based on the visualisation context.
 #'
-#' In presence matrix (\code{use_support = FALSE}),For multiple equally most
+#' In presence matrix (`use_support = FALSE`),For multiple equally most
 #' parsimonious trees (MPTs) the cell records the clade frequency among MPTs
 #' and, for a single-tree this is 1 for presence  or 0 for absence.
 #'
-#' In support matrix (\code{use_support = TRUE}), the cell records the support
-#' value from the tree that recovered the clade, such as bootstrap or posterior
+#' In support matrix `use_support = TRUE`, the cell records the support value
+#' from the tree that recovered the clade, such as bootstrap or posterior
 #' probability. For MPTs, support values are averaged across the trees that
 #' recovered the clade; trees that did not recover it contribute nothing. For a
-#' single tree this is the support value where the clade is present, or
-#' \code{NA} where it is absent, since a clade that is not in the tree has no
-#' node to carry a support value.
+#' single tree this is the support value where the clade is present, or `NA`
+#' where it is absent, since a clade that is not in the tree has no node to
+#' carry a support value.
 #'
 #'
-#' @param backbone A phylogenetic tree of class \code{"phylo"}. Each of its
-#'   internal nodes becomes one row of the output matrix.
+#' @param backbone A phylogenetic tree of class `"phylo"`. Each of its internal
+#'   nodes becomes one row of the output matrix.
 #'
-#' @param trees A named list of \code{"phylo"} objects, or a \code{"multiPhylo"}
-#'   object. Each object becomes one column of the output matrix. An object
-#'   holding several trees is scored as a pool.
+#' @param trees A named list of `"phylo"` objects, or a `"multiPhylo"` object.
+#'   Each object becomes one column of the output matrix. An object holding
+#'   several trees is scored as a pool.
 #'
 #' @param support_col Integer or vector of integers (max 3). Specifies which
 #'   value(s) to extract from multi-metric node labels. For example, if an
@@ -48,13 +48,12 @@
 #' @return A named list with one row per internal backbone node and one column
 #'   per comparison tree:
 #'   \describe{
-#'     \item{presence}{Clade presence: \code{1} where recovered, \code{0}
-#'       where absent, or the proportion of pool trees recovering the clade.}
-#'     \item{support_1, support_2, ...}{One matrix per value in
-#'       \code{support_col}. Raw support values where the clade was recovered,
-#'       \code{NA} where absent. Named in the order requested, so
-#'       \code{support_col = c(1, 2)} produces \code{support_1} and
-#'       \code{support_2}.}
+#'     \item{presence}{Clade presence: `1` where recovered, `0` where absent, or
+#'      the proportion of pool trees recovering the clade.}
+#'     \item{support_1, support_2, ...}{One matrix per value in `support_col`.
+#'      Raw support values where the clade was recovered,`NA` where absent.
+#'      Named in the order requested, so `support_col = c(1, 2)` produces
+#'      `support_1` and `support_2`.}
 #'   }
 #' @export
 #'

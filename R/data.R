@@ -1,4 +1,4 @@
-#' Sample  20 taxa beetle phylogenetic trees
+#' Sample beetle phylogenies (20-taxon subset)
 #'
 #' A named list of five phylogenetic trees from a dung beetle phylogenomic
 #' study, pruned to 20 taxa for compact demonstration of the phylorug
@@ -21,7 +21,7 @@
 #'     partitioned gene trees.}
 #' }
 #'
-#' @format A named list of 5 objects of class \code{phylo} (from the ape
+#' @format A named list of 5 objects of class `"phylo"` (from the ape
 #'   package), each with 20 tips. Node labels contain support values:
 #'   SH-aLRT/UFBoot2 for IQ-TREE trees and local posterior probability for
 #'   ASTRAL trees.

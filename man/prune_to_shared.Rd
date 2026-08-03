@@ -9,36 +9,36 @@ prune_to_shared(backbone, trees, verbose = TRUE)
 \arguments{
 \item{backbone}{A phylogenetic tree of class \code{"phylo"}.}
 
-\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects,
-one per comparison, as returned by \code{\link{read_trees}}.}
+\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects, one per
+comparison, as returned by \code{\link[=read_trees]{read_trees()}}.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), reports how many taxa were
 dropped and names them.}
 }
 \value{
-A list with two elements: \code{backbone}, the pruned backbone tree,
-and \code{trees}, the pruned comparison trees, retaining their names and
-their original single-tree or pooled structure. The list carries a
-\code{"dropped"} attribute naming the taxa that were removed.
+A list with two elements: \code{backbone}, the pruned backbone tree, and
+\code{trees}, the pruned comparison trees, retaining their names and their
+original single-tree or pooled structure. The list carries a \code{"dropped"}
+attribute naming the taxa that were removed.
 }
 \description{
 Drops from the backbone, and from every comparison tree, any taxon that is
 not present in all of them. The result is a set of trees that can be compared
-clade by clade by \code{\link{node_presence_matrix}}.
+clade by clade by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.
 }
 \details{
 A clade cannot be compared across trees that were not run on the same
 terminals. Where a comparison tree is missing a backbone taxon, every
 backbone clade containing that taxon becomes unevaluable in that tree, and
-\code{\link{node_presence_matrix}} refuses to proceed. Pruning to the shared
-taxa resolves this by making every tree ask the same question.
+\code{\link[=node_presence_matrix]{node_presence_matrix()}} refuses to proceed. Pruning to the shared taxa
+resolves this by making every tree ask the same question.
 
 The cost is that the question narrows. Any clade containing a dropped taxon
 no longer exists on the backbone and cannot be reported, even where most
-comparison trees recovered it. Inspect the report from
-\code{\link{check_taxa}} before pruning: if only one or two taxa are involved
-the loss is slight, but if several comparison trees each lack a different
-taxon the shared set can shrink quickly.
+comparison trees recovered it. Inspect the report from \code{\link[=check_taxa]{check_taxa()}} before
+pruning: if only one or two taxa are involved the loss is slight, but if
+several comparison trees each lack a different taxon the shared set can
+shrink quickly.
 }
 \examples{
 \dontrun{
@@ -58,6 +58,6 @@ m <- node_presence_matrix(shared$backbone, shared$trees)
 }
 }
 \seealso{
-\code{\link{check_taxa}} to see which taxa are missing and from
-where, before deciding to prune.
+\code{\link[=check_taxa]{check_taxa()}} to see which taxa are missing and fromn where, before
+deciding to prune.
 }

@@ -5,7 +5,7 @@
 \title{Draw the rug cells at every node of a plotted tree}
 \usage{
 plot_node_rug(
-  presence,
+  npm,
   support = NULL,
   support_type = NULL,
   thresholds = NULL,
@@ -19,19 +19,19 @@ plot_node_rug(
 )
 }
 \arguments{
-\item{presence}{Presence matrix from \code{node_presence_matrix()}: one row
-per internal backbone node (node numbers as rownames), one column per
-comparison tree. Cells are \code{1}, \code{0}, or a pool proportion.}
+\item{npm}{Node presence or support matrix from \code{\link[=node_presence_matrix]{node_presence_matrix()}}.
+one row per internal backbone node (node numbers as rownames), one column
+per comparison tree. Cells are \code{1}, \code{0}, or a pool proportion.}
 
-\item{support}{Support matrix of the same shape, or \code{NULL}. When
-\code{NULL}, the rug is drawn in presence mode.}
+\item{support}{Support matrix of the same shape, or \code{NULL}. When \code{NULL}, the
+rug is drawn in presence mode.}
 
 \item{support_type}{Named character vector mapping each comparison tree to
-its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
-\code{"posterior"}), or \code{NULL}. Required for binned shading.}
+its support measure \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}, \code{"posterior"}), or
+\code{NULL}. Required for binned shading.}
 
 \item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
-by support type. \code{NULL} uses the literature defaults.}
+by support type.\code{NULL} uses the literature defaults.}
 
 \item{cell_h, cell_w}{Numeric. Height and width of one cell, in the tree's
 plotting coordinates.}
@@ -43,8 +43,8 @@ a fraction of the tree's width and height.}
 
 \item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.}
 
-\item{last_pp}{The stored \code{plot.phylo} coordinates from
-\code{plot_phylorug()}. If \code{NULL}, fetched from the active device.}
+\item{last_pp}{The stored \code{\link[ape:plot.phylo]{ape::plot.phylo()}} coordinates from
+\code{\link[=plot_phylorug]{plot_phylorug()}}. If \code{NULL}, fetched from the active device.}
 }
 \value{
 Invisibly \code{NULL}; called for its drawing side effect.
@@ -60,15 +60,14 @@ rather than named directly:
 \itemize{
 \item Presence (Tier 1): \code{support} is \code{NULL}. Black = present,
 white = absent, grey = partial recovery in a pool.
-\item Not-computed (Tier 2): \code{support} is given but
-\code{support_type} is not. Adds a hatched cell for clades that could not
-be evaluated.
-\item Four-state (Tier 3): both \code{support} and \code{support_type} are
-given. Present cells are shaded by binned support; absent cells are
+\item Not-computed (Tier 2): \code{support} is given but \code{support_type} is not.
+Adds a hatched cell for clades that could not be evaluated.
+\item Four-state (Tier 3): both \code{support} and \code{support_type} are given.
+Present cells are shaded by binned support; absent cells are
 marked distinctly; not-computed cells are hatched.
 }
 
-Users do not call this directly; \code{plot_phylorug()} calls it after
-drawing the tree and working out the cell geometry.
+Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the
+tree and working out the cell geometry.
 }
 \keyword{internal}

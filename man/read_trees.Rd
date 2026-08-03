@@ -33,8 +33,8 @@ skipped, and pooled analyses. Errors are always reported.}
 }
 \value{
 A named list, one element per tree file, named after the filenames
-with extensions removed. Single-tree files yield \code{phylo} objects;
-multi-tree files yield \code{multiPhylo}. Carries a \code{"pool_sizes"}
+with extensions removed. Single-tree files yield \code{"phylo"} objects;
+multi-tree files yield \code{"multiPhylo"}. Carries a \code{"pool_sizes"}
 attribute giving the number of trees per analysis.
 }
 \description{
@@ -44,18 +44,29 @@ may mix Newick and NEXUS files.
 }
 \details{
 Each file is one analysis. A file holding a single tree is returned as a
-\code{phylo}; a file holding several equally optimal trees from one search
-(as POY, TNT and PAUP* write them) is returned as a \code{multiPhylo} and is
-scored as a pool, the clade presence being the proportion of trees in that
-file recovering it.
+\code{"phylo"} ; a file holding several equally optimal trees from one search
+(as from POY, TNT, or PAUP*) is returned as a \code{"multiPhylo"} and is
+scored as a pool. How a pool's clade recovery is summarised (as a
+continuous proportion, or binarised at a threshold) is decided later, by
+\code{\link[=node_presence_matrix]{node_presence_matrix()}}, not here.
 
 Do not supply posterior samples, bootstrap replicates, or sets of gene trees.
 These are distributions rather than analyses and must be summarised before
 use. A file holding more than 100 trees is an error.
 
 Support values written as Newick node labels are read normally. BEAST-style
-bracket annotations (\code{[&posterior=0.98]}) are discarded by \pkg{ape};
+bracket annotations (\verb{[&posterior=0.98]}) are discarded by \pkg{ape};
 the topology is unaffected, and a message is emitted.
+
+Support values are imported exactly as written in the tree file;
+\code{\link[=read_trees]{read_trees()}} does not recompute or verify them. When a file holds
+several tied-optimal trees, be aware that upstream programs differ in how
+they summarise support across such trees: TNT and POY4 default to the more
+conservative strict-consensus approach, whereas PAUP* and PHYLIP default to
+the frequency-within-replicates approach, which Simmons and Freudenstein
+(2011) showed can inflate apparent support for unsupported clades. This
+choice is made by the upstream software before the file reaches
+\code{\link[=read_trees]{read_trees()}} and cannot be corrected here.
 
 Files matching \code{ext} that contain no tree, such as a NEXUS character
 matrix, are skipped with a message. A tree file that fails to parse is an
@@ -76,4 +87,9 @@ trees <- read_trees("path/to/your/trees", ext = "treefile")
 # Force Newick parsing
 trees <- read_trees("path/to/your/trees", format = "newick")
 }
+}
+\references{
+Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99\% bootstrap and
+jackknife support for unsupported clades. \emph{Molecular Phylogenetics and
+Evolution}, 61(1), 177-191. \doi{10.1016/j.ympev.2011.06.003}
 }

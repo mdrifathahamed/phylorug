@@ -403,7 +403,7 @@ plot_phylorug <- function(backbone, npm,
   }
   if (any(variable)) {
     plot_node_rug(
-      presence     = presence[variable, , drop = FALSE],
+      npm          = presence[variable, , drop = FALSE],
       support      = if (is.null(support)) NULL else
         support[variable, , drop = FALSE],
       support_type = support_type,

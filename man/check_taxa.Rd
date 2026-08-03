@@ -2,17 +2,17 @@
 % Please edit documentation in R/check_taxa.R
 \name{check_taxa}
 \alias{check_taxa}
-\title{Check tip label consistency between backbone and a set of trees}
+\title{Diagnose taxon consistency between backbone and comparison trees}
 \usage{
 check_taxa(backbone, trees, verbose = TRUE)
 }
 \arguments{
-\item{backbone}{The reference tree, as a \code{phylo} object. The rug is
+\item{backbone}{The reference tree, as a \code{"phylo"} object. The rug is
 drawn on this tree, and its clades are searched for in each comparison
 tree.}
 
-\item{trees}{A named list of \code{phylo} or \code{multiPhylo} objects, one
-per comparison, as returned by \code{\link[=read_trees]{read_trees()}}.If the backbone is present in the
+\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects, one per
+comparison, as returned by \code{\link[=read_trees]{read_trees()}}.If the backbone is present in the
 list it is removed automatically before comparison, so you can pass the
 full list from \code{\link[=read_trees]{read_trees()}} without subsetting first.}
 
@@ -20,12 +20,12 @@ full list from \code{\link[=read_trees]{read_trees()}} without subsetting first.
 names any mismatched comparison trees.}
 }
 \value{
-A single logical value: \code{TRUE} if every comparison tree shares
-the backbone's taxa exactly. The value carries a \code{"diagnostics"}
-attribute, a data frame with one row per comparison tree giving its status
-(\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa
-missing from, or extra to, the backbone. Diagnostics are attached whatever
-\code{verbose} is set to.
+A single logical value: \code{TRUE} if every comparison tree shares the
+backbone's taxa exactly. The value carries a \code{"diagnostics"} attribute, a
+data frame with one row per comparison tree giving its status
+(\code{"identical"}, \code{"superset"} or \code{"missing"}) and the taxa missing from, or
+extra to, the backbone. Diagnostics are attached whatever \code{verbose} is set
+to.
 }
 \description{
 Compares each comparison tree against the backbone to confirm that all
@@ -46,10 +46,10 @@ some extra. Every backbone clade can still be evaluated, so no action is
 needed; the extra taxa are ignored.}
 
 \item{missing}{The comparison trees lacks one or more backbone taxa. Any
-backbone clade containing a missing taxon \emph{might produce false
-absence} in that tree. Scoring such a clade as absent would report a
-rejection where no question was ever put. Use \code{\link[=prune_to_shared]{prune_to_shared()}} to
-reduce the backbone and the comparison trees to their common taxa.}
+backbone clade containing a missing taxon might produce false absence in
+that tree. Scoring such a clade as absent would report a rejection where
+no question was ever put. Use \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce the backbone
+and the comparison trees to their common taxa.}
 }
 
 Where a comparison tree is a pool of several equally optimal trees, every
@@ -73,6 +73,6 @@ report[report$status == "missing", ]
 }
 }
 \seealso{
-\code{\link{read_trees}} to load the trees;
-\code{\link{prune_to_shared}} to reduce them to a common taxon set.
+\code{\link[=read_trees]{read_trees()}} to load the trees and \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce
+them to a common taxon set.
 }

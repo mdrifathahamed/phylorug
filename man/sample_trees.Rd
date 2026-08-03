@@ -3,9 +3,9 @@
 \docType{data}
 \name{sample_trees}
 \alias{sample_trees}
-\title{Sample  20 taxa beetle phylogenetic trees}
+\title{Sample beetle phylogenies (20-taxon subset)}
 \format{
-A named list of 5 objects of class \code{phylo} (from the ape
+A named list of 5 objects of class \code{"phylo"} (from the ape
 package), each with 20 tips. Node labels contain support values:
 SH-aLRT/UFBoot2 for IQ-TREE trees and local posterior probability for
 ASTRAL trees.

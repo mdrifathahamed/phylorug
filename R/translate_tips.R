@@ -1,4 +1,4 @@
-#' Translate tip labels across a list of phylogenetic trees
+#' Relabel tips across a list of trees using a lookup table
 #'
 #' Translates tip labels of each tree in a list using a lookup table supplied
 #' as a data frame. This function is optional in the phylorug workflow , use it
@@ -6,30 +6,28 @@
 #' other identifiers that need converting to a different format, such as
 #' scientific species names.
 #' If your tip labels are already in the correc format, skip this step and
-#' proceed directly to \code{node_presence_matrix()}. Only tips with a
-#' matching entry in \code{from_col} re replaced with the corresponding value in
-#' \code{to_col}. Unmatched tips are left unchanged.This function modifies only
-#' the tip.label field of each tree. Tree topology, branch lengths, and node
-#' labels are unaffected.
+#' proceed directly to [node_presence_matrix()]. Only tips with a matching entry
+#' in `from_col` re replaced with the corresponding value in `to_col`. Unmatched
+#' tips are left unchanged.This function modifies only the tip.label field of
+#' each tree. Tree topology, branch lengths, and node labels are unaffected.
 #'
-#' @param trees A named list of \code{"phylo"} objects, as returned by
-#'   \code{\link{read_trees}}.
+#' @param trees A named list of `"phylo"` objects, returned by [read_trees()].
 #'
 #' @param data A data frame containing the label translation lookup table. Can
-#'   be a standard \code{data.frame} or a \code{tibble}.
+#'   be a standard `data.frame` or a `tibble`.
 #'
-#' @param from_col A character string specifying the column name in \code{data}
-#'   that holds the current tip labels of the trees. Defaults to \code{"from"}.
+#' @param from_col A character string specifying the column name in `data`
+#'   that holds the current tip labels of the trees. Defaults to `"from"`.
 #'
-#' @param to_col A character string specifying the column name in \code{data}
-#'   that holds the replacement labels. Defaults to \code{"to"}.
+#' @param to_col A character string specifying the column name in `data`
+#'   that holds the replacement labels. Defaults to `to`.
 #'
-#' @param verbose Logical. If \code{TRUE} (default), reports how many tip
+#' @param verbose Logical. If `TRUE` (default), reports how many tip
 #'   labels were translated and how many were left unchanged for each tree.
 #'
-#' @return A named list of \code{"phylo"} objects identical in structure to
-#'   \code{trees}, with matching tip labels replaced according to \code{data}.
-#'   Tree topology and edge lengths remain unchanged.
+#' @return A named list of `"phylo"` objects identical in structure to `trees`,
+#'   with matching tip labels replaced according to `data`.Tree topology and
+#'   edge lengths remain unchanged.
 #'
 #' @export
 #'

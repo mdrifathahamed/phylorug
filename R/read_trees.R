@@ -6,20 +6,31 @@
 #'
 #' @details
 #' Each file is one analysis. A file holding a single tree is returned as a
-#' \code{phylo}; a file holding several equally optimal trees from one search
-#' (as POY, TNT and PAUP* write them) is returned as a \code{multiPhylo} and is
-#' scored as a pool, the clade presence being the proportion of trees in that
-#' file recovering it.
+#' `"phylo"` ; a file holding several equally optimal trees from one search
+#' (as from POY, TNT, or PAUP*) is returned as a `"multiPhylo"` and is
+#' scored as a pool. How a pool's clade recovery is summarised (as a
+#' continuous proportion, or binarised at a threshold) is decided later, by
+#' [node_presence_matrix()], not here.
 #'
 #' Do not supply posterior samples, bootstrap replicates, or sets of gene trees.
 #' These are distributions rather than analyses and must be summarised before
 #' use. A file holding more than 100 trees is an error.
 #'
 #' Support values written as Newick node labels are read normally. BEAST-style
-#' bracket annotations (\code{[&posterior=0.98]}) are discarded by \pkg{ape};
+#' bracket annotations (`[&posterior=0.98]`) are discarded by \pkg{ape};
 #' the topology is unaffected, and a message is emitted.
 #'
-#' Files matching \code{ext} that contain no tree, such as a NEXUS character
+#' Support values are imported exactly as written in the tree file;
+#' [read_trees()] does not recompute or verify them. When a file holds
+#' several tied-optimal trees, be aware that upstream programs differ in how
+#' they summarise support across such trees: TNT and POY4 default to the more
+#' conservative strict-consensus approach, whereas PAUP* and PHYLIP default to
+#' the frequency-within-replicates approach, which Simmons and Freudenstein
+#' (2011) showed can inflate apparent support for unsupported clades. This
+#' choice is made by the upstream software before the file reaches
+#' [read_trees()] and cannot be corrected here.
+#'
+#' Files matching `ext` that contain no tree, such as a NEXUS character
 #' matrix, are skipped with a message. A tree file that fails to parse is an
 #' error.
 #'
@@ -28,24 +39,29 @@
 #'
 #' @param ext Character vector of file extensions to search for, without the
 #'   leading dot. Matching is case-insensitive. You may supply your own, for
-#'   example \code{ext = "treefile"} to read only IQ-TREE output. If you do not,
+#'   example `ext = "treefile"` to read only IQ-TREE output. If you do not,
 #'   the default filters the directory to the common tree file extensions, so
 #'   that alignments, log files and configuration files sitting beside the trees
 #'   are not read. Files with no extension, such as classic RAxML output, cannot
 #'   be matched.
 #'
-#' @param format The parsing strategy to use. Defaults to \code{"auto"}, which
+#' @param format The parsing strategy to use. Defaults to `"auto"`, which
 #'   detects the format of each file individually, so a directory may mix
-#'   formats. Use \code{"newick"} or \code{"nexus"} to force one parser for all
+#'   formats. Use `"newick"` or `"nexus"` to force one parser for all
 #'   files.
 #'
-#' @param verbose Logical. If \code{TRUE} (default), reports trees read, files
+#' @param verbose Logical. If `TRUE` (default), reports trees read, files
 #'   skipped, and pooled analyses. Errors are always reported.
 #'
 #' @return A named list, one element per tree file, named after the filenames
-#'   with extensions removed. Single-tree files yield \code{phylo} objects;
-#'   multi-tree files yield \code{multiPhylo}. Carries a \code{"pool_sizes"}
+#'   with extensions removed. Single-tree files yield `"phylo"` objects;
+#'   multi-tree files yield `"multiPhylo"`. Carries a `"pool_sizes"`
 #'   attribute giving the number of trees per analysis.
+#'
+#' @references
+#' Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99% bootstrap and
+#' jackknife support for unsupported clades. \emph{Molecular Phylogenetics and
+#' Evolution}, 61(1), 177-191. \doi{10.1016/j.ympev.2011.06.003}
 #'
 #' @export
 #'

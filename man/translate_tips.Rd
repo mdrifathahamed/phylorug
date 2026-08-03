@@ -2,13 +2,12 @@
 % Please edit documentation in R/translate_tips.R
 \name{translate_tips}
 \alias{translate_tips}
-\title{Translate tip labels across a list of phylogenetic trees}
+\title{Relabel tips across a list of trees using a lookup table}
 \usage{
 translate_tips(trees, data, from_col = "from", to_col = "to", verbose = TRUE)
 }
 \arguments{
-\item{trees}{A named list of \code{"phylo"} objects, as returned by
-\code{\link{read_trees}}.}
+\item{trees}{A named list of \code{"phylo"} objects, returned by \code{\link[=read_trees]{read_trees()}}.}
 
 \item{data}{A data frame containing the label translation lookup table. Can
 be a standard \code{data.frame} or a \code{tibble}.}
@@ -17,15 +16,15 @@ be a standard \code{data.frame} or a \code{tibble}.}
 that holds the current tip labels of the trees. Defaults to \code{"from"}.}
 
 \item{to_col}{A character string specifying the column name in \code{data}
-that holds the replacement labels. Defaults to \code{"to"}.}
+that holds the replacement labels. Defaults to \code{to}.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), reports how many tip
 labels were translated and how many were left unchanged for each tree.}
 }
 \value{
-A named list of \code{"phylo"} objects identical in structure to
-\code{trees}, with matching tip labels replaced according to \code{data}.
-Tree topology and edge lengths remain unchanged.
+A named list of \code{"phylo"} objects identical in structure to \code{trees},
+with matching tip labels replaced according to \code{data}.Tree topology and
+edge lengths remain unchanged.
 }
 \description{
 Translates tip labels of each tree in a list using a lookup table supplied
@@ -34,11 +33,10 @@ only if your tip labels are in  specimen codes, accession numbers, or any
 other identifiers that need converting to a different format, such as
 scientific species names.
 If your tip labels are already in the correc format, skip this step and
-proceed directly to \code{node_presence_matrix()}. Only tips with a
-matching entry in \code{from_col} re replaced with the corresponding value in
-\code{to_col}. Unmatched tips are left unchanged.This function modifies only
-the tip.label field of each tree. Tree topology, branch lengths, and node
-labels are unaffected.
+proceed directly to \code{\link[=node_presence_matrix]{node_presence_matrix()}}. Only tips with a matching entry
+in \code{from_col} re replaced with the corresponding value in \code{to_col}. Unmatched
+tips are left unchanged.This function modifies only the tip.label field of
+each tree. Tree topology, branch lengths, and node labels are unaffected.
 }
 \examples{
 \dontrun{
