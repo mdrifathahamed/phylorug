@@ -10,10 +10,10 @@
 #'   \item Presence (Tier 1): `support` is `NULL`. Black = present,
 #'     white = absent, grey = partial recovery in a pool.
 #'   \item Not-computed (Tier 2): `support` is given but `support_type` is not.
-#'     Adds a hatched cell for clades that could not be evaluated.
+#'     Adds a red cell for clades that could not be evaluated.
 #'   \item Four-state (Tier 3): both `support` and `support_type` are given.
-#'     Present cells are shaded by binned support; absent cells are
-#'     marked distinctly; not-computed cells are hatched.
+#'     Present cells are shaded by binned support, with low support in yellow;
+#'     not-recovered cells are white; not-computed cells are red.
 #' }
 #'
 #' Users do not call this directly; [plot_phylorug()] calls it after drawing the
@@ -156,9 +156,9 @@ resolve_tier <- function(support, support_type) {
 #' @noRd
 resolve_cell <- function(p, s, support_type, thresholds, tier) {
 
-  # Not evaluable: cross.
+  # Not computable: red.
   if (is.na(p)) {
-    return(list(fill = "white", pattern = "cross", border = "grey40"))
+    return(list(fill = "#D64545", pattern = "none", border = "grey40"))
   }
 
   # Absent: white, no pattern.
@@ -254,13 +254,11 @@ default_thresholds <- function(support_type) {
 }
 
 
-#' Fill colour for an integer support bin
-#'
-#' Internal. Greyscale for the four support tiers, red for the lowest. The
-#' absent (yellow) and not-computed (hatch) states are handled in
-#' \code{resolve_cell()}, not here.
-#'
 #' Fill and pattern for an integer support bin
+#'
+#' Internal. Greyscale for the top three support tiers, yellow for the lowest.
+#' The not-recovered (white) and not-computed (red) states are handled in
+#' \code{resolve_cell()}, not here.
 #'
 #' @noRd
 bin_fill <- function(bin) {

@@ -1,27 +1,27 @@
 #' Diagnose taxon consistency between backbone and comparison trees
 #'
-#' Compares each comparison tree against the backbone to confirm that all
-#' analyses were run on the same set of taxa. A clade cannot be evaluated in an
-#' analysis that lacks its taxa, so this check should be run before a phylorug
-#' is built.
+#' For each comparison tree, checks whether its tip labels(taxon) match the
+#' backbone's exactly, contain extra labels, or are missing some. A tree missing
+#' a tip label of backbone tree cannot be scored for any clade containing that
+#' tip, so run this diagnosis before building a phylorug.
 #'
 #' @details
 #' This function reports; it does not modify the trees. If the backbone is
-#' present in `trees` it is silently removed before comparison. Three
+#' present in comparison `trees` it is silently removes before comparison. Three
 #' outcomes are
 #'
 #' \describe{
-#'   \item{identical}{The comparison tree shares the backbone's taxa exactly.}
+#'   \item{identical}{All comparison trees share the backbone's taxa exactly.}
 #'
-#'   \item{superset}{The comparison trees contains every backbone taxon, plus
-#'     some extra. Every backbone clade can still be evaluated, so no action is
-#'     needed; the extra taxa are ignored.}
+#'   \item{superset}{One or more comparison trees contain every backbone taxon,
+#'     plus some extra. Every backbone clade can still be evaluated, so no
+#'     action is needed; the extra taxa can be ignored.}
 #'
-#'   \item{missing}{The comparison trees lacks one or more backbone taxa. Any
-#'     backbone clade containing a missing taxon might produce false absence in
-#'     that tree. Scoring such a clade as absent would report a rejection where
-#'     no question was ever put. Use [prune_to_shared()] to reduce the backbone
-#'     and the comparison trees to their common taxa.}
+#'   \item{missing}{One or more comparison trees lack one or more backbone
+#'     taxa. Any backbone clade containing a missing taxon might produce false
+#'     absence in that tree. Scoring such a clade as absent would report a
+#'     rejection where no question was ever put. Use [prune_to_shared()] to
+#'     reduce the backbone and the comparison trees to their common taxa.}
 #' }
 #'
 #' Where a comparison tree is a pool of several equally optimal trees, every

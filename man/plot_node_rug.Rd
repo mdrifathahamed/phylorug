@@ -61,10 +61,10 @@ rather than named directly:
 \item Presence (Tier 1): \code{support} is \code{NULL}. Black = present,
 white = absent, grey = partial recovery in a pool.
 \item Not-computed (Tier 2): \code{support} is given but \code{support_type} is not.
-Adds a hatched cell for clades that could not be evaluated.
+Adds a red cell for clades that could not be evaluated.
 \item Four-state (Tier 3): both \code{support} and \code{support_type} are given.
-Present cells are shaded by binned support; absent cells are
-marked distinctly; not-computed cells are hatched.
+Present cells are shaded by binned support, with low support in yellow;
+not-recovered cells are white; not-computed cells are red.
 }
 
 Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the

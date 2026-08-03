@@ -5,10 +5,9 @@
 \alias{sample_trees}
 \title{Sample beetle phylogenies (20-taxon subset)}
 \format{
-A named list of 5 objects of class \code{"phylo"} (from the ape
-package), each with 20 tips. Node labels contain support values:
-SH-aLRT/UFBoot2 for IQ-TREE trees and local posterior probability for
-ASTRAL trees.
+A named list of 5 objects of class \code{"phylo"}, each with 20 tips. Node
+labels contain support values: SH-aLRT/UFBoot2 for IQ-TREE trees and local
+posterior probability for ASTRAL trees.
 }
 \source{
 Lopes, F., Gunter, N., Gillett, C. P. D. T., et al. (2024).
@@ -21,17 +20,17 @@ collections. \emph{PLOS ONE}, 19(12), e0309596.
 sample_trees
 }
 \description{
-A named list of five phylogenetic trees from a dung beetle phylogenomic
-study, pruned to 20 taxa for compact demonstration of the phylorug
-pipeline. The trees are already rooted, outgroup-removed, and tip labels
-translated to species names. Users can select a backbone tree and
-comparison trees, then pass them directly to \code{\link[=check_taxa]{check_taxa()}},
+A named list (the same structure returned by \code{\link[=read_trees]{read_trees()}}) of five
+phylogenetic trees from a dung beetle phylogenomic study, Lopes et al.
+(2024), pruned to 20 taxa for compact demonstration of the \code{phylorug}
+workflow. The trees are already rooted, outgroup-removed, and tip labels
+translated from museum codes to species names. Users can select a backbone
+tree and comparison trees, then pass them directly to \code{\link[=check_taxa]{check_taxa()}},
 \code{\link[=node_presence_matrix]{node_presence_matrix()}}, and \code{\link[=plot_phylorug]{plot_phylorug()}}.
 }
 \details{
 The five trees represent independent phylogenomic analyses of the same
-taxon set using different inference methods and data types:
-
+set of taxa using different inference methods and data types:
 \describe{
 \item{70p_uce}{IQ-TREE maximum likelihood analysis of ultraconserved
 element (UCE) data. Recommended as the backbone tree.}

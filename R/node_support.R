@@ -1,30 +1,35 @@
-#' Parse support values from internal nodes of a phylogenetic tree.
+#' Parse support values from internal nodes of a phylogenetic tree
 #'
-#' Extracts up to three node support values from the node labels of a
-#' phylogenetic tree. A single value (such as an IQ-TREE bootstrap) fills the
-#' first column and leaves the rest as NA. A compound label separated by `sep`
-#' fills as many columns as it carries: two for IQ-TREE SH-aLRT/UFBoot2 or
-#' ASTRAL pp1/pp2, three for IQ-TREE SH-aLRT/UFBoot2/aBayes or ASTRAL
-#' pp1/pp2/pp3. Empty or non-numeric labels become NA. Trees without node labels
-#' return a data frame of NAs, one row per internal node.
+#' @description
+#' Extracts the node labels of one tree and returns their support values as a
+#' data frame: one row per internal node, three columns (`support_1`,
+#' `support_2`, `support_3`). How a label fills those columns:
+#'
+#' * A single value (such as an IQ-TREE bootstrap) fills `support_1`; the other
+#'   two are `NA`.
+#' * A compound label split by `sep` (default `/`) fills one column per value:
+#'   * Two for IQ-TREE SH-aLRT/UFBoot2 or ASTRAL pp1/pp2.
+#'   * Three for IQ-TREE SH-aLRT/UFBoot2/aBayes or ASTRAL pp1/pp2/pp3.
+#' * Empty or non-numeric pieces become `NA`.
+#' * A tree with no node labels returns a data frame of all `NA`.
 #'
 #' @param tree A phylogenetic tree of class `"phylo"`, with node labels stored
-#'   in tree$node.label.
+#'   in `tree$node.label`.
 #'
 #' @param sep A single character string giving the delimiter that separates
 #'   compound support values. Defaults to `"/"`.
 #'
-#' @param round Integer or `NULL`. If supplied, support values are rounded to this
+#' @param digits Integer or `NULL`. If supplied, support values are rounded to this
 #'   many decimal places. Defaults to `NULL`.
 #'
-#' @return A data frame with three columns, support_1, support_2 and support_3,
-#'   and one row per internal node of the tree. Columns not present in a given
-#'   label are `NA`.
+#' @return A data frame with three columns, `support_1`, `support_2` and
+#'   `support_3`, and one row per internal node of the tree. Columns not present
+#'   in a given label are `NA`.
 #'
-#' @noRd
+#' @keywords internal
 node_support <- function(tree,
                          sep   = "/",
-                         round = NULL) {
+                         digits = NULL) {
 
   # 1. Validate the tree
   if (!inherits(tree, "phylo")) {
@@ -34,10 +39,10 @@ node_support <- function(tree,
     )
   }
 
-  # 2. Validate the round argument
-  if (!is.null(round) && (!is.numeric(round) || length(round) != 1)) {
+  # 2. Validate the digits argument
+  if (!is.null(digits) && (!is.numeric(digits) || length(digits) != 1)) {
     stop(
-      "`round` must be a single integer or NULL.",
+      "`digits` must be a single integer or NULL.",
       call. = FALSE
     )
   }
@@ -82,8 +87,8 @@ node_support <- function(tree,
   names(result) <- paste0("support_", seq_len(n_col))
 
   # 9. Round if requested
-  if (!is.null(round)) {
-    result[] <- lapply(result, function(v) round(v, round))
+  if (!is.null(digits)) {
+    result[] <- lapply(result, function(v) round(v, digits))
   }
 
   result
