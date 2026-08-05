@@ -64,20 +64,30 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # One tree per analysis. Each element is a `phylo`.
-#' trees <- read_trees("path/to/your/trees")
-#' ape::plot.phylo(trees[[1]])
+#' # phylorug ships example  raw tree files in its `extdata` directory.
+#' # Point read_trees() at one of those folders:
+#' dir <- system.file("extdata", "beetles_70p", package = "phylorug")
 #'
-#' # Trees per analysis
-#' attr(trees, "pool_sizes")
+#' # With only the directory, read_trees() detects each file's format from its
+#' # contents (NEXUS or Newick, the two formats this version supports) and
+#' # matches the default extension filter (tre, tree, treefile, nwk, ...).
 #'
-#' # Restrict to one extension
-#' trees <- read_trees("path/to/your/trees", ext = "treefile")
+#' trees <- read_trees(dir)
 #'
-#' # Force Newick parsing
-#' trees <- read_trees("path/to/your/trees", format = "newick")
-#' }
+#' # The result is a named list, one element per analysis, ready to pass to
+#' # [check_taxa()] or [node_presence_matrix()]:
+#'
+#' names(trees)
+#'
+#' # If a folder holds many files and you want only some, narrow `ext`
+#' # to one extension, or to a set of them:
+#' trees <- read_trees(dir, ext = "tre")
+#' trees <- read_trees(dir, ext = c("tre", "tree", "treefile"))
+#'
+#' # For full control you can also force a single parser. Note this applies
+#' # one format to every matched file, so a file of a different format would
+#' # not be read.
+#' trees <- read_trees(dir, format = "newick")
 read_trees <- function(dir     = ".",
                        ext     = c("tre", "tree", "treefile", "nwk",
                                    "newick", "nex", "nexus", "contree"),
@@ -177,7 +187,7 @@ read_trees <- function(dir     = ".",
 #'
 #' Internal. Every function that iterates over the trees of an analysis calls
 #' this first, so that single-tree and multi-tree analyses share one code path.
-#' A \code{phylo} becomes a \code{multiPhylo} of length one; a \code{multiPhylo}
+#' A `"phylo"` becomes a `"multiPhylo"` of length one; a `"multiPhylo"`
 #' passes through unchanged.
 #'
 #' @noRd
@@ -213,7 +223,7 @@ pool_size <- function(x) {
 read_one_analysis <- function(f, format) {
 
   # Maximum trees in one file. A file holding more is a posterior sample, a
-  # bootstrap set, or trees pooled across several analytical conditions --
+  # bootstrap set, or trees pooled across several analytical conditions
   # none of which is a single analysis.
   pool_max <- 100L
 
@@ -227,7 +237,10 @@ read_one_analysis <- function(f, format) {
   reader <- switch(fmt,
                    nexus  = ape::read.nexus,
                    newick = ape::read.tree,
-                   stop("Unrecognised format \"", fmt, "\" for file: ", basename(f),
+                   stop("Unrecognised format \"",
+                        fmt,
+                        "\" for file: ",
+                        basename(f),
                         call. = FALSE)
   )
 
@@ -253,7 +266,7 @@ read_one_analysis <- function(f, format) {
   }
 
   # ape returns a multiPhylo even for a NEXUS file holding exactly one tree.
-  # Unwrap it, so that a single tree is a phylo whatever the file format.
+  # Unwrapped it, so that a single tree is a phylo whatever the file format.
   if (inherits(tr, "multiPhylo") && length(tr) == 1L) {
     tr <- tr[[1L]]
   }
@@ -264,8 +277,9 @@ read_one_analysis <- function(f, format) {
   }
 
   # A file holding many trees is one analysis with a tied optimum. A file
-  # holding very many is a posterior sample, a bootstrap set, or trees pooled
-  # across several analytical conditions, none of which is a single analysis.
+  # holding more than 100 trees  is a posterior sample, a bootstrap set, or
+  # trees pooled across several analytical conditions, none of which is a
+  # single analysis.
   if (n > pool_max) {
     stop(
       basename(f), " contains ", n, " trees, exceeding `pool_max` (", pool_max,
@@ -338,9 +352,9 @@ detect_format <- function(path) {
 #'
 #' BEAST and TreeAnnotator write node metadata as bracketed comments, e.g.
 #' \code{[&posterior=0.98,rate=1.01]}. The Newick grammar treats brackets as
-#' comments, so ape strips them and \code{node.label} comes back \code{NULL}.
-#' The annotations must therefore be detected in the raw file text, before
-#' parsing.
+#' comments, so ape strips them during parsing and `node.label` comes back
+#' `NULL`. The annotations can only be found by searching the raw file text,
+#' not the parsed tree.
 #'
 #' @noRd
 has_beast_annotations <- function(path) {

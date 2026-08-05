@@ -71,20 +71,28 @@ matrix, are skipped with a message. A tree file that fails to parse is an
 error.
 }
 \examples{
-\dontrun{
-# One tree per analysis. Each element is a `phylo`.
-trees <- read_trees("path/to/your/trees")
-ape::plot.phylo(trees[[1]])
+# phylorug ships example tree files in its `extdata` directory.
+# Point read_trees() at one of those folders:
+dir <- system.file("extdata", "beetles_70p", package = "phylorug")
 
-# Trees per analysis
-attr(trees, "pool_sizes")
+# With only the directory, read_trees() detects each file's format from its
+# contents (NEXUS or Newick, the two formats this version supports) and
+# matches the default extension filter (tre, tree, treefile, nwk, ...).
+trees <- read_trees(dir)
 
-# Restrict to one extension
-trees <- read_trees("path/to/your/trees", ext = "treefile")
+# The result is a named list, one element per analysis, ready to pass to
+# check_taxa() or node_presence_matrix():
+names(trees)
 
-# Force Newick parsing
-trees <- read_trees("path/to/your/trees", format = "newick")
-}
+# If a folder holds many files and you want only some, narrow `ext`
+# to one extension, or to a set of them:
+trees <- read_trees(dir, ext = "tre")
+trees <- read_trees(dir, ext = c("tre", "tree", "treefile"))
+
+# For full control you can also force a single parser. Note this applies
+# one format to every matched file, so a file of a different format would
+# not be read.
+trees <- read_trees(dir, format = "newick")
 }
 \references{
 Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99\% bootstrap and

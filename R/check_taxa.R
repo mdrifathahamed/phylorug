@@ -52,21 +52,7 @@
 #'
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' trees    <- read_trees("path/to/your/trees")
-#' backbone <- trees[["iqtree"]]
-#'
-#' ok <- check_taxa(backbone, trees)
-#'
-#'
-#' # The full report, whether or not anything went wrong
-#' report <- attr(ok, "diagnostics")
-#' report
-#'
-#' # Which comparison trees cannot evaluate every backbone clade?
-#' report[report$status == "missing", ]
-#' }
+
 check_taxa <- function(backbone, trees, verbose = TRUE) {
 
   if (!inherits(backbone, "phylo") && !inherits(backbone, "multiPhylo")) {

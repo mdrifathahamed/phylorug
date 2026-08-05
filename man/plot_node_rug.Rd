@@ -28,7 +28,7 @@ proportion (pool recovery).}
 \code{NULL}, the rug is drawn in presence mode.}
 
 \item{support_type}{Named character vector mapping each comparison tree to
-its support measure \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}, \code{"posterior"}), or
+its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}, \code{"posterior"}), or
 \code{NULL}. Required for binned shading.}
 
 \item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
@@ -52,6 +52,25 @@ the coordinates are fetched from the most recently drawn tree.
 #' @return Returns nothing; it draws the rug cells directly onto the tree.}
 }
 \description{
+For each internal node of the backbone tree, paints a small grid of
+rectangles, one per comparison tree, showing whether that tree recovered the
+node's clade and, in support mode, how strongly. Together these grids are the
+rug.
 
+The appearance is set by a tier, resolved from which arguments are supplied
+rather than named directly. (\code{\link[=plot_phylorug]{plot_phylorug()}} selects the tier for the user
+through its \code{mode} argument.)
+\itemize{
+\item Tier 1, presence: \code{support} is \code{NULL}. Cells are black for present,
+white for absent, and grey for partial recovery in a pool.
+\item Tier 2, support: both \code{support} and \code{support_type} are supplied.
+Recovered cells are shaded by binned support strength, from black (very
+high) through greys to yellow (low). A cell is white when the tree does
+not recover the clade at all, and red when the tree recovers the clade
+but carries no support value for it (an unscored node).
+}
+
+Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the
+tree and working out the cell geometry.
 }
 \keyword{internal}

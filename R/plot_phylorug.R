@@ -206,7 +206,35 @@ plot_phylorug <- function(backbone, npm,
   support <- NULL
   if (mode == "support") {
     support <- npm[[paste0("support_", support_idx)]]
+
+    # ---- NEW: guard against empty support ----
+    if (all(is.na(support))) {
+      stop(
+        "`mode = \"support\"` was requested, but the selected support matrix ",
+        "(`support_", support_idx, "`) contains no support values (all NA). ",
+        "This happens when the trees carry no node support, for example a ",
+        "topology-only tree, or a BEAST/TreeAnnotator tree whose bracket ",
+        "annotations ape could not import. Use `mode = \"presence\"` for these ",
+        "trees, or supply trees whose node labels hold support values.",
+        call. = FALSE
+      )
+    }
+
+    empty_cols <- apply(support, 2, function(col) all(is.na(col)))
+    if (any(empty_cols)) {
+      warning(
+        "These comparison tree(s) have no support values in `support_",
+        support_idx, "` (their cells will show as not-recovered or ",
+        "not-computed): ",
+        paste(colnames(support)[empty_cols], collapse = ", "),
+        ". Check that `support_type` maps them correctly, or that the trees ",
+        "carry node support.",
+        call. = FALSE
+      )
+    }
+    # ---- end new guard ----
   }
+
 
   if (include_backbone) {
     bb_name <- "backbone"

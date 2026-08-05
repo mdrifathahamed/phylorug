@@ -18,7 +18,6 @@
 #'     not recover the clade at all, and red when the tree recovers the clade
 #'     but carries no support value for it (an unscored node).
 #' }
-#' }
 #'
 #' Users do not call this directly; [plot_phylorug()] calls it after drawing the
 #' tree and working out the cell geometry.
@@ -32,7 +31,7 @@
 #'   `NULL`, the rug is drawn in presence mode.
 #'
 #' @param support_type Named character vector mapping each comparison tree to
-#'   its support measure `"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or
+#'   its support measure (`"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or
 #'   `NULL`. Required for binned shading.
 #'
 #' @param thresholds Optional list overriding the built-in bin thresholds, keyed
