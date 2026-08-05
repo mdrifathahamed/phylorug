@@ -1,6 +1,6 @@
 #' Draw a phylorug: a backbone tree with node rugs
 #'
-#'[plot_phylorug()] overlays clade stability grids (rugs) on a backbone
+#' [plot_phylorug()] overlays clade stability grids (rugs) on a backbone
 #' phylogeny, comparing how multiple analyses treat each internal node.
 #' In presence mode, cells are black (recovered) or white (absent). In
 #' support mode, cells are shaded by binned support strength. The function
@@ -182,6 +182,16 @@ plot_phylorug <- function(backbone, npm,
 
       stop(msg, call. = FALSE)
     }
+  }
+
+  if (mode == "support" && is.null(support_type)) {
+    stop(
+      "`mode = \"support\"` requires `support_type` to interpret support ",
+      "values. Without it, a value like 95 cannot be told apart between ",
+      "UFBoot2, SH-aLRT, or a posterior probability. Supply a named vector ",
+      "mapping each tree to its measure, e.g. c(iqtree = \"ufboot\").",
+      call. = FALSE
+    )
   }
   # ---------------------------------------------
   presence <- npm$presence

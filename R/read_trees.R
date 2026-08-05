@@ -27,8 +27,7 @@
 #' conservative strict-consensus approach, whereas PAUP* and PHYLIP default to
 #' the frequency-within-replicates approach, which Simmons and Freudenstein
 #' (2011) showed can inflate apparent support for unsupported clades. This
-#' choice is made by the upstream software before the file reaches
-#' [read_trees()] and cannot be corrected here.
+#' choice is made by the upstream software before the file reaches.
 #'
 #' Files matching `ext` that contain no tree, such as a NEXUS character
 #' matrix, are skipped with a message. A tree file that fails to parse is an
@@ -39,11 +38,10 @@
 #'
 #' @param ext Character vector of file extensions to search for, without the
 #'   leading dot. Matching is case-insensitive. You may supply your own, for
-#'   example `ext = "treefile"` to read only IQ-TREE output. If you do not,
-#'   the default filters the directory to the common tree file extensions, so
-#'   that alignments, log files and configuration files sitting beside the trees
-#'   are not read. Files with no extension, such as classic RAxML output, cannot
-#'   be matched.
+#'   example `ext = "treefile"`. If you do not, the default filters the
+#'   directory to the common tree file extensions, so that alignments, log files
+#'   and configuration files sitting beside the trees are not read. Files with
+#'   no extension, such as classic RAxML output, cannot be matched.
 #'
 #' @param format The parsing strategy to use. Defaults to `"auto"`, which
 #'   detects the format of each file individually, so a directory may mix

@@ -1,27 +1,26 @@
-#' Reduce a backbone and its comparison trees to their shared taxa
+#' Trim the backbone and its comparison trees to their shared set of taxa
 #'
-#' Drops from the backbone, and from every comparison tree, any taxon that is
-#' not present in all of them. The result is a set of trees that can be compared
-#' clade by clade by [node_presence_matrix()].
+#' First finds the taxa that the backbone and all comparison trees share, then
+#' trims everything else from the backbone and from every comparison tree.
 #'
 #' @details
 #' A clade cannot be compared across trees that were not run on the same
-#' terminals. Where a comparison tree is missing a backbone taxon, every
+#' taxon. Where a comparison tree is missing a backbone taxon, every
 #' backbone clade containing that taxon becomes unevaluable in that tree, and
-#' [node_presence_matrix()] refuses to proceed. Pruning to the shared taxa
-#' resolves this by making every tree ask the same question.
+#' [node_presence_matrix()] refuses to proceed. Trimming to the shared taxa
+#' resolves this by making every tree consist the same taxon.
 #'
-#' The cost is that the question narrows. Any clade containing a dropped taxon
-#' no longer exists on the backbone and cannot be reported, even where most
-#' comparison trees recovered it. Inspect the report from [check_taxa()] before
-#' pruning: if only one or two taxa are involved the loss is slight, but if
-#' several comparison trees each lack a different taxon the shared set can
-#' shrink quickly.
+#' The cost is that the questions become narrower. Any clade containing a
+#' dropped taxon no longer exists on the backbone and cannot be reported, even
+#' where most comparison trees recovered it. Check the report from
+#' [check_taxa()] before trimming: if only one or two taxa are involved the loss
+#' is minimal, but if several comparison trees each lack a different taxon, the
+#' shared set can shrink quickly.
 #'
 #' @param backbone A phylogenetic tree of class `"phylo"`.
 #'
-#' @param trees A named list of `"phylo"` or `"multiPhylo"` objects, one per
-#'   comparison, as returned by [read_trees()].
+#' @param trees A named list of `"phylo"` or `"multiPhylo"` objects,
+#'    as returned by [read_trees()].
 #'
 #' @param verbose Logical. If `TRUE` (default), reports how many taxa were
 #'   dropped and names them.

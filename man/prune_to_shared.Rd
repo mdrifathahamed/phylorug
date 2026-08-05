@@ -2,15 +2,15 @@
 % Please edit documentation in R/prune_to_shared.R
 \name{prune_to_shared}
 \alias{prune_to_shared}
-\title{Reduce a backbone and its comparison trees to their shared taxa}
+\title{Trim the backbone and its comparison trees to their shared set of taxa}
 \usage{
 prune_to_shared(backbone, trees, verbose = TRUE)
 }
 \arguments{
 \item{backbone}{A phylogenetic tree of class \code{"phylo"}.}
 
-\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects, one per
-comparison, as returned by \code{\link[=read_trees]{read_trees()}}.}
+\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects,
+as returned by \code{\link[=read_trees]{read_trees()}}.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), reports how many taxa were
 dropped and names them.}
@@ -22,23 +22,22 @@ original single-tree or pooled structure. The list carries a \code{"dropped"}
 attribute naming the taxa that were removed.
 }
 \description{
-Drops from the backbone, and from every comparison tree, any taxon that is
-not present in all of them. The result is a set of trees that can be compared
-clade by clade by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.
+First finds the taxa that the backbone and all comparison trees share, then
+trims everything else from the backbone and from every comparison tree.
 }
 \details{
 A clade cannot be compared across trees that were not run on the same
-terminals. Where a comparison tree is missing a backbone taxon, every
+taxon. Where a comparison tree is missing a backbone taxon, every
 backbone clade containing that taxon becomes unevaluable in that tree, and
-\code{\link[=node_presence_matrix]{node_presence_matrix()}} refuses to proceed. Pruning to the shared taxa
-resolves this by making every tree ask the same question.
+\code{\link[=node_presence_matrix]{node_presence_matrix()}} refuses to proceed. Trimming to the shared taxa
+resolves this by making every tree consist the same taxon.
 
-The cost is that the question narrows. Any clade containing a dropped taxon
-no longer exists on the backbone and cannot be reported, even where most
-comparison trees recovered it. Inspect the report from \code{\link[=check_taxa]{check_taxa()}} before
-pruning: if only one or two taxa are involved the loss is slight, but if
-several comparison trees each lack a different taxon the shared set can
-shrink quickly.
+The cost is that the questions become narrower. Any clade containing a
+dropped taxon no longer exists on the backbone and cannot be reported, even
+where most comparison trees recovered it. Check the report from
+\code{\link[=check_taxa]{check_taxa()}} before trimming: if only one or two taxa are involved the loss
+is minimal, but if several comparison trees each lack a different taxon, the
+shared set can shrink quickly.
 }
 \examples{
 \dontrun{

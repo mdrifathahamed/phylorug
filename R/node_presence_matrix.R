@@ -29,13 +29,7 @@
 #' where it is absent, since a clade that is not in the tree has no node to
 #' carry a support value.
 #'
-#'
-#' @param backbone A phylogenetic tree of class `"phylo"`. Each of its internal
-#'   nodes becomes one row of the output matrix.
-#'
-#' @param trees A named list of `"phylo"` objects, or a `"multiPhylo"` object.
-#'   Each object becomes one column of the output matrix. An object holding
-#'   several trees is scored as a pool.
+#' @inheritParams check_taxa
 #'
 #' @param support_col Integer or vector of integers (max 3). Specifies which
 #'   value(s) to extract from multi-metric node labels. For example, if an

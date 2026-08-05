@@ -38,36 +38,19 @@ draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
   text_gap <- sq_w * 0.3
 
   rows <- list(
-    list(fill = "#000000", pattern = "none",
+    list(fill = "#000000",
          label = ">=98 (SH-aLRT/UFBoot2) or >=0.99 (ASTRAL)"),
-    list(fill = "#5F5E5A", pattern = "none",
+    list(fill = "#5F5E5A",
          label = ">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) or >=0.95-0.98 (ASTRAL)"),
-    list(fill = "#B4B2A9", pattern = "none",
+    list(fill = "#B4B2A9",
          label = ">=50-79.9 (SH-aLRT) or >=50-94 (UFBoot2) or >=0.5-0.95 (ASTRAL)"),
-    list(fill = "#E8C547", pattern = "none",
+    list(fill = "#E8C547",
          label = "<50 (SH-aLRT/UFBoot2) or <0.5 (ASTRAL)"),
-    list(fill = "white",   pattern = "none",
+    list(fill = "white",
          label = "monophyly not supported"),
-    list(fill = "white",   pattern = "cross",
+    list(fill = "#D64545",
          label = "not computed")
   )
-
-  for (i in seq_along(rows)) {
-    r      <- rows[[i]]
-    y_top  <- y0 - (i - 1) * (sq_h + gap)
-    y_bot  <- y_top - sq_h
-    xleft  <- x0
-    xright <- x0 + sq_w
-    graphics::rect(xleft, y_bot, xright, y_top,
-                   col = r$fill, border = "black", lwd = 0.4)
-    if (identical(r$pattern, "cross"))  {
-      graphics::segments(xleft, y_bot, xright, y_top, col = "grey30", lwd = 0.5)
-      graphics::segments(xleft, y_top, xright, y_bot, col = "grey30", lwd = 0.5)
-    }
-    graphics::text(xright + text_gap, (y_top + y_bot) / 2,
-                   labels = r$label, adj = c(0, 0.5),
-                   cex = text_cex, family = "sans")
-  }
   invisible(NULL)
 }
 

@@ -4,7 +4,7 @@
 \alias{translate_tips}
 \title{Relabel tips across a list of trees using a lookup table}
 \usage{
-translate_tips(trees, data, from_col = "from", to_col = "to", verbose = TRUE)
+translate_tips(trees, data, from_col, to_col, verbose = TRUE)
 }
 \arguments{
 \item{trees}{A named list of \code{"phylo"} objects, returned by \code{\link[=read_trees]{read_trees()}}.}
@@ -12,11 +12,11 @@ translate_tips(trees, data, from_col = "from", to_col = "to", verbose = TRUE)
 \item{data}{A data frame containing the label translation lookup table. Can
 be a standard \code{data.frame} or a \code{tibble}.}
 
-\item{from_col}{A character string specifying the column name in \code{data}
-that holds the current tip labels of the trees. Defaults to \code{"from"}.}
+\item{from_col}{A character string naming the column in \code{data} that holds the
+current tip labels (for example \code{"specimen_code"}). Required.}
 
-\item{to_col}{A character string specifying the column name in \code{data}
-that holds the replacement labels. Defaults to \code{to}.}
+\item{to_col}{A character string naming the column in \code{data} that holds the
+replacement labels (for example \code{"scientific_name"}). Required.}
 
 \item{verbose}{Logical. If \code{TRUE} (default), reports how many tip
 labels were translated and how many were left unchanged for each tree.}
@@ -32,6 +32,7 @@ as a data frame. This function is optional in the phylorug workflow , use it
 only if your tip labels are in  specimen codes, accession numbers, or any
 other identifiers that need converting to a different format, such as
 scientific species names.
+
 If your tip labels are already in the correc format, skip this step and
 proceed directly to \code{\link[=node_presence_matrix]{node_presence_matrix()}}. Only tips with a matching entry
 in \code{from_col} re replaced with the corresponding value in \code{to_col}. Unmatched

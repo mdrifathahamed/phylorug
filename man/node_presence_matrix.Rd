@@ -7,12 +7,14 @@
 node_presence_matrix(backbone, trees, support_col = 1)
 }
 \arguments{
-\item{backbone}{A phylogenetic tree of class \code{"phylo"}. Each of its internal
-nodes becomes one row of the output matrix.}
+\item{backbone}{The reference tree, as a \code{"phylo"} object. The rug is
+drawn on this tree, and its clades are searched for in each comparison
+tree.}
 
-\item{trees}{A named list of \code{"phylo"} objects, or a \code{"multiPhylo"} object.
-Each object becomes one column of the output matrix. An object holding
-several trees is scored as a pool.}
+\item{trees}{A named list of \code{"phylo"} or \code{"multiPhylo"} objects, one per
+comparison, as returned by \code{\link[=read_trees]{read_trees()}}.If the backbone is present in the
+list it is removed automatically before comparison, so you can pass the
+full list from \code{\link[=read_trees]{read_trees()}} without subsetting first.}
 
 \item{support_col}{Integer or vector of integers (max 3). Specifies which
 value(s) to extract from multi-metric node labels. For example, if an

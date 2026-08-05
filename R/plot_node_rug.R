@@ -1,44 +1,59 @@
-#' Draw the rug cells at every node of a plotted tree
+#' Draw the rug at every internal node of a plotted tree
 #'
-#' For each internal backbone node, paints a small grid of rectangles, one per
-#' comparison tree, showing whether that tree recovered the node's clade and, in
-#' support mode, how strongly. Together these grids are the rug.
+#' @description
+#' For each internal node of the backbone tree, paints a small grid of
+#' rectangles, one per comparison tree, showing whether that tree recovered the
+#' node's clade and, in support mode, how strongly. Together these grids are the
+#' rug.
 #'
-#' The appearance is set by the tier, which is resolved from the arguments
-#' rather than named directly:
+#' The appearance is set by a tier, resolved from which arguments are supplied
+#' rather than named directly. ([plot_phylorug()] selects the tier for the user
+#' through its `mode` argument.)
 #' \itemize{
-#'   \item Presence (Tier 1): `support` is `NULL`. Black = present,
-#'     white = absent, grey = partial recovery in a pool.
-#'   \item Not-computed (Tier 2): `support` is given but `support_type` is not.
-#'     Adds a red cell for clades that could not be evaluated.
-#'   \item Four-state (Tier 3): both `support` and `support_type` are given.
-#'     Present cells are shaded by binned support, with low support in yellow;
-#'     not-recovered cells are white; not-computed cells are red.
+#'   \item Tier 1, presence: `support` is `NULL`. Cells are black for present,
+#'     white for absent, and grey for partial recovery in a pool.
+#'   \item Tier 2, support: both `support` and `support_type` are supplied.
+#'     Recovered cells are shaded by binned support strength, from black (very
+#'     high) through greys to yellow (low). A cell is white when the tree does
+#'     not recover the clade at all, and red when the tree recovers the clade
+#'     but carries no support value for it (an unscored node).
+#' }
 #' }
 #'
 #' Users do not call this directly; [plot_phylorug()] calls it after drawing the
 #' tree and working out the cell geometry.
 #'
-#' @param npm Node presence or support matrix from [node_presence_matrix()].
-#'   one row per internal backbone node (node numbers as rownames), one column
-#'   per comparison tree. Cells are `1`, `0`, or a pool proportion.
-#' @param support Support matrix of the same shape, or `NULL`. When `NULL`, the
-#'  rug is drawn in presence mode.
+#' @param npm The presence matrix from [node_presence_matrix()]. One row per
+#'   internal backbone node (node numbers as rownames), one column per
+#'   comparison tree. Cells are `1` (recovered), `0` (not recovered), or a
+#'   proportion (pool recovery).
+#'
+#' @param support Support matrix of the same shape as `npm`, or `NULL`. When
+#'   `NULL`, the rug is drawn in presence mode.
+#'
 #' @param support_type Named character vector mapping each comparison tree to
 #'   its support measure `"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or
 #'   `NULL`. Required for binned shading.
+#'
 #' @param thresholds Optional list overriding the built-in bin thresholds, keyed
 #'   by support type.`NULL` uses the literature defaults.
+#'
 #' @param cell_h,cell_w Numeric. Height and width of one cell, in the tree's
 #'   plotting coordinates.
+#'
 #' @param n_cols Integer. Columns in each node's grid.
+#'
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node, as
 #'   a fraction of the tree's width and height.
-#' @param rug_position One of `"outside"` (default) or `"inside"`.
-#' @param last_pp The stored [ape::plot.phylo()] coordinates from
-#'   [plot_phylorug()]. If `NULL`, fetched from the active device.
 #'
-#' @return Invisibly `NULL`; called for its drawing side effect.
+#' @param rug_position One of `"outside"` or `"inside"`(default).
+#'
+#' @param last_pp Plot coordinates from [ape::plot.phylo()] giving the x/y
+#'   position of every node and tip, used to place each rug grid at its node.
+#'   [plot_phylorug()] always supplies this. If called directly with `NULL`,
+#'   the coordinates are fetched from the most recently drawn tree.
+#'
+#'#' @return Returns nothing; it draws the rug cells directly onto the tree.
 #'
 #' @keywords internal
 plot_node_rug <- function(npm,
@@ -50,7 +65,7 @@ plot_node_rug <- function(npm,
                           n_cols,
                           x_offset     = 0,
                           y_offset     = 0,
-                          rug_position = c("outside", "inside"),
+                          rug_position = c("inside", "outside"),
                           last_pp      = NULL) {
 
   if (!is.matrix(npm)) {
@@ -134,50 +149,42 @@ plot_node_rug <- function(npm,
 #' @noRd
 resolve_tier <- function(support, support_type) {
   if (is.null(support)) {
-    return(1L)                      # presence only
+    return(1L)   # presence
   }
-  if (is.null(support_type)) {
-    return(2L)                      # presence + not-computed, no binning
-  }
-  3L                                # full four-state with binned support
+  2L             # support, fully specified (support_type guaranteed by caller)
 }
 
 
 #' Decide one cell's fill and pattern
 #'
-#' Internal. Returns a list describing how to draw one cell: \code{fill} colour,
-#' \code{hatch} logical, and \code{border}. This is the single place where the
-#' four-state grammar lives; every tier routes through it.
+#' Internal. Returns a list describing how to draw one cell: `fill` colour,
+#' `pattern`, and `border`. This is the single place where the cell colour
+#' grammar lives; both tiers route through it.
 #'
 #' State priority is the same across tiers:
-#'   not evaluable (presence NA)  ->  absent (presence 0)  ->  present.
-#' What each state looks like depends on the tier.
+#'  not computed (presence NA)  ->  not recovered (presence 0)  ->  present.
 #'
 #' @noRd
 resolve_cell <- function(p, s, support_type, thresholds, tier) {
-
-  # Not computable: red.
+  # Not computed: red.
   if (is.na(p)) {
     return(list(fill = "#D64545", pattern = "none", border = "grey40"))
   }
-
-  # Absent: white, no pattern.
+  # Not recovered: white.
   if (p == 0) {
     return(list(fill = "white", pattern = "none", border = "grey40"))
   }
-
-  # Tier 1 and 2: greyscale by presence proportion.
-  if (tier < 3L) {
+  # Tier 1 (presence): greyscale by recovery proportion.
+  if (tier == 1L) {
     grey <- 1 - p
-    fill <- grDevices::rgb(grey, grey, grey)
-    return(list(fill = fill, pattern = "none", border = "grey40"))
+    return(list(fill = grDevices::rgb(grey, grey, grey),
+                pattern = "none", border = "grey40"))
   }
-
-  # Tier 3, present but no support value.
+  # Tier 2 (support): recovered but no support value -> treat as not-computed.
   if (is.na(s)) {
-    return(list(fill = "black", pattern = "none", border = "grey40"))
+    return(list(fill = "#D64545", pattern = "none", border = "grey40"))
   }
-
+  # Tier 2 (support): bin the value.
   bin  <- bin_support(s, support_type, thresholds)
   spec <- bin_fill(bin)
   list(fill = spec$fill, pattern = spec$pattern, border = "grey40")
@@ -193,26 +200,14 @@ draw_cell <- function(xleft, ybottom, xright, ytop, cell) {
     border = cell$border,
     lwd    = 0.2
   )
-
-  if (identical(cell$pattern, "cross")) {
-    # Single X across the cell.
-    graphics::segments(xleft, ybottom, xright, ytop,
-                       col = "grey30", lwd = 0.5)
-    graphics::segments(xleft, ytop, xright, ybottom,
-                       col = "grey30", lwd = 0.5)
-  }
-
   invisible(NULL)
 }
 
 #' Map a support value to an integer bin, by support type
 #'
-#' Internal. Returns an integer tier: 4 = very high, 3 = high, 2 = moderate,
-#' 1 = low/rejected, NA passes through. Thresholds are per measure, following
-#' each measure's own literature; no normalization across measures.
-#'
-#' STUB: the default thresholds below are the working values from the plan and
-#' must be checked against the primary literature before release.
+#' Internal. Returns an integer bin: 4 = very high, 3 = high, 2 = moderate,
+#' 1 = low. NA passes through. Thresholds are per measure, following each
+#' measure's own literature; no normalization across measures.
 #'
 #' @noRd
 bin_support <- function(value, support_type, thresholds = NULL) {
@@ -236,15 +231,17 @@ bin_support <- function(value, support_type, thresholds = NULL) {
 
 #' Built-in bin thresholds per support measure
 #'
-#' Internal. Lower bound of each tier. STUB values from the development plan,
-#' pending literature validation (Minh et al. 2013 for UFBoot2, Guindon et al.
-#' 2010 for SH-aLRT, Sayyari and Mirarab 2016 for ASTRAL LPP).
+#' Internal. Lower bound of each tier, following the binning used by Fu et al.
+#' (2025) for the Culicomorpha analysis: UFBoot2 and SH-aLRT on a 0-100 scale,
+#' ASTRAL local posterior probability on 0-1. See Minh et al. (2013) for
+#' UFBoot2, Guindon et al. (2010) for SH-aLRT, and Sayyari and Mirarab (2016)
+#' for ASTRAL LPP.
 #'
 #' @noRd
 default_thresholds <- function(support_type) {
   switch(
     support_type %||% "ufboot",
-    ufboot    = c(very_high = 95,   high = 95,   moderate = 50),
+    ufboot    = c(very_high = 98,   high = 95,   moderate = 50),
     sh_alrt   = c(very_high = 98,   high = 80,   moderate = 50),
     lpp       = c(very_high = 0.99, high = 0.95, moderate = 0.5),
     posterior = c(very_high = 0.99, high = 0.95, moderate = 0.5),

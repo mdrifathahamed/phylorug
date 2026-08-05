@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_node_rug.R
 \name{plot_node_rug}
 \alias{plot_node_rug}
-\title{Draw the rug cells at every node of a plotted tree}
+\title{Draw the rug at every internal node of a plotted tree}
 \usage{
 plot_node_rug(
   npm,
@@ -14,17 +14,18 @@ plot_node_rug(
   n_cols,
   x_offset = 0,
   y_offset = 0,
-  rug_position = c("outside", "inside"),
+  rug_position = c("inside", "outside"),
   last_pp = NULL
 )
 }
 \arguments{
-\item{npm}{Node presence or support matrix from \code{\link[=node_presence_matrix]{node_presence_matrix()}}.
-one row per internal backbone node (node numbers as rownames), one column
-per comparison tree. Cells are \code{1}, \code{0}, or a pool proportion.}
+\item{npm}{The presence matrix from \code{\link[=node_presence_matrix]{node_presence_matrix()}}. One row per
+internal backbone node (node numbers as rownames), one column per
+comparison tree. Cells are \code{1} (recovered), \code{0} (not recovered), or a
+proportion (pool recovery).}
 
-\item{support}{Support matrix of the same shape, or \code{NULL}. When \code{NULL}, the
-rug is drawn in presence mode.}
+\item{support}{Support matrix of the same shape as \code{npm}, or \code{NULL}. When
+\code{NULL}, the rug is drawn in presence mode.}
 
 \item{support_type}{Named character vector mapping each comparison tree to
 its support measure \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}, \code{"posterior"}), or
@@ -41,33 +42,16 @@ plotting coordinates.}
 \item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node, as
 a fraction of the tree's width and height.}
 
-\item{rug_position}{One of \code{"outside"} (default) or \code{"inside"}.}
+\item{rug_position}{One of \code{"outside"} or \code{"inside"}(default).}
 
-\item{last_pp}{The stored \code{\link[ape:plot.phylo]{ape::plot.phylo()}} coordinates from
-\code{\link[=plot_phylorug]{plot_phylorug()}}. If \code{NULL}, fetched from the active device.}
-}
-\value{
-Invisibly \code{NULL}; called for its drawing side effect.
+\item{last_pp}{Plot coordinates from \code{\link[ape:plot.phylo]{ape::plot.phylo()}} giving the x/y
+position of every node and tip, used to place each rug grid at its node.
+\code{\link[=plot_phylorug]{plot_phylorug()}} always supplies this. If called directly with \code{NULL},
+the coordinates are fetched from the most recently drawn tree.
+
+#' @return Returns nothing; it draws the rug cells directly onto the tree.}
 }
 \description{
-For each internal backbone node, paints a small grid of rectangles, one per
-comparison tree, showing whether that tree recovered the node's clade and, in
-support mode, how strongly. Together these grids are the rug.
-}
-\details{
-The appearance is set by the tier, which is resolved from the arguments
-rather than named directly:
-\itemize{
-\item Presence (Tier 1): \code{support} is \code{NULL}. Black = present,
-white = absent, grey = partial recovery in a pool.
-\item Not-computed (Tier 2): \code{support} is given but \code{support_type} is not.
-Adds a red cell for clades that could not be evaluated.
-\item Four-state (Tier 3): both \code{support} and \code{support_type} are given.
-Present cells are shaded by binned support, with low support in yellow;
-not-recovered cells are white; not-computed cells are red.
-}
 
-Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the
-tree and working out the cell geometry.
 }
 \keyword{internal}

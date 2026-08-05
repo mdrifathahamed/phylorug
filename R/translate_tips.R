@@ -1,10 +1,12 @@
 #' Relabel tips across a list of trees using a lookup table
 #'
+#' @description
 #' Translates tip labels of each tree in a list using a lookup table supplied
 #' as a data frame. This function is optional in the phylorug workflow , use it
 #' only if your tip labels are in  specimen codes, accession numbers, or any
 #' other identifiers that need converting to a different format, such as
 #' scientific species names.
+#'
 #' If your tip labels are already in the correc format, skip this step and
 #' proceed directly to [node_presence_matrix()]. Only tips with a matching entry
 #' in `from_col` re replaced with the corresponding value in `to_col`. Unmatched
@@ -16,11 +18,11 @@
 #' @param data A data frame containing the label translation lookup table. Can
 #'   be a standard `data.frame` or a `tibble`.
 #'
-#' @param from_col A character string specifying the column name in `data`
-#'   that holds the current tip labels of the trees. Defaults to `"from"`.
+#' @param from_col A character string naming the column in `data` that holds the
+#'   current tip labels (for example `"specimen_code"`). Required.
 #'
-#' @param to_col A character string specifying the column name in `data`
-#'   that holds the replacement labels. Defaults to `to`.
+#' @param to_col A character string naming the column in `data` that holds the
+#'   replacement labels (for example `"scientific_name"`). Required.
 #'
 #' @param verbose Logical. If `TRUE` (default), reports how many tip
 #'   labels were translated and how many were left unchanged for each tree.
@@ -51,34 +53,27 @@
 #' }
 translate_tips <- function(trees,
                            data,
-                           from_col = "from",
-                           to_col = "to",
+                           from_col,
+                           to_col,
                            verbose = TRUE) {
   # Validate inputs
+  if (missing(from_col) || missing(to_col)) {
+    stop("`from_col` and `to_col` are required: name the columns in `data` ",
+         "that hold the current and replacement labels.", call. = FALSE)
+  }
   if (!inherits(trees, c("list", "multiPhylo"))) {
-    stop(
-      "`trees` must be a list of phylo objects or a multiPhylo object.",
-      call. = FALSE
-    )
+    stop("`trees` must be a list of phylo objects or a multiPhylo object.",
+         call. = FALSE)
   }
   if (!inherits(data, "data.frame")) {
-    stop(
-      "`data` must be a data frame.",
-      call. = FALSE
-    )
+    stop("`data` must be a data frame.", call. = FALSE)
   }
   if (!all(c(from_col, to_col) %in% colnames(data))) {
-    stop(
-      "Columns \"", from_col, "\" and \"", to_col,
-      "\" not found in `data`.",
-      call. = FALSE
-    )
+    stop("Columns \"", from_col, "\" and \"", to_col,
+         "\" not found in `data`.", call. = FALSE)
   }
   if (anyDuplicated(data[[from_col]])) {
-    stop(
-      "Values in `from_col` must be unique.",
-      call. = FALSE
-    )
+    stop("Values in `from_col` must be unique.", call. = FALSE)
   }
   # Build translation dictionary
   trans_dict <- stats::setNames(
