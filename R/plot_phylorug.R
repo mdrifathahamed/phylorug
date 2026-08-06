@@ -105,26 +105,46 @@
 #' @export
 #'
 #' @examples
-#' backbone <- ape::read.tree(text = "(((A,B),C),(D,E));")
-#' npm <- list(
-#'   presence = matrix(c(1,0,1,1, 1,1,0,1), nrow = 4, ncol = 2,
-#'     dimnames = list(as.character(6:9), c("tree_1", "tree_2")))
-#' )
+#' # Build the plotting input from real trees:
+#' backbone <- sample_trees[["70p_uce"]]
+#' others   <- sample_trees[names(sample_trees) != "70p_uce"]
+#' npm <- node_presence_matrix(backbone, others, support_col = 1)
 #'
-#' # --- Presence mode to a temp file -----------------------------------------
+#' # --- Presence mode --------------------------------------------------------
+#' # Each cell shows whether an analysis recovered the backbone clade.
+#' # Writing to a file uses the internal scaling engine for a clean figure.
 #' tmp <- tempfile(fileext = ".pdf")
 #' plot_phylorug(backbone, npm, file = tmp)
 #' unlink(tmp)
 #'
-#' # --- Support mode to a temp file ------------------------------------------
-#' npm$support_1 <- matrix(
-#'   c(99, NA, 85, 70, 0.99, 0.6, NA, 0.97), nrow = 4, ncol = 2,
-#'   dimnames = list(as.character(6:9), c("tree_1", "tree_2"))
+#' # --- Support mode ---------------------------------------------------------
+#' # Cells are shaded by support strength. `support_type` tells plot_phylorug
+#' # how to read each tree's values: ASTRAL trees carry local posterior
+#' # probability ("lpp"), IQ-TREE trees carry UFBoot2 ("ufboot").
+#' support_type <- c(
+#'   "70p_ASTRAL_partition_entropy" = "lpp",
+#'   "70p_ASTRAL_uce"               = "lpp",
+#'   "70p_ghost"                    = "ufboot",
+#'   "70p_partition_entropy"        = "ufboot"
 #' )
 #' tmp2 <- tempfile(fileext = ".pdf")
-#' plot_phylorug(backbone, npm, file = tmp2, mode = "support",
-#'   support_type = c(tree_1 = "sh_alrt", tree_2 = "lpp"))
+#' plot_phylorug(backbone, npm,
+#'               file         = tmp2,
+#'               mode         = "support",
+#'               support_idx  = 1,
+#'               support_type = support_type)
 #' unlink(tmp2)
+#'
+#' # --- Some optional controls -----------------------------------------------
+#' # include_backbone = TRUE adds the backbone as its own cell in every rug;
+#' # rug_position = "outside" places grids toward the tips instead of the crook;
+#' # hide_unsupported = TRUE leaves clades no analysis recovered bare.
+#' tmp3 <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm,
+#'               file             = tmp3,
+#'               include_backbone = TRUE,
+#'               rug_position     = "outside")
+#' unlink(tmp3)
 plot_phylorug <- function(backbone, npm,
                           file             = NULL,
                           width            = NULL,
