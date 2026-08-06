@@ -67,22 +67,24 @@ where it is absent, since a clade that is not in the tree has no node to
 carry a support value.
 }
 \examples{
-\dontrun{
-trees    <- read_trees("path/to/your/trees")
-backbone <- trees[["iqtree"]]
-others   <- trees[names(trees) != "iqtree"]
+# phylorug ships `sample_trees`: a named list of 5 phylo objects (beetles),
+# the same structure you get from read_trees(). Just type `sample_trees`.
+# Pick one analysis as the backbone, and the rest as comparison trees:
+backbone <- sample_trees[["70p_uce"]]
+others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
+# It is good practice to check the taxa line up before building the matrix:
 check_taxa(backbone, others)
 
+# For a presence/absence matrix, just pass the backbone and comparison trees
+# (support_col defaults to 1):
 npmatrix <- node_presence_matrix(backbone, others)
+npmatrix$presence     # clade presence/absence
+npmatrix$support_1    # support values (from column 1 of the node labels)
 
-# Access individual matrices
-npmatrix$presence    # clade presence/absence
-npmatrix$support_1   # raw support values (column 1)
-
-# Bootstrap + SH-aLRT together
+# To extract several support metrics at once (e.g. SH-aLRT and UFBoot2 stored
+# as "80/95"), pass their column positions to support_col:
 rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-rugmt$support_1   # bootstrap
-rugmt$support_2   # SH-aLRT
-}
+rugmt$support_1       # first metric
+rugmt$support_2       # second metric
 }

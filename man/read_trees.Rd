@@ -71,17 +71,19 @@ matrix, are skipped with a message. A tree file that fails to parse is an
 error.
 }
 \examples{
-# phylorug ships example tree files in its `extdata` directory.
+# phylorug ships example  raw tree files in its `extdata` directory.
 # Point read_trees() at one of those folders:
 dir <- system.file("extdata", "beetles_70p", package = "phylorug")
 
 # With only the directory, read_trees() detects each file's format from its
 # contents (NEXUS or Newick, the two formats this version supports) and
 # matches the default extension filter (tre, tree, treefile, nwk, ...).
+
 trees <- read_trees(dir)
 
 # The result is a named list, one element per analysis, ready to pass to
-# check_taxa() or node_presence_matrix():
+# [check_taxa()] or [node_presence_matrix()]:
+
 names(trees)
 
 # If a folder holds many files and you want only some, narrow `ext`

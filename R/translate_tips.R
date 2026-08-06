@@ -2,15 +2,15 @@
 #'
 #' @description
 #' Translates tip labels of each tree in a list using a lookup table supplied
-#' as a data frame. This function is optional in the phylorug workflow , use it
-#' only if your tip labels are in  specimen codes, accession numbers, or any
-#' other identifiers that need converting to a different format, such as
-#' scientific species names.
+#' as a data frame. This function is optional in the phylorug workflow, use it
+#' only if your tip labels are specimen codes, accession numbers, or any other
+#' identifiers that need converting to a different format, such as scientific
+#' species names.
 #'
-#' If your tip labels are already in the correc format, skip this step and
+#' If your tip labels are already in the correct format, skip this step and
 #' proceed directly to [node_presence_matrix()]. Only tips with a matching entry
-#' in `from_col` re replaced with the corresponding value in `to_col`. Unmatched
-#' tips are left unchanged.This function modifies only the tip.label field of
+#' in `from_col` replaced with the corresponding value in `to_col`. Unmatched
+#' tips are left unchanged. This function modifies only the `tip.label` field of
 #' each tree. Tree topology, branch lengths, and node labels are unaffected.
 #'
 #' @param trees A named list of `"phylo"` objects, returned by [read_trees()].
@@ -28,29 +28,26 @@
 #'   labels were translated and how many were left unchanged for each tree.
 #'
 #' @return A named list of `"phylo"` objects identical in structure to `trees`,
-#'   with matching tip labels replaced according to `data`.Tree topology and
+#'   with matching tip labels replaced according to `data`. Tree topology and
 #'   edge lengths remain unchanged.
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' # Example trees and a lookup table ship inside phylorug, so we first read
+#' # them into the environment, then tell translate_tips() which column holds
+#' # the current labels and which holds the replacements:
+#' dir  <- system.file("extdata", "beetles_50p", package = "phylorug")
+#' file <- system.file("extdata", "beetles_50p", "biogeo.csv", package = "phylorug")
 #'
-#' # Load trees
-#' trees <- read_trees("path/to/trees")
+#' trees <- read_trees(dir)
+#' dict  <- utils::read.csv(file)
 #'
-#' # Translation table mapping specimen codes to scientific names
-#' dict <- data.frame(
-#'   from = c("NicorbUCE", "NicvesUCE"),
-#'   to   = c("Nicrophorus_orbus", "Nicrophorus_vespillo")
-#' )
-#'
-#' # Translate tip labels
-#' trees <- translate_tips(trees,
-#'                         data     = dict,
-#'                         from_col = "from",
-#'                         to_col   = "to")
-#' }
+#' # Relabel tips from specimen codes to species names. The message reports how
+#' # many tips were translated and how many were left unchanged in each tree:
+#' translated <- translate_tips(trees, dict,
+#'                              from_col = "specimen_code",
+#'                              to_col   = "species_name")
 translate_tips <- function(trees,
                            data,
                            from_col,

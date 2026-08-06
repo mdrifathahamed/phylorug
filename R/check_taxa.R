@@ -52,6 +52,18 @@
 #'
 #' @export
 #'
+#' @examples
+#' # sample_trees is a named list of 5 phylo objects shipped with phylorug,
+#' # the same structure you get from read_trees(). Pick one analysis as the
+#' # backbone, and the rest as comparison trees:
+#' backbone <- sample_trees[["70p_uce"]]
+#' others   <- sample_trees[names(sample_trees) != "70p_uce"]
+#'
+#' # Diagnose taxon consistency (verbose = TRUE by default reports the outcome):
+#' result <- check_taxa(backbone, others)
+#'
+#' # If any tree is missing or has extra taxa, inspect the full report:
+#' attr(result, "diagnostics")
 
 check_taxa <- function(backbone, trees, verbose = TRUE) {
 

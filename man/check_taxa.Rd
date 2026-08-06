@@ -57,20 +57,17 @@ tree in the pool is checked. A pool whose trees disagree about their own taxa
 is a data problem, and is an error.
 }
 \examples{
-\dontrun{
-trees    <- read_trees("path/to/your/trees")
-backbone <- trees[["iqtree"]]
+# sample_trees is a named list of 5 phylo objects shipped with phylorug,
+# the same structure you get from read_trees(). Pick one analysis as the
+# backbone, and the rest as comparison trees:
+backbone <- sample_trees[["70p_uce"]]
+others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-ok <- check_taxa(backbone, trees)
+# Diagnose taxon consistency (verbose = TRUE by default reports the outcome):
+result <- check_taxa(backbone, others)
 
-
-# The full report, whether or not anything went wrong
-report <- attr(ok, "diagnostics")
-report
-
-# Which comparison trees cannot evaluate every backbone clade?
-report[report$status == "missing", ]
-}
+# If any tree is missing or has extra taxa, inspect the full report:
+attr(result, "diagnostics")
 }
 \seealso{
 \code{\link[=read_trees]{read_trees()}} to load the trees and \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce

@@ -17,14 +17,14 @@
 #   *_ASTRAL_uce.tre               ASTRAL coalescent on UCE gene trees
 #   *_ASTRAL_partition_entropy.tre ASTRAL coalescent on partitioned genes
 #
-# The file biogeo.xlsx (in beetles_50p/) is a lookup table that maps
-# short specimen codes to full species names. It serves both the 50p
-# and 70p datasets.
+# The file biogeo.csv (in beetles_50p/) is a small demonstration lookup
+# table that maps short specimen codes to full species names, used by the
+# translate_tips() examples. It serves both the 50p and 70p datasets.
 #
 # All trees include two outgroup taxa (NicorbUCE, NicvesUCE) that
 # users must root on and remove before analysis. Tip labels are
 # specimen codes that users translate with translate_tips() and the
-# biogeo.xlsx lookup table.
+# biogeo.csv lookup table.
 #
 # Reference
 #   Lopes et al. (2024) From museum drawer to tree: Historical DNA phylogenomics

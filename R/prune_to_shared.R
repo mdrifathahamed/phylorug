@@ -36,21 +36,32 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' trees    <- read_trees("path/to/your/trees")
-#' backbone <- trees[["iqtree"]]
-#' others   <- trees[names(trees) != "iqtree"]
+#' # Build a backbone and comparison trees that do NOT all share the same taxa,
+#' # so there is something to trim. (In practice these come from read_trees().)
+#' backbone <- ape::read.tree(
+#'   text = "((((A,B),(C,D)),((E,F),(G,H))),(I,J));"
+#' )
+#' others <- list(
+#'   # All ten taxa, same as the backbone:
+#'   tree_1 = ape::read.tree(text = "((((A,B),(C,D)),((E,F),(G,H))),(I,J));"),
+#'   # Missing J:
+#'   tree_2 = ape::read.tree(text = "((((A,B),(C,D)),((E,F),(G,H))),I);"),
+#'   # Missing I:
+#'   tree_3 = ape::read.tree(text = "((((A,B),(C,D)),((E,F),(G,H))),J);")
+#' )
 #'
-#' # See what is missing, and from which comparison trees
-#' ok <- check_taxa(backbone, others)
-#' attr(ok, "diagnostics")
+#' # See which taxa are missing, and from which trees, before trimming:
+#' check_taxa(backbone, others)
 #'
-#' # Reduce everything to the shared taxa
+#' # Trim the backbone and every comparison tree to their shared taxa:
 #' shared <- prune_to_shared(backbone, others)
+#'
+#' # Which taxa were dropped:
 #' attr(shared, "dropped")
 #'
-#' m <- node_presence_matrix(shared$backbone, shared$trees)
-#' }
+#' # The pruned trees are ready for node_presence_matrix():
+#' shared$backbone
+#' shared$trees
 prune_to_shared <- function(backbone, trees, verbose = TRUE) {
 
   if (!inherits(backbone, "phylo") && !inherits(backbone, "multiPhylo")) {
