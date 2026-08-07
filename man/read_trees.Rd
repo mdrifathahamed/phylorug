@@ -31,7 +31,7 @@ files.}
 skipped, and pooled analyses. Errors are always reported.}
 }
 \value{
-A named list, one element per tree file, named after the filenames
+A named list, one element per tree file, named after the file names
 with extensions removed. Single-tree files yield \code{"phylo"} objects;
 multi-tree files yield \code{"multiPhylo"}. Carries a \code{"pool_sizes"}
 attribute giving the number of trees per analysis.
@@ -45,7 +45,7 @@ may mix Newick and NEXUS files.
 Each file is one analysis. A file holding a single tree is returned as a
 \code{"phylo"} ; a file holding several equally optimal trees from one search
 (as from POY, TNT, or PAUP*) is returned as a \code{"multiPhylo"} and is
-scored as a pool. How a pool's clade recovery is summarised (as a
+scored as a pool. How a pool's clade recovery is summarized (as a
 continuous proportion, or binarised at a threshold) is decided later, by
 \code{\link[=node_presence_matrix]{node_presence_matrix()}}, not here.
 
@@ -60,7 +60,7 @@ the topology is unaffected, and a message is emitted.
 Support values are imported exactly as written in the tree file;
 \code{\link[=read_trees]{read_trees()}} does not recompute or verify them. When a file holds
 several tied-optimal trees, be aware that upstream programs differ in how
-they summarise support across such trees: TNT and POY4 default to the more
+they summarize support across such trees: TNT and POY4 default to the more
 conservative strict-consensus approach, whereas PAUP* and PHYLIP default to
 the frequency-within-replicates approach, which Simmons and Freudenstein
 (2011) showed can inflate apparent support for unsupported clades. This

@@ -8,7 +8,7 @@
 #' Each file is one analysis. A file holding a single tree is returned as a
 #' `"phylo"` ; a file holding several equally optimal trees from one search
 #' (as from POY, TNT, or PAUP*) is returned as a `"multiPhylo"` and is
-#' scored as a pool. How a pool's clade recovery is summarised (as a
+#' scored as a pool. How a pool's clade recovery is summarized (as a
 #' continuous proportion, or binarised at a threshold) is decided later, by
 #' [node_presence_matrix()], not here.
 #'
@@ -23,7 +23,7 @@
 #' Support values are imported exactly as written in the tree file;
 #' [read_trees()] does not recompute or verify them. When a file holds
 #' several tied-optimal trees, be aware that upstream programs differ in how
-#' they summarise support across such trees: TNT and POY4 default to the more
+#' they summarize support across such trees: TNT and POY4 default to the more
 #' conservative strict-consensus approach, whereas PAUP* and PHYLIP default to
 #' the frequency-within-replicates approach, which Simmons and Freudenstein
 #' (2011) showed can inflate apparent support for unsupported clades. This
@@ -51,7 +51,7 @@
 #' @param verbose Logical. If `TRUE` (default), reports trees read, files
 #'   skipped, and pooled analyses. Errors are always reported.
 #'
-#' @return A named list, one element per tree file, named after the filenames
+#' @return A named list, one element per tree file, named after the file names
 #'   with extensions removed. Single-tree files yield `"phylo"` objects;
 #'   multi-tree files yield `"multiPhylo"`. Carries a `"pool_sizes"`
 #'   attribute giving the number of trees per analysis.
@@ -105,7 +105,21 @@ read_trees <- function(dir     = ".",
       call. = FALSE
     )
   }
-
+  has_dot <- grepl("^\\.", ext)
+  if (any(has_dot)) {
+    stop(
+      "`ext` must not include a leading dot. ",
+      "Use ext = \"tre\", not ext = \".tre\".",
+      call. = FALSE
+    )
+  }
+  has_blank <- !nzchar(trimws(ext))
+  if (any(has_blank)) {
+    stop(
+      "`ext` must not contain empty or whitespace-only strings.",
+      call. = FALSE
+    )
+  }
   ext         <- ext[order(nchar(ext), decreasing = TRUE)]
   ext_pattern <- paste0("\\.(", paste(ext, collapse = "|"), ")$")
 
@@ -154,7 +168,7 @@ read_trees <- function(dir     = ".",
     stop(
       "Tree names are not unique after removing file extensions: ",
       paste(dup, collapse = ", "),
-      ". Rename the files, or narrow `ext` so that only one is read.",
+      ". Rename the files, so that only one is read.",
       call. = FALSE
     )
   }
@@ -182,7 +196,79 @@ read_trees <- function(dir     = ".",
   parsed
 }
 
-
+#' Read a single file into one analysis
+#'
+#' Returns a `"phylo"` (single tree), a `"multiPhylo"` (pool), or `NULL` when
+#' the file contains no tree and should be skipped.
+#' @noRd
+read_one_analysis <- function(f, format) {
+  # A file holding more than 100 tres is a posterior sample, a bootstrap set, or
+  # trees pooled across several analytical conditions none of which is a single
+  # analysis.
+  pool_max <- 100L
+  fmt <- if (format == "auto") detect_format(f) else format
+  if (identical(fmt, "none")) {
+    return(NULL)
+  }
+  reader <- switch(fmt,
+                   nexus  = ape::read.nexus,
+                   newick = ape::read.tree,
+                   stop("Unrecognised format \"",
+                        fmt,
+                        "\" for file: ",
+                        basename(f),
+                        call. = FALSE)
+  )
+  tr <- tryCatch(
+    suppressWarnings(reader(f)),
+    error = function(e) {
+      stop(
+        "Could not parse tree file ", basename(f), ": ", conditionMessage(e),
+        call. = FALSE
+      )
+    }
+  )
+  if (is.null(tr)) {
+    stop("No tree could be read from: ", basename(f), call. = FALSE) # nocov
+  }
+  if (!inherits(tr, "phylo") && !inherits(tr, "multiPhylo")) {
+    stop(                                                          # nocov start
+      basename(f), " did not yield a phylogenetic tree (got class ",
+      paste(class(tr), collapse = "/"), ").",
+      call. = FALSE
+    )                                                               # nocov end
+  }
+  if (inherits(tr, "multiPhylo") && length(tr) == 1L) {
+    tr <- tr[[1L]]
+  }
+  n <- pool_size(tr)
+  if (n == 0L) {
+    stop("No tree could be read from: ", basename(f), call. = FALSE) # nocov
+  }
+  if (n > pool_max) {
+    stop(
+      basename(f), " contains ", n, " trees, which exceeds the limit of 100. ",
+      "This is usually a posterior sample, a bootstrap set, or trees pooled ",
+      "across several analytical conditions. phylorug treats each file as one ",
+      "analysis. Summarise these trees (e.g. into a consensus) before use.",
+      call. = FALSE
+    )
+  }
+  no_labels <- all(vapply(
+    as_pool(tr),
+    function(x) is.null(x$node.label),
+    logical(1)
+  ))
+  if (no_labels && has_beast_annotations(f)) {
+    message(
+      basename(f), " contains BEAST-style node annotations. ape reads ",
+      "topology only, so posterior probabilities are not imported. The tree ",
+      "is fully usable for presence/absence rugs. To import support values, ",
+      "use treeio::read.beast() and convert with as.phylo()."
+    )
+  }
+  tr
+}
 #' Coerce one analysis to a pool of trees
 #'
 #' Internal. Every function that iterates over the trees of an analysis calls
@@ -204,154 +290,39 @@ as_pool <- function(x) {
     call. = FALSE
   )
 }
-
-
 #' Number of trees in one analysis
 #'
 #' @noRd
 pool_size <- function(x) {
   if (inherits(x, "phylo")) 1L else length(x)
 }
-
-
-#' Read a single file into one analysis
-#'
-#' Returns a \code{phylo} (single tree), a \code{multiPhylo} (pool), or
-#' \code{NULL} when the file contains no tree and should be skipped.
-#'
-#' @noRd
-read_one_analysis <- function(f, format) {
-
-  # Maximum trees in one file. A file holding more is a posterior sample, a
-  # bootstrap set, or trees pooled across several analytical conditions
-  # none of which is a single analysis.
-  pool_max <- 100L
-
-  fmt <- if (format == "auto") detect_format(f) else format
-  # detect_format() returns "none" for a file that matched `ext` but holds no
-  # tree, e.g. a PAUP*-format NEXUS character matrix.
-  if (identical(fmt, "none")) {
-    return(NULL)
-  }
-
-  reader <- switch(fmt,
-                   nexus  = ape::read.nexus,
-                   newick = ape::read.tree,
-                   stop("Unrecognised format \"",
-                        fmt,
-                        "\" for file: ",
-                        basename(f),
-                        call. = FALSE)
-  )
-
-  tr <- tryCatch(
-    suppressWarnings(reader(f)),
-    error = function(e) {
-      stop(
-        "Could not parse tree file ", basename(f), ": ", conditionMessage(e),
-        call. = FALSE
-      )
-    }
-  )
-
-  if (is.null(tr)) {
-    stop("No tree could be read from: ", basename(f), call. = FALSE)
-  }
-  if (!inherits(tr, "phylo") && !inherits(tr, "multiPhylo")) {
-    stop(
-      basename(f), " did not yield a phylogenetic tree (got class ",
-      paste(class(tr), collapse = "/"), ").",
-      call. = FALSE
-    )
-  }
-
-  # ape returns a multiPhylo even for a NEXUS file holding exactly one tree.
-  # Unwrapped it, so that a single tree is a phylo whatever the file format.
-  if (inherits(tr, "multiPhylo") && length(tr) == 1L) {
-    tr <- tr[[1L]]
-  }
-
-  n <- pool_size(tr)
-  if (n == 0L) {
-    stop("No tree could be read from: ", basename(f), call. = FALSE)
-  }
-
-  # A file holding many trees is one analysis with a tied optimum. A file
-  # holding more than 100 trees  is a posterior sample, a bootstrap set, or
-  # trees pooled across several analytical conditions, none of which is a
-  # single analysis.
-  if (n > pool_max) {
-    stop(
-      basename(f), " contains ", n, " trees, exceeding `pool_max` (", pool_max,
-      "). This is usually a posterior sample, a bootstrap set, or trees pooled ",
-      "across several analytical conditions. phylorug treats each file as one ",
-      "analysis. If these are genuinely the equally optimal trees from one ",
-      "search, raise `pool_max`.",
-      call. = FALSE
-    )
-  }
-
-  # ape discards BEAST-style bracket annotations, so support is silently lost
-  # unless we say so. Only report when there is genuinely nothing to read.
-  no_labels <- all(vapply(
-    as_pool(tr),
-    function(x) is.null(x$node.label),
-    logical(1)
-  ))
-  if (no_labels && has_beast_annotations(f)) {
-    message(
-      basename(f), " contains BEAST-style node annotations. ape reads ",
-      "topology only, so posterior probabilities are not imported. The tree ",
-      "is fully usable for presence/absence rugs; see ?read_trees to import ",
-      "support values."
-    )
-  }
-
-  tr
-}
-
-
 #' Detect the format of a tree file
-#'
-#' Returns \code{"nexus"}, \code{"newick"}, or \code{"none"} when the file
+#' Returns `"nexus"`, `"newick"`, or `"none"` when the file
 #' contains no tree and should be skipped.
-#'
 #' @noRd
 detect_format <- function(path) {
   txt <- readLines(path, warn = FALSE)
-
   if (length(txt) == 0L || all(!nzchar(trimws(txt)))) {
     stop("File appears to be empty: ", basename(path), call. = FALSE)
   }
-
-  # #NEXUS need not be on the first physical line: files routinely open with a
-  # blank line or a bracketed comment block. Check the head, not only line 1.
   head_lines <- utils::head(txt, 50L)
   if (any(grepl("^\\s*#NEXUS", head_lines, ignore.case = TRUE))) {
-    # NEXUS is a container format. A character matrix is a valid NEXUS file
-    # with no TREES block, and is not a tree file.
     if (!any(grepl("BEGIN\\s+TREES", txt, ignore.case = TRUE))) {
       return("none")
     }
     return("nexus")
   }
-
-  # Otherwise assume Newick, but only if something tree-like is present. A
-  # Newick tree must contain a parenthesis and terminate with a semicolon.
   has_paren <- any(grepl("(", txt, fixed = TRUE))
   has_semi  <- any(grepl(";", txt, fixed = TRUE))
   if (!has_paren || !has_semi) {
     return("none")
   }
-
   "newick"
 }
-
-
 #' Test whether a file carries BEAST-style node annotations
 #'
 #' BEAST and TreeAnnotator write node metadata as bracketed comments, e.g.
-#' \code{[&posterior=0.98,rate=1.01]}. The Newick grammar treats brackets as
+#' `[&posterior=0.98,rate=1.01]`. The Newick grammar treats brackets as
 #' comments, so ape strips them during parsing and `node.label` comes back
 #' `NULL`. The annotations can only be found by searching the raw file text,
 #' not the parsed tree.
