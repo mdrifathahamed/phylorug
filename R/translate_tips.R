@@ -129,7 +129,7 @@ translate_tips <- function(trees,
       return(result$tree)
     }
 
-    # multiPhylo pool — translate each tree inside
+    # multiPhylo pool-- translate each tree inside
     n_trees  <- length(element)
     results  <- lapply(element, translate_one)
     element[] <- lapply(results, `[[`, "tree")

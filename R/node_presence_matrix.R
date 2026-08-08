@@ -11,7 +11,7 @@
 #' containing that taxon,scoring such a clade as 'absent' would introduce a
 #' false negative.The function therefore enforces strict taxon matching. Use
 #' [check_taxa()] to diagnose the discrepancies and [prune_to_shared()] to
-#' harmonize the backbone and comapring tree taxa.
+#' harmonize the backbone and comparing tree taxa.
 #'
 #' The function always computes both a presence matrix and a support matrix
 #' in a single pass. The plotting function [plot_phylorug()] decide which to

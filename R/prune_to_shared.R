@@ -30,7 +30,7 @@
 #'   original single-tree or pooled structure. The list carries a `"dropped"`
 #'   attribute naming the taxa that were removed.
 #'
-#' @seealso [check_taxa()] to see which taxa are missing and fromn where, before
+#' @seealso [check_taxa()] to see which taxa are missing and from where, before
 #'   deciding to prune.
 #'
 #' @export

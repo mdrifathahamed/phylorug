@@ -95,7 +95,7 @@
 #'   the backbone topology.
 #'
 #' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
-#'   directly to the active graphics device (not reconmonded).
+#'   directly to the active graphics device (not recommended).
 #'
 #' @seealso [node_presence_matrix()] to build the input data,
 #'   [check_taxa()] to verify taxon sets, and
