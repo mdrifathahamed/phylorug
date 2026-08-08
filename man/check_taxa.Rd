@@ -35,7 +35,7 @@ tip, so run this diagnosis before building a phylorug.
 }
 \details{
 This function reports; it does not modify the trees. If the backbone is
-present in comparison \code{trees} it is silently removes before comparison. Three
+present in comparison \code{trees} it is silently removed before comparison. Three
 outcomes are
 
 \describe{

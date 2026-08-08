@@ -9,11 +9,15 @@
 #'
 #' If your tip labels are already in the correct format, skip this step and
 #' proceed directly to [node_presence_matrix()]. Only tips with a matching entry
-#' in `from_col` replaced with the corresponding value in `to_col`. Unmatched
-#' tips are left unchanged. This function modifies only the `tip.label` field of
-#' each tree. Tree topology, branch lengths, and node labels are unaffected.
+#' in `from_col` are replaced with the corresponding value in `to_col`.
+#' Unmatched tips are left unchanged. This function modifies only the
+#' `tip.label` field of each tree. Tree topology, branch lengths, and node
+#' labels are unaffected.
 #'
-#' @param trees A named list of `"phylo"` objects, returned by [read_trees()].
+#' @param trees A named list of `"phylo"` and/or `"multiPhylo"` objects, one
+#'   element per analysis, as returned by [read_trees()]. A `"multiPhylo"`
+#'   element is a pool of tied-optimal trees (POY/TNT/PAUP*) treated as a
+#'   single analysis.
 #'
 #' @param data A data frame containing the label translation lookup table. Can
 #'   be a standard `data.frame` or a `tibble`.
@@ -53,14 +57,31 @@ translate_tips <- function(trees,
                            from_col,
                            to_col,
                            verbose = TRUE) {
-  # Validate inputs
   if (missing(from_col) || missing(to_col)) {
     stop("`from_col` and `to_col` are required: name the columns in `data` ",
          "that hold the current and replacement labels.", call. = FALSE)
   }
-  if (!inherits(trees, c("list", "multiPhylo"))) {
-    stop("`trees` must be a list of phylo objects or a multiPhylo object.",
+  if (!inherits(trees, "list")) {
+    stop("`trees` must be a list of `phylo` and/or `multiPhylo` objects, ",
+         "one element per analysis (as returned by `read_trees()`). A pool of ",
+         "tied-optimal trees (POY/TNT/PAUP*) is a `multiPhylo` element *inside* ",
+         "this list, representing a single analysis.",
          call. = FALSE)
+  }
+  if (length(trees) == 0L) {
+    stop("`trees` is empty; nothing to translate.", call. = FALSE)
+  }
+  # Each element must be a phylo or multiPhylo (pool)
+  valid_element <- vapply(trees, function(x) {
+    inherits(x, "phylo") || inherits(x, "multiPhylo")
+  }, logical(1))
+  if (!all(valid_element)) {
+    stop(
+      "All elements of `trees` must be `phylo` or `multiPhylo` objects. ",
+      "Invalid elements at positions: ",
+      paste(which(!valid_element), collapse = ", "), ".",
+      call. = FALSE
+    )
   }
   if (!inherits(data, "data.frame")) {
     stop("`data` must be a data frame.", call. = FALSE)
@@ -72,23 +93,64 @@ translate_tips <- function(trees,
   if (anyDuplicated(data[[from_col]])) {
     stop("Values in `from_col` must be unique.", call. = FALSE)
   }
+  if (anyNA(data[[from_col]])) {
+    stop("`from_col` contains NA values. Remove or fill them.", call. = FALSE)
+  }
+  if (anyNA(data[[to_col]])) {
+    stop("`to_col` contains NA values. Remove or fill them.", call. = FALSE)
+  }
+  # Preserve attributes that lapply would strip
+  original_attrs <- attributes(trees)
+
   # Build translation dictionary
   trans_dict <- stats::setNames(
     as.character(data[[to_col]]),
     as.character(data[[from_col]])
   )
-  # Translate each tree in the list
-  trees <- lapply(trees, function(tr) {
+
+  # Translate tips in a single phylo
+  translate_one <- function(tr) {
     match_idx <- match(tr$tip.label, names(trans_dict))
     matched   <- !is.na(match_idx)
-
     tr$tip.label[matched] <- trans_dict[match_idx[matched]]
+    list(tree = tr, n_matched = sum(matched), n_unmatched = sum(!matched))
+  }
+
+  # Translate each analysis-- unwrap pools, translate every tree, rewrap
+  trees <- lapply(names(trees), function(nm) {
+    element <- trees[[nm]]
+
+    if (inherits(element, "phylo")) {
+      result <- translate_one(element)
+      if (verbose) {
+        message(nm, ": ", result$n_matched, " tips translated, ",
+                result$n_unmatched, " unchanged")
+      }
+      return(result$tree)
+    }
+
+    # multiPhylo pool — translate each tree inside
+    n_trees  <- length(element)
+    results  <- lapply(element, translate_one)
+    element[] <- lapply(results, `[[`, "tree")
 
     if (verbose) {
-      message("Tips translated : ", sum(matched))
-      message("Tips unchanged  : ", sum(!matched))
+      total_matched   <- sum(vapply(results, `[[`, integer(1), "n_matched"))
+      total_unmatched <- sum(vapply(results, `[[`, integer(1), "n_unmatched"))
+      message(nm, " (", n_trees, " trees): ",
+              total_matched, " tips translated, ",
+              total_unmatched, " unchanged (totals across pool)")
     }
-    tr
+    element
   })
+  names(trees) <- original_attrs$names
+
+  # Restore attributes lost by lapply (pool_sizes, class, etc.)
+  for (a in names(original_attrs)) {
+    if (is.null(attr(trees, a))) {
+      attr(trees, a) <- original_attrs[[a]]
+    }
+  }
+
   trees
 }

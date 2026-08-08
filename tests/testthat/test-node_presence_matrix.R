@@ -1,9 +1,8 @@
 # Tests for node_presence_matrix()
 #
-# The function returns a list of two matrices: $presence and $support.
+# The function returns a list: $presence + $support_1 (+ $support_2, $support_3)
 
 # ---- helpers ----------------------------------------------------------------
-
 make_backbone <- function() {
   ape::read.tree(text = "(((A,B),C),(D,E));")
 }
@@ -47,7 +46,6 @@ make_unrooted <- function() {
 
 
 # ---- input validation -------------------------------------------------------
-
 test_that("stops when backbone is not a phylo object", {
   expect_error(
     node_presence_matrix("not_a_tree", make_comparisons()),
@@ -73,20 +71,45 @@ test_that("stops when support_col is out of range", {
   msg <- "`support_col` must be an integer or integer vector with values 1, 2, or 3."
   expect_error(
     node_presence_matrix(make_backbone(), make_comparisons(), support_col = 4),
-    regexp = msg,
-    fixed = TRUE
+    regexp = msg, fixed = TRUE
   )
-
   expect_error(
     node_presence_matrix(make_backbone(), make_comparisons(), support_col = 0),
-    regexp = msg,
-    fixed = TRUE
+    regexp = msg, fixed = TRUE
+  )
+})
+
+test_that("stops when support_col is non-numeric", {
+  expect_error(
+    node_presence_matrix(make_backbone(), make_comparisons(), support_col = "one"),
+    "must be an integer"
+  )
+})
+
+test_that("support_col with decimal is rejected", {
+  expect_error(
+  node_presence_matrix(make_backbone(), make_comparisons(), support_col = 1.5),
+    "must be an integer"
+  )
+})
+
+test_that("support_col with duplicates produces duplicate matrices", {
+  result <- node_presence_matrix(
+    make_backbone(), make_comparisons(), support_col = c(1, 1)
+  )
+  expect_named(result, c("presence", "support_1", "support_2"))
+  expect_equal(result$support_1, result$support_2)
+})
+
+test_that("stops when trees contains a NULL element", {
+  trees <- list(good = make_backbone(), bad = NULL)
+  expect_error(
+    node_presence_matrix(make_backbone(), trees)
   )
 })
 
 
 # ---- rooted guard -----------------------------------------------------------
-
 test_that("stops when backbone is unrooted", {
   expect_error(
     node_presence_matrix(make_unrooted(), make_comparisons()),
@@ -113,9 +136,17 @@ test_that("names all unrooted comparison trees in the error", {
   )
 })
 
+test_that("unrooted tree inside a pool is caught", {
+  pool <- list(make_backbone(), make_unrooted())
+  class(pool) <- "multiPhylo"
+  expect_error(
+    node_presence_matrix(make_backbone(), list(pool = pool)),
+    "unrooted"
+  )
+})
+
 
 # ---- taxon gate -------------------------------------------------------------
-
 test_that("stops when a comparison tree is missing a backbone taxon", {
   expect_error(
     node_presence_matrix(make_backbone(), make_missing_taxon()),
@@ -128,9 +159,19 @@ test_that("accepts a comparison tree with extra taxa", {
   expect_no_error(node_presence_matrix(make_backbone(), trees))
 })
 
+test_that("error lists all trees missing taxa when multiple fail", {
+  trees <- list(
+    gappy1 = ape::read.tree(text = "((A,B),(D,E));"),    # missing C
+    gappy2 = ape::read.tree(text = "(((A,B),C),D);")     # missing E
+  )
+  expect_error(
+    node_presence_matrix(make_backbone(), trees),
+    "2 tree\\(s\\)"
+  )
+})
+
 
 # ---- output structure -------------------------------------------------------
-
 test_that("returns a list with presence and support_1 by default", {
   result <- node_presence_matrix(make_backbone(), make_comparisons())
   expect_type(result, "list")
@@ -148,7 +189,6 @@ test_that("both matrices have the same dimensions", {
 
 test_that("node IDs are in rownames, not a column", {
   result <- node_presence_matrix(make_backbone(), make_comparisons())
-
   expect_false("node_id" %in% colnames(result$presence))
   expect_equal(rownames(result$presence), as.character(6:9))
   expect_equal(rownames(result$support_1), as.character(6:9))
@@ -168,7 +208,6 @@ test_that("generates positional names when the list is unnamed", {
 
 
 # ---- presence matrix --------------------------------------------------------
-
 test_that("presence: identical tree scores all 1", {
   result <- node_presence_matrix(make_backbone(), list(same = make_backbone()))
   expect_true(all(result$presence[, "same"] == 1))
@@ -183,7 +222,6 @@ test_that("presence: different tree has at least one 0", {
 test_that("presence: absence is 0, never NA", {
   trees  <- list(diff = ape::read.tree(text = "((A,(B,C)),(D,E));"))
   result <- node_presence_matrix(make_backbone(), trees)
-
   expect_false(any(is.na(result$presence)))
   expect_true(all(as.vector(result$presence) %in% c(0, 1)))
 })
@@ -193,23 +231,27 @@ test_that("presence: values are between 0 and 1", {
   expect_true(all(result$presence >= 0 & result$presence <= 1))
 })
 
+test_that("presence: root node clade is always recovered", {
+  # Root clade = all tips — every tree recovers it by definition
+  result <- node_presence_matrix(make_backbone(), make_comparisons())
+  root_row <- as.character(ape::Ntip(make_backbone()) + 1L)
+  expect_true(all(result$presence[root_row, ] == 1))
+})
+
 
 # ---- pools ------------------------------------------------------------------
-
 test_that("pool presence: identical trees give 1.0", {
   pool <- list(
     ape::read.tree(text = "(((A,B),C),(D,E));"),
     ape::read.tree(text = "(((A,B),C),(D,E));")
   )
   class(pool) <- "multiPhylo"
-
   result <- node_presence_matrix(make_backbone(), list(pool = pool))
   expect_true(all(result$presence[, "pool"] == 1))
 })
 
 test_that("pool presence: mixed recovery gives a fraction", {
   result <- node_presence_matrix(make_backbone(), list(pool = make_pool()))
-
   vals      <- result$presence[, "pool"]
   fractions <- vals[vals > 0 & vals < 1]
   expect_true(length(fractions) > 0)
@@ -229,18 +271,23 @@ test_that("pool and single tree can be mixed in one call", {
     pool   = make_pool()
   )
   result <- node_presence_matrix(make_backbone(), trees)
-
   expect_equal(ncol(result$presence), 2L)
   expect_true(all(result$presence[, "single"] %in% c(0, 1)))
 })
 
+test_that("pool of size 1 behaves like a single tree", {
+  single <- make_backbone()
+  pool   <- structure(list(single), class = "multiPhylo")
+  r_single <- node_presence_matrix(make_backbone(), list(t = single))
+  r_pool   <- node_presence_matrix(make_backbone(), list(t = pool))
+  expect_equal(r_single$presence, r_pool$presence)
+})
+
 
 # ---- support matrix ---------------------------------------------------------
-
 test_that("support: present clade has a numeric value", {
   result <- node_presence_matrix(make_supported(), list(t1 = make_supported()))
-
-  vals    <- result$support[, "t1"]
+  vals    <- result$support_1[, "t1"]
   present <- vals[!is.na(vals)]
   expect_true(length(present) > 0)
   expect_true(all(present > 0))
@@ -249,34 +296,27 @@ test_that("support: present clade has a numeric value", {
 test_that("support: absent clade is NA", {
   trees  <- list(diff = ape::read.tree(text = "((A,(B,C)),(D,E));"))
   result <- node_presence_matrix(make_backbone(), trees)
-  expect_true(any(is.na(result$support)))
+  expect_true(any(is.na(result$support_1)))
 })
 
 test_that("support: a tree with no labels gives all NA", {
-  # make_backbone() carries no node labels. Clades are present (topology
-  # matches) but there is no value to read.
   result <- node_presence_matrix(make_backbone(), list(t1 = make_backbone()))
-  expect_true(all(is.na(result$support)))
+  expect_true(all(is.na(result$support_1)))
 })
 
 test_that("support: presence and support disagree on absent clades", {
-  # Where a clade is absent, presence is 0 but support is NA. This is the whole
-  # reason two matrices exist.
   trees  <- list(diff = ape::read.tree(text = "((A,(B,C)),(D,E));"))
   result <- node_presence_matrix(make_backbone(), trees)
-
   absent <- result$presence[, "diff"] == 0
-  expect_true(all(is.na(result$support[absent, "diff"])))
+  expect_true(all(is.na(result$support_1[absent, "diff"])))
 })
 
 test_that("support_col = 2 reads the second value", {
   bb <- make_compound_support()
-
   s1 <- node_presence_matrix(bb, list(t1 = make_compound_support()),
                              support_col = 1)$support_1
   s2 <- node_presence_matrix(bb, list(t1 = make_compound_support()),
                              support_col = 2)$support_1
-
   v1 <- s1[!is.na(s1)]
   v2 <- s2[!is.na(s2)]
   if (length(v1) > 0 && length(v2) > 0) {
@@ -289,42 +329,28 @@ test_that("support_col = 3 reads the third value", {
   result <- node_presence_matrix(bb, list(t1 = make_triple_support()),
                                  support_col = 3)
   expect_false(all(is.na(result$support_1)))
-  expect_false(all(is.na(result$support)))
 })
 
 test_that("support_col = 3 gives NA when the tree has fewer values", {
-  # Single value per node, so column 3 does not exist. NA, not an error.
   bb     <- make_supported()
   result <- node_presence_matrix(bb, list(t1 = make_supported()),
                                  support_col = 3)
   expect_true(all(is.na(result$support_1)))
 })
 
-
-# ---- attributes -------------------------------------------------------------
-
-test_that("node_id attribute matches backbone internal nodes", {
-  bb     <- make_backbone()
-  result <- node_presence_matrix(bb, make_comparisons())
-
-  ntip     <- ape::Ntip(bb)
-  expected <- (ntip + 1L):(ntip + bb$Nnode)
-  expect_equal(attr(result, "node_id"), expected)
+test_that("support values are averaged across pool trees that recover the clade", {
+  # Two pool trees both recover (A,B) with support 80 and 100 → average = 90
+  t1 <- ape::read.tree(text = "(((A,B)80,C),(D,E));")
+  t2 <- ape::read.tree(text = "(((A,B)100,C),(D,E));")
+  pool <- structure(list(t1, t2), class = "multiPhylo")
+  result <- node_presence_matrix(make_backbone(), list(pool = pool))
+  # Find the (A,B) clade row and check the average
+  ab_support <- result$support_1[, "pool"]
+  ab_val <- ab_support[!is.na(ab_support)]
+  expect_true(90 %in% ab_val)
 })
 
-test_that("pool_sizes attribute records tree count per comparison", {
-  trees  <- list(single = make_backbone(), pool = make_pool())
-  result <- node_presence_matrix(make_backbone(), trees)
-  sizes  <- attr(result, "pool_sizes")
 
-  expect_equal(sizes[["single"]], 1L)
-  expect_equal(sizes[["pool"]], 3L)
-})
-
-test_that("no phylorug_mode attribute (both matrices are always returned)", {
-  result <- node_presence_matrix(make_backbone(), make_comparisons())
-  expect_null(attr(result, "phylorug_mode"))
-})
 # ---- multi-column behaviour -------------------------------------------------
 test_that("support_col = c(1,2) returns support_1 and support_2", {
   bb     <- make_compound_support()
@@ -342,4 +368,104 @@ test_that("support_1 and support_2 differ when node labels have two fields", {
   v1 <- result$support_1[!is.na(result$support_1)]
   v2 <- result$support_2[!is.na(result$support_2)]
   expect_false(identical(v1, v2))
+})
+
+test_that("support_col = c(1,2,3) returns all three matrices", {
+  bb     <- make_triple_support()
+  result <- node_presence_matrix(bb, list(t1 = make_triple_support()),
+                                 support_col = c(1, 2, 3))
+  expect_named(result, c("presence", "support_1", "support_2", "support_3"))
+  expect_false(all(is.na(result$support_3)))
+})
+
+test_that("support_col = 2 alone names the output support_1", {
+  # When only column 2 is requested, the output matrix is still called
+  # support_1 (first in the requested sequence), not support_2
+  bb     <- make_compound_support()
+  result <- node_presence_matrix(bb, list(t1 = make_compound_support()),
+                                 support_col = 2)
+  expect_named(result, c("presence", "support_1"))
+})
+
+
+# ---- attributes -------------------------------------------------------------
+test_that("node_id attribute matches backbone internal nodes", {
+  bb     <- make_backbone()
+  result <- node_presence_matrix(bb, make_comparisons())
+  ntip     <- ape::Ntip(bb)
+  expected <- (ntip + 1L):(ntip + bb$Nnode)
+  expect_equal(attr(result, "node_id"), expected)
+})
+
+test_that("node_id attribute is integer type", {
+  result <- node_presence_matrix(make_backbone(), make_comparisons())
+  expect_type(attr(result, "node_id"), "integer")
+})
+
+test_that("pool_sizes attribute records tree count per comparison", {
+  trees  <- list(single = make_backbone(), pool = make_pool())
+  result <- node_presence_matrix(make_backbone(), trees)
+  sizes  <- attr(result, "pool_sizes")
+  expect_equal(sizes[["single"]], 1L)
+  expect_equal(sizes[["pool"]], 3L)
+})
+
+test_that("no phylorug_mode attribute (both matrices are always returned)", {
+  result <- node_presence_matrix(make_backbone(), make_comparisons())
+  expect_null(attr(result, "phylorug_mode"))
+})
+
+
+# ---- internal: clade_keys ---------------------------------------------------
+test_that("clade_keys returns one key per internal node", {
+  bb   <- make_backbone()
+  keys <- phylorug:::clade_keys(bb)
+  expect_length(keys, bb$Nnode)
+})
+
+test_that("clade_keys produces sorted pipe-separated tip labels", {
+  bb   <- make_backbone()
+  keys <- phylorug:::clade_keys(bb)
+  # The (A,B) clade should produce "A|B"
+  expect_true("A|B" %in% keys)
+  # The root clade should contain all tips
+  expect_true("A|B|C|D|E" %in% keys)
+})
+
+test_that("clade_keys are identical for two trees with the same topology", {
+  t1 <- ape::read.tree(text = "(((A,B),C),(D,E));")
+  t2 <- ape::read.tree(text = "(((A,B),C),(D,E));")
+  expect_equal(phylorug:::clade_keys(t1), phylorug:::clade_keys(t2))
+})
+
+test_that("clade_keys differ for trees with different topologies", {
+  t1 <- ape::read.tree(text = "(((A,B),C),(D,E));")
+  t2 <- ape::read.tree(text = "((A,(B,C)),(D,E));")
+  k1 <- phylorug:::clade_keys(t1)
+  k2 <- phylorug:::clade_keys(t2)
+  # Both have root and (D,E), but (A,B) vs (B,C) differ
+  expect_true("A|B" %in% k1)
+  expect_false("A|B" %in% k2)
+  expect_true("B|C" %in% k2)
+})
+
+
+# ---- internal: assert_shared_taxa -------------------------------------------
+test_that("assert_shared_taxa passes silently when taxa match", {
+  bb_taxa <- sort(c("A", "B", "C", "D", "E"))
+  trees   <- make_comparisons()
+  nm      <- names(trees)
+  expect_invisible(
+    phylorug:::assert_shared_taxa(bb_taxa, trees, nm)
+  )
+})
+
+test_that("assert_shared_taxa errors with detail when taxa are missing", {
+  bb_taxa <- sort(c("A", "B", "C", "D", "E"))
+  trees   <- make_missing_taxon()
+  nm      <- names(trees)
+  expect_error(
+    phylorug:::assert_shared_taxa(bb_taxa, trees, nm),
+    "do not contain every backbone taxon"
+  )
 })

@@ -7,7 +7,10 @@
 translate_tips(trees, data, from_col, to_col, verbose = TRUE)
 }
 \arguments{
-\item{trees}{A named list of \code{"phylo"} objects, returned by \code{\link[=read_trees]{read_trees()}}.}
+\item{trees}{A named list of \code{"phylo"} and/or \code{"multiPhylo"} objects, one
+element per analysis, as returned by \code{\link[=read_trees]{read_trees()}}. A \code{"multiPhylo"}
+element is a pool of tied-optimal trees (POY/TNT/PAUP*) treated as a
+single analysis.}
 
 \item{data}{A data frame containing the label translation lookup table. Can
 be a standard \code{data.frame} or a \code{tibble}.}
@@ -35,9 +38,10 @@ species names.
 
 If your tip labels are already in the correct format, skip this step and
 proceed directly to \code{\link[=node_presence_matrix]{node_presence_matrix()}}. Only tips with a matching entry
-in \code{from_col} replaced with the corresponding value in \code{to_col}. Unmatched
-tips are left unchanged. This function modifies only the \code{tip.label} field of
-each tree. Tree topology, branch lengths, and node labels are unaffected.
+in \code{from_col} are replaced with the corresponding value in \code{to_col}.
+Unmatched tips are left unchanged. This function modifies only the
+\code{tip.label} field of each tree. Tree topology, branch lengths, and node
+labels are unaffected.
 }
 \examples{
 # Example trees and a lookup table ship inside phylorug, so we first read

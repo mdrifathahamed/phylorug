@@ -82,9 +82,10 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
-  if (!inherits(trees, c("list", "multiPhylo"))) {
+  if (!inherits(trees, "list")) {
     stop(
-      "`trees` must be a list of phylo objects or a multiPhylo object.",
+      "`trees` must be a list of `phylo` and/or `multiPhylo` objects, one ",
+      "element per analysis, as returned by `read_trees()`.",
       call. = FALSE
     )
   }
@@ -96,7 +97,6 @@ node_presence_matrix <- function(backbone,
                 "with values 1, 2, or 3."), call. = FALSE)
   }
   support_col <- as.integer(support_col)
-  #names
   nm <- names(trees)
   if (is.null(nm)) {
     nm <- paste0("tree_", seq_along(trees))
@@ -128,7 +128,6 @@ node_presence_matrix <- function(backbone,
     )
   }
  # every trees must carry the same  set of taxa
-
   bb_taxa <- sort(backbone$tip.label)
   assert_shared_taxa(bb_taxa, trees, nm)
  #setup the empty matrix

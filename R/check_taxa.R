@@ -7,7 +7,7 @@
 #'
 #' @details
 #' This function reports; it does not modify the trees. If the backbone is
-#' present in comparison `trees` it is silently removes before comparison. Three
+#' present in comparison `trees` it is silently removed before comparison. Three
 #' outcomes are
 #'
 #' \describe{
@@ -74,9 +74,12 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
       call. = FALSE
     )
   }
-  if (!inherits(trees, c("list", "multiPhylo"))) {
+  if (!inherits(trees, "list")) {
     stop(
-      "`trees` must be a list of trees, as returned by `read_trees()`.",
+      "`trees` must be a list of `phylo` and/or `multiPhylo` objects, one ",
+      "element per analysis, as returned by `read_trees()`. A single ",
+    "`multiPhylo` is a pool of trees from ONE analysis and should be wrapped ",
+      "in a list.",
       call. = FALSE
     )
   }
@@ -86,52 +89,58 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   }
   if (any(vapply(trees, is.null, logical(1)))) {
     stop(
-      "`trees` contains NULL elements. Ensure every tree was read successfully.",
+    "`trees` contains NULL elements. Ensure every tree was read successfully.",
       call. = FALSE
     )
   }
-
-  # A compressed multiPhylo stores tip labels once, as an attribute, rather than
-  # per tree. Taxon sets cannot be compared until it is decompressed.
-  if (inherits(trees, "multiPhylo") && !is.null(attr(trees, "TipLabel"))) {
+  valid_element <- vapply(trees, function(x) {
+    inherits(x, "phylo") || inherits(x, "multiPhylo")
+  }, logical(1))
+  if (!all(valid_element)) {
     stop(
-      "`trees` is a compressed multiPhylo object (tip labels stored as an ",
-      "attribute, not per tree). Decompress it first with ",
-      "`ape::uncompressTipLabel(trees)`.",
+      "All elements of `trees` must be `phylo` or `multiPhylo` objects. ",
+      "Invalid elements at positions: ",
+      paste(which(!valid_element), collapse = ", "), ".",
       call. = FALSE
     )
   }
-
-  # Remove the backbone from `trees` if it was passed in, identified by
-  # object identity. This lets the user pass the full read_trees() output
-  # without subsetting first.
+  is_compressed <- vapply(trees, function(x) {
+    inherits(x, "multiPhylo") && !is.null(attr(x, "TipLabel"))
+  }, logical(1))
+  if (any(is_compressed)) {
+    stop(
+      "Element(s) at position(s) ",
+      paste(which(is_compressed), collapse = ", "),
+      " are compressed multiPhylo objects (tip labels stored as an ",
+      "attribute, not per tree). Decompress with ",
+      "`ape::uncompressTipLabel()` first.",
+      call. = FALSE
+    )
+  }
   is_backbone <- vapply(trees, identical, logical(1L), backbone)
   if (any(is_backbone)) {
     trees <- trees[!is_backbone]
   }
   if (length(trees) == 0L) {
     stop(
-      "`trees` contains only the backbone. Supply at least one comparison tree.",
+    "`trees` contains only the backbone. Supply at least one comparison tree.",
       call. = FALSE
     )
   }
-
   bb_taxa <- pool_taxa(backbone, name = "backbone")
   nm <- names(trees)
   if (is.null(nm)) {
     nm <- paste0("tree_", seq_along(trees))
   }
-
   status <- character(length(trees))
   miss   <- character(length(trees))
   extra  <- character(length(trees))
   n_taxa <- integer(length(trees))
-
   for (i in seq_along(trees)) {
     taxa <- pool_taxa(trees[[i]], name = nm[i])
 
-    m <- setdiff(bb_taxa, taxa)   # in backbone, absent from this comparison
-    e <- setdiff(taxa, bb_taxa)   # in this comparison, absent from backbone
+    m <- setdiff(bb_taxa, taxa)
+    e <- setdiff(taxa, bb_taxa)
 
     status[i] <- if (length(m) == 0L && length(e) == 0L) {
       "identical"
@@ -140,7 +149,6 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
     } else {
       "missing"
     }
-
     miss[i]   <- paste(m, collapse = ", ")
     extra[i]  <- paste(e, collapse = ", ")
     n_taxa[i] <- length(taxa)
@@ -155,9 +163,7 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
     stringsAsFactors = FALSE,
     row.names        = NULL
   )
-
   ok <- all(status == "identical")
-
   if (verbose) {
     if (ok) {
       message(
@@ -180,8 +186,8 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
         message(
           sum(is_missing), " comparison tree(s) are MISSING backbone taxa: ",
           paste(nm[is_missing], collapse = ", "),
-          ". Any backbone clade containing a missing taxon cannot be evaluated ",
-          "in those trees. Use `prune_to_shared()` to reduce the backbone and ",
+        ". Any backbone clade containing a missing taxon cannot be evaluated ",
+         "in those trees. Use `prune_to_shared()` to reduce the backbone and ",
           "the comparison trees to their common taxa. See ",
           "`attr(result, \"diagnostics\")` for the taxa involved."
         )

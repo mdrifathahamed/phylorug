@@ -71,26 +71,23 @@ prune_to_shared <- function(backbone, trees, verbose = TRUE) {
       call. = FALSE
     )
   }
-  if (!inherits(trees, c("list", "multiPhylo"))) {
+  if (!inherits(trees, "list")) {
     stop(
-      "`trees` must be a list of trees, as returned by `read_trees()`.",
+      "`trees` must be a list of `phylo` and/or `multiPhylo` objects, one ",
+      "element per analysis, as returned by `read_trees()`.",
       call. = FALSE
     )
   }
   if (length(trees) == 0L) {
     stop("`trees` is empty.", call. = FALSE)
   }
-
   bb_taxa <- tree_taxa(backbone)
-
-  # Taxa shared by the backbone and every comparison tree.
   shared <- Reduce(
     intersect,
     lapply(trees, tree_taxa),
     accumulate = FALSE,
     init        = bb_taxa
   )
-
   if (length(shared) < 3L) {
     stop(
       "Only ", length(shared), " taxa are shared by the backbone and every ",
@@ -99,9 +96,7 @@ prune_to_shared <- function(backbone, trees, verbose = TRUE) {
       call. = FALSE
     )
   }
-
   dropped <- setdiff(bb_taxa, shared)
-
   if (verbose) {
     if (length(dropped) == 0L) {
       message(
@@ -117,7 +112,6 @@ prune_to_shared <- function(backbone, trees, verbose = TRUE) {
       )
     }
   }
-
   out <- list(
     backbone = prune_one(backbone, shared),
     trees    = stats::setNames(
@@ -125,11 +119,9 @@ prune_to_shared <- function(backbone, trees, verbose = TRUE) {
       names(trees)
     )
   )
-
   attr(out, "dropped") <- dropped
   out
 }
-
 
 #' Sorted tip labels of one tree or pool
 #'
@@ -140,7 +132,6 @@ prune_to_shared <- function(backbone, trees, verbose = TRUE) {
 tree_taxa <- function(x) {
   sort(as_pool(x)[[1L]]$tip.label)
 }
-
 
 #' Prune one comparison tree to a set of taxa
 #'
@@ -156,7 +147,6 @@ prune_one <- function(x, keep) {
     }
     return(ape::drop.tip(x, drop))
   }
-
   pool <- as_pool(x)
   out  <- lapply(pool, function(tr) {
     drop <- setdiff(tr$tip.label, keep)

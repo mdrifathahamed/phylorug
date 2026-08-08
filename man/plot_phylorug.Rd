@@ -180,6 +180,6 @@ unlink(tmp3)
 \seealso{
 \code{\link[=node_presence_matrix]{node_presence_matrix()}} to build the input data,
 \code{\link[=check_taxa]{check_taxa()}} to verify taxon sets, and
-\code{\link[=plot_node_rug]{plot_node_rug()}} which handles the cell-level
+\code{plot_node_rug()} which handles the cell-level
 drawing(not used by the user).
 }

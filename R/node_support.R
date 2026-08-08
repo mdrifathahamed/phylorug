@@ -19,8 +19,8 @@
 #' @param sep A single character string giving the delimiter that separates
 #'   compound support values. Defaults to `"/"`.
 #'
-#' @param digits Integer or `NULL`. If supplied, support values are rounded to this
-#'   many decimal places. Defaults to `NULL`.
+#' @param digits Integer or `NULL`. If supplied, support values are rounded to
+#'   this many decimal places. Defaults to `NULL`.
 #'
 #' @return A data frame with three columns, `support_1`, `support_2` and
 #'   `support_3`, and one row per internal node of the tree. Columns not present
@@ -30,45 +30,34 @@
 node_support <- function(tree,
                          sep   = "/",
                          digits = NULL) {
-
-  # 1. Validate the tree
   if (!inherits(tree, "phylo")) {
     stop(
       "`tree` must be a phylogenetic tree of class \"phylo\".",
       call. = FALSE
     )
   }
-
-  # 2. Validate the digits argument
   if (!is.null(digits) && (!is.numeric(digits) || length(digits) != 1)) {
     stop(
       "`digits` must be a single integer or NULL.",
       call. = FALSE
     )
   }
-
   n_node <- ape::Nnode(tree)
-  n_col  <- 3L   # up to three support values: bootstrap / UFBoot2 / aBayes
-
-  # 3. Pull out the node labels
+  n_col  <- 3L
   lbl <- tree$node.label
-
-  # 4. No labels: return all NA, one row per internal node
+ # No labels: return all NA, one row per internal node
   if (is.null(lbl)) {
     out <- as.data.frame(matrix(NA_real_, nrow = n_node, ncol = n_col))
     names(out) <- paste0("support_", seq_len(n_col))
     return(out)
   }
-
-  # 5. Pad short label vectors so there is one entry per internal node
+  # Pad short label vectors so there is one entry per internal node
   if (length(lbl) < n_node) {
     lbl <- c(lbl, rep(NA_character_, n_node - length(lbl)))
   }
-
-  # 6. Split each label on the separator
+  # Split each label on the separator
   spl <- strsplit(lbl, sep, fixed = TRUE)
-
-  # 7. Coerce each split label to exactly n_col numbers, padding with NA
+  #Coerce each split label to exactly n_col numbers, padding with NA
   supp_mat <- t(
     vapply(
       spl,
@@ -81,15 +70,12 @@ node_support <- function(tree,
       numeric(n_col)
     )
   )
-
-  # 8. Build the output data frame
+  #Build the output data frame
   result <- as.data.frame(supp_mat)
   names(result) <- paste0("support_", seq_len(n_col))
-
-  # 9. Round if requested
+  #Round if requested
   if (!is.null(digits)) {
     result[] <- lapply(result, function(v) round(v, digits))
   }
-
   result
 }

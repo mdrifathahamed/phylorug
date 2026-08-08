@@ -13,8 +13,8 @@ in \code{tree$node.label}.}
 \item{sep}{A single character string giving the delimiter that separates
 compound support values. Defaults to \code{"/"}.}
 
-\item{digits}{Integer or \code{NULL}. If supplied, support values are rounded to this
-many decimal places. Defaults to \code{NULL}.}
+\item{digits}{Integer or \code{NULL}. If supplied, support values are rounded to
+this many decimal places. Defaults to \code{NULL}.}
 }
 \value{
 A data frame with three columns, \code{support_1}, \code{support_2} and

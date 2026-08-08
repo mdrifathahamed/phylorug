@@ -99,7 +99,7 @@
 #'
 #' @seealso [node_presence_matrix()] to build the input data,
 #'   [check_taxa()] to verify taxon sets, and
-#'   [plot_node_rug()] which handles the cell-level
+#'   `plot_node_rug()` which handles the cell-level
 #'   drawing(not used by the user).
 #'
 #' @export
@@ -253,14 +253,20 @@ plot_phylorug <- function(backbone, npm,
       )
     }
   }
-
-
   if (include_backbone) {
     bb_name <- "backbone"
     bb_p <- matrix(1, nrow = nrow(presence), ncol = 1,
                    dimnames = list(rownames(presence), bb_name))
     presence <- cbind(bb_p, presence)
     if (mode == "support") {
+      if (!(bb_name %in% names(support_type))) {
+        stop(
+          "`include_backbone = TRUE` with `mode = \"support\"` requires a ",
+          "\"backbone\" entry in `support_type`, e.g. ",
+          "support_type = c(backbone = \"ufboot\", iqtree = \"sh_alrt\", ...)",
+          call. = FALSE
+        )
+      }
       bb_s <- node_support(backbone)[[paste0("support_", support_idx)]]
       bb_col <- matrix(bb_s[as.integer(rownames(presence)) - ntip],
                        ncol = 1, dimnames = list(rownames(presence), bb_name))
@@ -667,7 +673,7 @@ choose_grid <- function(n_cells) {
 #'
 #' @param analyses Character vector of comparison-tree names (already truncated
 #'   to a maximum length by the caller).
-#' @param n_cols Integer. Columns in the mini-grid, from [choose_grid()].
+#' @param n_cols Integer. Columns in the mini-grid, from `choose_grid()`.
 #' @param cell_w,cell_h Numeric. Width and height of one legend cell, in user
 #'   coordinates.
 #' @param x0,y0 Numeric. Top-left anchor of the grid, in user coordinates.
@@ -677,7 +683,7 @@ choose_grid <- function(n_cells) {
 #'   can stack content below it if needed.
 #'
 #' @seealso [plot_phylorug()] (Section 10) for the caller, and
-#'   [draw_threshold_legend()] for the companion support-colour key.
+#'   `draw_threshold_legend()` for the companion support-colour key.
 #'
 #' @noRd
 draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
@@ -738,7 +744,7 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #' @return Invisibly, the y-coordinate below the last row.
 #'
 #' @seealso [plot_phylorug()] (Section 10) for the caller, and
-#'   [draw_position_legend()] for the companion numbered analysis key.
+#'   `draw_position_legend()` for the companion numbered analysis key.
 #'
 #' @noRd
 draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
