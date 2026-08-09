@@ -206,16 +206,24 @@ trees    <- read_trees(tree_dir)
 names(trees)
 ```
 
-### Root and remove the outgroup
+###Root and remove the outgroups
 
-These trees need rooting on *Pseudosmittia* sp., the outgroup. Root
-first, then drop the outgroup tip. The order matters — you must root
-while the outgroup is still present:
+The Culicomorpha trees include three outgroup taxa from outside the
+infraorder: Phlebotomus chinensis and Clogmia albipunctata
+(Psychodidae) and Coboldia fuscipes (Scatopsidae). Root on all
+three, then drop them. The order matters — you must root while the
+outgroup tips are still present, because ape::root() needs to find
+them in the tree:
 
 ```{r root-culico}
 trees <- lapply(trees, function(tr) {
-  tr <- ape::root(tr, outgroup = "Pseudosmittia_sp", resolve.root = TRUE)
-  ape::drop.tip(tr, "Pseudosmittia_sp")
+  tr <- ape::root(tr, outgroup = c("Coboldia_fuscipes",
+                                    "Phlebotomus_chinensis",
+                                    "Clogmia_albipunctata"),
+                  resolve.root = TRUE)
+  ape::drop.tip(tr, c("Coboldia_fuscipes",
+                       "Phlebotomus_chinensis",
+                       "Clogmia_albipunctata"))
 })
 ```
 
@@ -224,8 +232,8 @@ trees <- lapply(trees, function(tr) {
 Pick one analysis as the backbone. The remaining trees are comparisons:
 
 ```{r backbone-culico}
-backbone <- trees[["Matrix1-kpi_partitioning"]]
-others   <- trees[names(trees) != "Matrix1-kpi_partitioning"]
+backbone <- trees[["Matrix1-kpi_PMSF(H1.guide)"]]
+others   <- trees[names(trees) != "Matrix1-kpi_PMSF(H1.guide)"]
 
 check_taxa(backbone, others)
 ```
@@ -243,6 +251,35 @@ plot_phylorug(backbone, npm)
 With 9 comparison trees, phylorug automatically arranges the rug grid
 (3 columns by 3 rows in this case). The position legend at the bottom
 maps each cell position to an analysis name.
+```{r}
+# --- Map each comparison tree to its support metric ---
+support_type <- c(
+  "Matrix1-kpi_ASTRAL"            = "lpp",
+  "Matrix1-smart_ASTRAL"          = "lpp",
+  "Matrix1-kpi_partitioning"      = "sh_alrt",
+  "Matrix1-kpi_PMSF(H2.guide)"    = "sh_alrt",
+  "Matrix1_LG_C20_F_R"            = "sh_alrt",
+  "Matrix1-smart_partitioning"    = "sh_alrt",   # added — now a comparison tree
+  "Matrix1-smart_PMSF(H1.guide)"  = "sh_alrt",
+  "Matrix1-smart_PMSF(H2.guide)"  = "sh_alrt",
+  "Matrix2_partitioning"          = "sh_alrt"
+  # "Matrix1-kpi_PMSF(H1.guide)" removed — it's the backbone now, not a comparison
+)
+```
+
+```{r plot-culico-support,fig.width = 8, fig.height = 10}
+plot_phylorug(backbone, npm,
+              mode               = "support",
+              support_type       = support_type,
+              show_support       = TRUE,
+              support_label_cex  = 0.25,
+              support_label_col  = "red",
+              cell_scale         = 0.35,
+              rug_position       = "inside",
+              rug_on_identical   = FALSE,
+              hide_unsupported   = TRUE)
+```
+
 
 ## Full pipeline: beetles with tip translation
 
