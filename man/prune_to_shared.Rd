@@ -68,6 +68,6 @@ shared$backbone
 shared$trees
 }
 \seealso{
-\code{\link[=check_taxa]{check_taxa()}} to see which taxa are missing and fromn where, before
+\code{\link[=check_taxa]{check_taxa()}} to see which taxa are missing and from where, before
 deciding to prune.
 }

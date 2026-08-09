@@ -48,7 +48,7 @@ tree lacking a backbone taxon cannot assess the presence of a clade
 containing that taxon,scoring such a clade as 'absent' would introduce a
 false negative.The function therefore enforces strict taxon matching. Use
 \code{\link[=check_taxa]{check_taxa()}} to diagnose the discrepancies and \code{\link[=prune_to_shared]{prune_to_shared()}} to
-harmonize the backbone and comapring tree taxa.
+harmonize the backbone and comparing tree taxa.
 
 The function always computes both a presence matrix and a support matrix
 in a single pass. The plotting function \code{\link[=plot_phylorug]{plot_phylorug()}} decide which to

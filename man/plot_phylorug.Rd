@@ -126,7 +126,7 @@ automatic scaling when provided.}
 }
 \value{
 Invisibly, the file path if a file was written, or \code{NULL} if plotted
-directly to the active graphics device (not reconmonded).
+directly to the active graphics device (not recommended).
 }
 \description{
 \code{\link[=plot_phylorug]{plot_phylorug()}} overlays clade stability grids (rugs) on a backbone

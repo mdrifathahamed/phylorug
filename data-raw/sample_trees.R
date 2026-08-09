@@ -36,6 +36,9 @@ trees <- lapply(trees, function(tr) {
   drop.tip(tr, c("NicorbUCE", "NicvesUCE"))
 })
 
+# Note: The lookup table was originally biogeo.xlsx. A CSV version
+# (biogeo.csv) is shipped in inst/extdata/beetles_50p/ for the vignette,
+# avoiding a hard dependency on readxl.
 biogeo <- read_excel(
   "C:/Users/1/Desktop/phylorug_analysis/data/biogeo.xlsx",
   sheet = "BioGeo"
