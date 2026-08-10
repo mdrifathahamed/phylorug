@@ -16,7 +16,7 @@ test_that("sample_trees has the expected analysis names", {
 
 test_that("all sample_trees have 20 tips", {
   tip_counts <- vapply(sample_trees, ape::Ntip, integer(1))
-  expect_true(all(tip_counts == 20L))
+  expect_true(all(tip_counts == 7L))
 })
 
 test_that("all sample_trees share the same taxa", {

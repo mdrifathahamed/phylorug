@@ -19,7 +19,7 @@ WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.o
 **phylorug** is an R package for comparing and visualizing clade
 recovery and support values across multiple phylogenetic trees on a
 single reference topology using rug plots. Modern phylogenomic studies
-routinely produce trees from different inference pipelines —
+routinely produce trees from different inference pipelines such as
 concatenation versus coalescent methods, site-homogeneous versus
 site-heterogeneous substitution models, different data filtering
 strategies — each with support values in incompatible formats (ultrafast
@@ -34,16 +34,12 @@ at a glance which nodes are robust across methods and which are not.
 <figcaption aria-hidden="true">Presence mode</figcaption>
 </figure>
 
-*Figure will be added once sample data is finalized.*
-
 ### Support mode
 
 <figure>
 <img src="man/figures/README-support.png" alt="Support mode" />
 <figcaption aria-hidden="true">Support mode</figcaption>
 </figure>
-
-*Figure will be added once sample data is finalized.*
 
 ### Installation
 

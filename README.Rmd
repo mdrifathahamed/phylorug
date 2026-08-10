@@ -23,19 +23,15 @@ knitr::opts_chunk$set(
 
 ------------------------------------------------------------------------
 
-**phylorug** is an R package for comparing and visualizing clade recovery and support values across multiple phylogenetic trees on a single reference topology using rug plots. Modern phylogenomic studies routinely produce trees from different inference pipelines — concatenation versus coalescent methods, site-homogeneous versus site-heterogeneous substitution models, different data filtering strategies — each with support values in incompatible formats (ultrafast bootstrap, SH-aLRT, posterior probability, local posterior probability). **phylorug** maps all of these onto one tree, letting the researcher see at a glance which nodes are robust across methods and which are not.
+**phylorug** is an R package for comparing and visualizing clade recovery and support values across multiple phylogenetic trees on a single reference topology using rug plots. Modern phylogenomic studies routinely produce trees from different inference pipelines such as concatenation versus coalescent methods, site-homogeneous versus site-heterogeneous substitution models, different data filtering strategies — each with support values in incompatible formats (ultrafast bootstrap, SH-aLRT, posterior probability, local posterior probability). **phylorug** maps all of these onto one tree, letting the researcher see at a glance which nodes are robust across methods and which are not.
 
 ### Presence mode
 
 ![Presence mode](man/figures/README-presence.png)
 
-*Figure will be added once sample data is finalized.*
-
 ### Support mode
 
 ![Support mode](man/figures/README-support.png)
-
-*Figure will be added once sample data is finalized.*
 
 ### Installation
 
@@ -63,8 +59,12 @@ plot_phylorug(npm, mode = "presence")
 
 # Support mode
 plot_phylorug(npm, mode = "support",
-              support_type = c("ufboot", "ufboot", "posterior",
-                               "ufboot", "lpp"))
+              support_type <- c(
+                "70p_ASTRAL_partition_entropy" = "lpp",
+                "70p_ASTRAL_uce"               = "lpp",
+                "70p_ghost"                    = "ufboot",
+                "70p_partition_entropy"        = "ufboot"
+              ),)
 ```
 
 ### Two modes

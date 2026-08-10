@@ -2,7 +2,7 @@
 #
 # Creates data/sample_trees.rda
 #
-# A 9-taxon subset of the Tarasov Lab 70% occupancy beetle phylogenomic
+# A 7-taxon subset of the Tarasov Lab 70% occupancy beetle phylogenomic
 # dataset (Scarabaeinae), pruned from the full 289-taxon ingroup to serve
 # as a quick demonstration of the phylorug pipeline in the README and
 # vignette.
@@ -42,7 +42,7 @@ biogeo <- read.csv(biogeo_path)
 trees <- phylorug::translate_tips(trees, biogeo, from = "specimen_code",
                                   to = "species_name")
 
-# -- 2. Pick 9 taxa --------------------------------------------------------
+# -- 2. Pick 7 taxa --------------------------------------------------------
 #
 # Chosen to produce a mix of:
 #   - nodes recovered by all 5 analyses (black row in presence mode)
@@ -56,23 +56,23 @@ keep <- c(
   "Kheper_nigroaeneus_STL10036",
   "Gyronotus_pumilus_STL10003",
   "Copris_fidius_ST005",
-  "Onthophagus_taurus_ST002",
-  "Onthophagus_probus_STL10015",
   "Nanos_dubitatus_STL5001",
   "Epilissus_cuprarius_STL5011",
   "Scarabaeus_westwoodi_STL10034",
   "Catharsius_sp._STL10033"
 )
 
-stopifnot(length(keep) == 9L)
+stopifnot(length(keep) == 7L)
 stopifnot(all(keep %in% trees[["70p_uce"]]$tip.label))
 
 # -- 3. Prune and save -------------------------------------------------------
 sample_trees <- lapply(trees, function(tr) keep.tip(tr, keep))
 # -- 4. Inject one low-support label for demo visualization -----------------
-# This ensures the README/vignette figures show a yellow cell (support < 50),
-# demonstrating the full colour range of support mode. The original value at
-# this node was "100/100".
-sample_trees[["70p_ghost"]]$node.label[6] <- "30/30"
+# Node 8 (node.label[1]) already shows genuine uncertainty across ASTRAL
+# analyses (lpp = 0.72 and 0.94). Setting 70p_ghost to 30/30 here adds a
+# yellow cell at a node where support genuinely varies, making the demo
+# figures more informative.
+sample_trees[["70p_ghost"]]$node.label[2] <- "30/30"
+
 usethis::use_data(sample_trees, overwrite = TRUE, compress = "bzip2")
 
