@@ -249,12 +249,11 @@ default_thresholds <- function(support_type) {
   )
 }
 
-
 #' Fill and pattern for an integer support bin
 #'
 #' Internal. Greyscale for the top three support tiers, yellow for the lowest.
 #' The not-recovered (white) and not-computed (red) states are handled in
-#' \code{resolve_cell()}, not here.
+#' `resolve_cell()`, not here.
 #'
 #' @noRd
 bin_fill <- function(bin) {
