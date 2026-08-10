@@ -68,8 +68,12 @@ plot_phylorug(npm, mode = "presence")
 
 # Support mode
 plot_phylorug(npm, mode = "support",
-              support_type = c("ufboot", "ufboot", "posterior",
-                               "ufboot", "lpp"))
+              support_type <- c(
+                "70p_ASTRAL_partition_entropy" = "lpp",
+                "70p_ASTRAL_uce"               = "lpp",
+                "70p_ghost"                    = "ufboot",
+                "70p_partition_entropy"        = "ufboot"
+              ),)
 ```
 
 ### Two modes
