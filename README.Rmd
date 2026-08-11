@@ -21,7 +21,14 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-------------------------------------------------------------------------
+**phylorug** is an R package for visualizing clade recovery and support
+across multiple phylogenetic trees. Given a set of trees from different
+inference pipelines, it draws a compact coloured grid a **rug plot** at
+each internal node of a reference tree, showing at a glance which clades
+are stable across methods and which are not. Nodes recovered by all
+analyses appear as solid dots; nodes that differ get a cell-by-cell
+breakdown of presence and support strength.
+
 
 ## Overview
 
