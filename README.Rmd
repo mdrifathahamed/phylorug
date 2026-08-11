@@ -13,26 +13,46 @@ knitr::opts_chunk$set(
 )
 ```
 
-# phylorug <img src="man/figures/logo.png" align="right" height="139" />
+# phylorug <img src="man/figures/logo.png" align="right" height="139"/>
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/github/mdrifathahamed/phylorug/branch/master/graphs/badge.svg)](https://codecov.io/github/mdrifathahamed/phylorug) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![R-CMD-check](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml)  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Codecov test coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
 
 <!-- badges: end -->
 
 ------------------------------------------------------------------------
+##Overview
 
-**phylorug** is an R package for comparing and visualizing clade recovery and support values across multiple phylogenetic trees on a single reference topology using rug plots. Modern phylogenomic studies routinely produce trees from different inference pipelines such as concatenation versus coalescent methods, site-homogeneous versus site-heterogeneous substitution models, different data filtering strategies — each with support values in incompatible formats (ultrafast bootstrap, SH-aLRT, posterior probability, local posterior probability). **phylorug** maps all of these onto one tree, letting the researcher see at a glance which nodes are robust across methods and which are not.
+Phylogenetic trees now routinely include hundreds or thousands of taxa, and as sequencing technologies become cheaper and datasets grow, trees will only get larger. Additionally, modern phylogenomic studies routinely produce multiple species trees for the same underlying hypothesis. Researchers combine different data types (morphology, UCEs, transcriptomes, whole genomes), apply different analytical strategies (concatenation with varying partitioning schemes, coalescent methods, site-heterogeneous models), use different alignment approaches, and employ different inference software (IQ-TREE, ASTRAL, MrBayes, RAxML). Each combination yields a tree with its own support values in its own format, such as ultrafast bootstrap, SH-aLRT, posterior probability, and local posterior probability, and the central question becomes: which nodes hold up across methods, and how strongly?
+
+The rug plot concept for comparing clade recovery across analytical conditions was introduced by Wheeler (1995) and popularized as "Navajo rugs" by Giribet (2003). Software to automate these plots, Cladescan (Sanders 2010) and YBYRÁ (Machado 2015), both of which are no longer maintained, were designed for parsimony parameter sensitivity rather than modern multi-method phylogenomic comparison. No existing tool maps heterogeneous support values from multiple inference pipelines onto a single tree within R.
+
+phylorug maps clade recovery and support values from any number of independently inferred phylogenetic trees onto a single reference topology as a rug plot. It operates in two modes:
+
+### Two modes
 
 ### Presence mode
-
+Black/white cells showing whether each tree recovers a given clade (the direct descendant of Wheeler's space plots, but phylorug is not limited to parameters)
 ![Presence mode](man/figures/README-presence.png)
 
 ### Support mode
 
 ![Support mode](man/figures/README-support.png)
+Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade, with automatic normalization across heterogeneous support formats.
 
+The package reads tree files directly, handles compound IQ-TREE labels, translates tip names between naming conventions, prunes to shared taxa, and produces publication-ready figures from R  no manual placement, no external software, no disposable scripts.
+
+
+### Features
+
+- Reads Newick and Nexus tree files via `read_trees()`
+- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`)
+- Translates tip labels between naming conventions with `translate_tips()`
+- Prunes to shared taxa across analyses with `prune_to_shared()`
+- Validates taxon overlap with `check_taxa()`
+- Treats a bare `multiPhylo` as one analysis (a pool of tied-optimal trees)
+- Explicit errors over silent failures throughout
 ### Installation
 
 **phylorug** is not yet on CRAN. To install the development version from GitHub:
@@ -66,22 +86,6 @@ plot_phylorug(npm, mode = "support",
                 "70p_partition_entropy"        = "ufboot"
               ),)
 ```
-
-### Two modes
-
-**Presence mode** shows whether each analysis recovers a given clade (black = recovered, white = not recovered). This is the direct descendant of the "Navajo rug" plots introduced by Wheeler (1995) and formalized by Giribet (2003).
-
-**Support mode** shows how strongly each analysis supports a given clade, with greyscale shading from low (light) to high (dark) support. Support values from different formats are automatically normalized to a common scale.
-
-### Features
-
-- Reads Newick and Nexus tree files via `read_trees()`
-- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`)
-- Translates tip labels between naming conventions with `translate_tips()`
-- Prunes to shared taxa across analyses with `prune_to_shared()`
-- Validates taxon overlap with `check_taxa()`
-- Treats a bare `multiPhylo` as one analysis (a pool of tied-optimal trees)
-- Explicit errors over silent failures throughout
 
 ### Dependencies
 
