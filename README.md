@@ -46,9 +46,13 @@ single tree within R.
 independently inferred phylogenetic trees onto a single reference
 topology as a rug plot. It operates in two modes:
 
+## Presence mode
+
 ![Presence mode](man/figures/README-presence.png)Black/white cells
 showing whether each tree recovers a given clade (the direct descendant
 of Wheeler’s space plots, but phylorug is not limited to parameters)
+
+## Support Mode
 
 ![Support mode](man/figures/README-support.png) Black, grey, yellow,
 white, and red cells showing how strongly each analysis supports a given
