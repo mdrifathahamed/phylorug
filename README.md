@@ -15,38 +15,41 @@ coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https:
 
 <!-- badges: end -->
 
-**phylorug** is an R package for visualizing clade recovery and support
-across multiple phylogenetic trees. Given a set of trees from different
-inference pipelines, it draws a compact coloured grid a **rug plot** at
-each internal node of a reference tree, showing at a glance which clades
-are stable across methods and which are not. Nodes recovered by all
-analyses appear as solid dots; nodes that differ get a cell-by-cell
-breakdown of presence and support strength.
+**phylorug** is an R package for comparing and visualizing clade
+recovery and support across multiple phylogenetic trees. It takes a set
+of trees from different inference pipelines, datasets, or statistical
+models, but inferred from the same set of taxa. It draws a compact
+coloured grid, a **rug** at each internal node of a reference tree,
+showing which clades are stable across trees and which are not. Nodes
+recovered by all trees appear as solid dots; nodes that differ get a
+**rug** visualizing presence/absence and support strength of that
+specific clade.
 
 ## Overview
 
-Phylogenetic trees now routinely include hundreds or thousands of taxa,
-and as sequencing technologies become cheaper and datasets grow, trees
-will only get larger. Additionally, modern phylogenomic studies
-routinely produce multiple species trees for the same underlying
-hypothesis. Researchers combine different data types (morphology, UCEs,
-transcriptomes, whole genomes), apply different analytical strategies
-(concatenation with varying partitioning schemes, coalescent methods,
-site-heterogeneous models), use different alignment approaches, and
-employ different inference software (IQ-TREE, ASTRAL, MrBayes, RAxML).
-Each combination yields a tree with its own support values in its own
-format, such as ultrafast bootstrap, SH-aLRT, posterior probability, and
-local posterior probability, and the central question becomes: which
-nodes hold up across methods, and how strongly?
+Phylogenetic trees with hundreds or even thousands of taxa has become
+common nowadays, and as sequencing technologies become cheaper and
+datasets grow, trees will only get larger. Additionally, modern
+phylogenomic studies routinely produce multiple species trees for the
+same underlying hypothesis. Researchers combine different data types
+(morphology, UCEs, transcriptomes, whole genomes), apply different
+analytical strategies (concatenation with varying partitioning schemes,
+coalescent methods, site-heterogeneous models), use different alignment
+approaches, and employ different inference software (IQ-TREE, ASTRAL,
+MrBayes, RAxML). Each combination yields a tree with its own support
+values in its own format, such as ultrafast bootstrap, SH-aLRT,
+posterior probability, and local posterior probability etc, and the
+central question becomes: which nodes hold up across methods, and how
+strongly?
 
-The rug plot concept for comparing clade recovery across analytical
-conditions was introduced by Wheeler (1995) and popularized as “Navajo
-rugs” by Giribet (2003). Software to automate these plots, Cladescan
-(Sanders 2010) and YBYRÁ (Machado 2015), both of which are no longer
-maintained, were designed for parsimony parameter sensitivity rather
-than modern multi-method phylogenomic comparison. No existing tool maps
-heterogeneous support values from multiple inference pipelines onto a
-single tree within R.
+The rug on tree node concept for comparing clade recovery across
+analytical conditions was introduced by Wheeler (1995) and popularized
+as “Navajo rugs” by Giribet (2003). Software to automate these plots,
+Cladescan (Sanders 2010) and YBYRÁ (Machado 2015), both of which are no
+longer maintained, were designed for parsimony parameter sensitivity
+rather than modern multi-method phylogenomic comparison. Additionally,
+no existing tool maps clade recovery or heterogeneous support values
+from multiple inference pipelines onto a single tree within R.
 
 **phylorug** maps clade recovery and support values from any number of
 independently inferred phylogenetic trees onto a single reference
@@ -55,23 +58,25 @@ topology as a rug plot. It operates in two modes:
 ## Presence mode
 
 ![Presence mode](man/figures/README-presence.png)Black/white cells
-showing whether each tree recovers a given clade (the direct descendant
-of Wheeler’s space plots, but phylorug is not limited to parameters)
+showing whether each tree recovers a given clade. A direct conceptual
+descendant of Wheeler’s (1995) space plots, extended beyond parameter
+sensitivity analysis to compare any set of independently inferred trees.
 
 ## Support Mode
 
-![Support mode](man/figures/README-support.png) Black, grey, yellow,
+![Support mode](man/figures/README-support.png)Black, grey, yellow,
 white, and red cells showing how strongly each analysis supports a given
-clade, with automatic normalization across heterogeneous support
-formats.
+clade. Each support value is binned on its own metric’s scale. Different
+formats are never rescaled or cross-compared numerically. Default
+thresholds are provided, but users are recommended to set their own.
 
 The entire workflow runs in R, from reading raw tree files to
-publication-ready figures. No manual placement, no external software ,
-just a few extra lines in your existing phylogenetic script. The package
-was developed on a 316-taxon dung beetle phylogenomic dataset (Lopes et
-al. 2024) and tested with simulated trees of over 700 taxa across 15
-analyses. Three real-world datasets are bundled so users can explore the
-pipeline before applying it to their own data.
+publication-ready figures, just a few lines added to an existing
+phylogenetic script. The package was developed around a 316-taxon dung
+beetle phylogenomic dataset (Lopes et al. 2024) and tested with
+simulated trees of over 700 taxa across 15 analyses. Three real-world
+datasets are bundled with the package so users can try the pipeline on
+real data before applying it to their own.
 
 ### Installation
 
@@ -89,23 +94,23 @@ library(phylorug)
 ``` r
 library(phylorug)
 
-# Load bundled example trees
+# Load example trees from the package data
 data(sample_trees)
 
 # Select backbone and comparison trees
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# Validate shared taxa
+# Validate  all trees share same set of taxa
 check_taxa(backbone, others)
 
 # Build the node presence matrix
 npm <- node_presence_matrix(backbone, others)
 
-# Presence mode — which analyses recover each clade?
-plot_phylorug(backbone, npm, mode = "presence")
+# Presence mode: Which analyses recover each clade?
+plot_phylorug(backbone, npm)
 
-# Support mode — how strongly?
+# Support mode: How strongly?
 plot_phylorug(backbone, npm, mode = "support",
               support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
@@ -120,9 +125,8 @@ plot_phylorug(backbone, npm, mode = "support",
 **phylorug** provides six functions that cover the full workflow from
 raw tree files to publication-ready figures:
 
-- `read_trees()` reads all Newick and Nexus tree files from a single
-  directory in one call. So you dont need to load each file
-  individually.
+- `read_trees()` reads all Newick and Nexus tree files from a directory.
+  So you don’t need to load each file individually.
 - `check_taxa()` validates that the backbone and comparison trees share
   the same taxa, reporting any missing or extra tips.
 - `node_presence_matrix()` builds the comparison matrix recording which
@@ -132,13 +136,14 @@ raw tree files to publication-ready figures:
   or support mode, with automatic normalization of heterogeneous support
   formats.
 
-That is the basic pipeline: read → check → matrix → plot. Two additional
-helpers are available when your data needs them:
+That is the basic pipeline: read -\> check -\> matrix -\> plot. Two
+additional helpers are available when your data needs them:
 
-- `translate_tips()` maps tip labels between naming conventions using a
-  lookup table (e.g. specimen codes to species names).
-- `prune_to_shared()` prunes all trees to their shared taxon set when
-  overlap is incomplete.
+- `translate_tips()` Rename tip labels between naming conventions using
+  a lookup table (e.g. specimen codes to species names).
+- `prune_to_shared()` drops taxa not present in all trees, keeping only
+  the shared set.Useful when comparison trees lack some taxa found in
+  the backbone.
 
 You can learn more about each step in `vignette("phylorug")`.
 
@@ -150,10 +155,19 @@ external dependencies are required.
 
 ### Additional features
 
-- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`) automatically
-- Treats a bare `multiPhylo` as one analysis (a pool of tied-optimal
-  trees)
-- Explicit errors over silent failures throughout
+- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`). User selects
+  which metric to use via `support_col`
+- Treats a bare `"multiPhylo"` as one analysis (a pool of tied-optimal
+  trees). Cell shading reflects the proportion of pool trees recovering
+  the clade, from white (none) through grey to black (all)
+- Supports both `"inside"` and `"outside"` rug positioning relative to
+  the tree
+- Backbone support values can be displayed alongside rug cells via
+  `show_support`
+- Unanimous nodes are collapsed to dots by default;
+  `rug_on_identical = TRUE` forces full display rugs to reveal support
+  variation
+- Saves directly to PDF, PNG, or JPEG via the `file` argument.
 
 ### Getting help
 
@@ -175,8 +189,9 @@ If you use **phylorug** in a publication, please cite:
 This package was developed at the [Finnish Museum of Natural History
 (LUOMUS)](https://www.luomus.fi/en), University of Helsinki, as part of
 an MSc thesis in Ecology and Evolutionary Biology under the supervision
-of Dr. Sergei Tarasov.
+of Sergei Tarasov and J. Salvador Arias.
 
-The rug-plot concept for phylogenetic sensitivity analysis traces to
-Wheeler (1995), was formalized by Giribet (2003), and automated by
-Sanders (2010, Cladescan) and Machado (2015, YBYRÁ).
+The rug-plot concept traces to Wheeler (1995), was named “Navajo rugs”
+by Giribet (2003), and automated by Sanders (2010, Cladescan) and
+Machado (2015, YBYRÁ). **phylorug** extends this lineage into R and
+beyond parameter sensitivity to modern phylogenomic workflows.
