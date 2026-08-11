@@ -31,17 +31,9 @@ The rug plot concept for comparing clade recovery across analytical conditions w
 
 **phylorug** maps clade recovery and support values from any number of independently inferred phylogenetic trees onto a single reference topology as a rug plot. It operates in two modes:
 
-### Presence mode
+![Presence mode](man/figures/README-presence.png)Black/white cells showing whether each tree recovers a given clade (the direct descendant of Wheeler's space plots, but phylorug is not limited to parameters)
 
-Black/white cells showing whether each tree recovers a given clade (the direct descendant of Wheeler's space plots, but phylorug is not limited to parameters)
-
-![Presence mode](man/figures/README-presence.png)
-
-### Support mode
-
-Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade, with automatic normalization across heterogeneous support formats.
-
-![Support mode](man/figures/README-support.png)
+![Support mode](man/figures/README-support.png) Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade, with automatic normalization across heterogeneous support formats.
 
 The entire workflow runs in R, from reading raw tree files to publication-ready figures. No manual placement, no external software , just a few extra lines in your existing phylogenetic script. The package was developed on a 316-taxon dung beetle phylogenomic dataset (Lopes et al. 2024) and tested with simulated trees of over 700 taxa across 15 analyses. Three real-world datasets are bundled so users can explore the pipeline before applying it to their own data.
 
