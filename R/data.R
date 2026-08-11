@@ -1,8 +1,8 @@
-#' Sample beetle phylogenies (20-taxon subset)
+#' Sample beetle phylogenies (15-taxon subset)
 #'
 #' A named list (the same structure returned by [read_trees()]) of five
 #' phylogenetic trees from a dung beetle phylogenomic study, Lopes et al.
-#' (2024), pruned to 20 taxa for compact demonstration of the `phylorug`
+#' (2024), pruned to 15 taxa for compact demonstration of the `phylorug`
 #' workflow. The trees are already rooted, outgroup-removed, and tip labels
 #' translated from museum codes to species names. Users can select a backbone
 #' tree and comparison trees, then pass them directly to [check_taxa()],
@@ -21,7 +21,7 @@
 #'     partitioned gene trees.}
 #' }
 #'
-#' @format A named list of 5 objects of class `"phylo"`, each with 20 tips. Node
+#' @format A named list of 5 objects of class `"phylo"`, each with 15 tips. Node
 #'   labels contain support values: SH-aLRT/UFBoot2 for IQ-TREE trees and local
 #'   posterior probability for ASTRAL trees.
 #'

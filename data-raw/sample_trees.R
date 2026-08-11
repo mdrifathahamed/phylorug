@@ -2,7 +2,7 @@
 #
 # Creates data/sample_trees.rda
 #
-# A 7-taxon subset of the Tarasov Lab 70% occupancy beetle phylogenomic
+# A 15-taxon subset of the Tarasov Lab 70% occupancy beetle phylogenomic
 # dataset (Scarabaeinae), pruned from the full 289-taxon ingroup to serve
 # as a quick demonstration of the phylorug pipeline in the README and
 # vignette.
@@ -42,7 +42,7 @@ biogeo <- read.csv(biogeo_path)
 trees <- phylorug::translate_tips(trees, biogeo, from = "specimen_code",
                                   to = "species_name")
 
-# -- 2. Pick 7 taxa --------------------------------------------------------
+# -- 2. Pick 15 taxa --------------------------------------------------------
 #
 # Chosen to produce a mix of:
 #   - nodes recovered by all 5 analyses (black row in presence mode)
@@ -76,10 +76,9 @@ stopifnot(all(keep %in% trees[["70p_uce"]]$tip.label))
 # -- 3. Prune and save -------------------------------------------------------
 sample_trees <- lapply(trees, function(tr) keep.tip(tr, keep))
 # -- 4. Inject one low-support label for demo visualization -----------------
-# Node 8 (node.label[1]) already shows genuine uncertainty across ASTRAL
-# analyses (lpp = 0.72 and 0.94). Setting 70p_ghost to 30/30 here adds a
-# yellow cell at a node where support genuinely varies, making the demo
-# figures more informative.
+# Node 18 (node.label[3]) shows genuine uncertainty across ASTRAL analyses.
+# Setting 70p_ASTRAL_uce to 0.3 here adds a yellow cell at a node where
+# support genuinely varies, making the demo figures more informative.
 sample_trees[["70p_ASTRAL_uce"]]$node.label[3] <- "0.3"
 
 usethis::use_data(sample_trees, overwrite = TRUE, compress = "bzip2")
