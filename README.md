@@ -17,7 +17,7 @@ coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https:
 
 ------------------------------------------------------------------------
 
-\##Overview
+## Overview
 
 Phylogenetic trees now routinely include hundreds or thousands of taxa,
 and as sequencing technologies become cheaper and datasets grow, trees
@@ -42,41 +42,41 @@ than modern multi-method phylogenomic comparison. No existing tool maps
 heterogeneous support values from multiple inference pipelines onto a
 single tree within R.
 
-phylorug maps clade recovery and support values from any number of
+**phylorug** maps clade recovery and support values from any number of
 independently inferred phylogenetic trees onto a single reference
 topology as a rug plot. It operates in two modes:
-
-### Two modes
 
 ### Presence mode
 
 Black/white cells showing whether each tree recovers a given clade (the
 direct descendant of Wheeler’s space plots, but phylorug is not limited
-to parameters) ![Presence mode](man/figures/README-presence.png)
+to parameters)
+
+<figure>
+<img src="man/figures/README-presence.png" alt="Presence mode" />
+<figcaption aria-hidden="true">Presence mode</figcaption>
+</figure>
 
 ### Support mode
 
-![Support mode](man/figures/README-support.png) Black, grey, yellow,
-white, and red cells showing how strongly each analysis supports a given
-clade, with automatic normalization across heterogeneous support
-formats.
+Black, grey, yellow, white, and red cells showing how strongly each
+analysis supports a given clade, with automatic normalization across
+heterogeneous support formats.
 
-The package reads tree files directly, handles compound IQ-TREE labels,
-translates tip names between naming conventions, prunes to shared taxa,
-and produces publication-ready figures from R  no manual placement, no
-external software, no disposable scripts.
+<figure>
+<img src="man/figures/README-support.png" alt="Support mode" />
+<figcaption aria-hidden="true">Support mode</figcaption>
+</figure>
 
-### Features
+The entire workflow runs in R, from reading raw tree files to
+publication-ready figures. No manual placement, no external software ,
+just a few extra lines in your existing phylogenetic script. The package
+was developed on a 316-taxon dung beetle phylogenomic dataset (Lopes et
+al. 2024) and tested with simulated trees of over 700 taxa across 15
+analyses. Three real-world datasets are bundled so users can explore the
+pipeline before applying it to their own data.
 
-- Reads Newick and Nexus tree files via `read_trees()`
-- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`)
-- Translates tip labels between naming conventions with
-  `translate_tips()`
-- Prunes to shared taxa across analyses with `prune_to_shared()`
-- Validates taxon overlap with `check_taxa()`
-- Treats a bare `multiPhylo` as one analysis (a pool of tied-optimal
-  trees)
-- Explicit errors over silent failures throughout \### Installation
+### Installation
 
 **phylorug** is not yet on CRAN. To install the development version from
 GitHub:
@@ -95,21 +95,55 @@ library(phylorug)
 # Load bundled example trees
 data(sample_trees)
 
+# Select backbone and comparison trees
+backbone <- sample_trees[["70p_uce"]]
+others   <- sample_trees[names(sample_trees) != "70p_uce"]
+
+# Validate shared taxa
+check_taxa(backbone, others)
+
 # Build the node presence matrix
-npm <- node_presence_matrix(sample_trees)
+npm <- node_presence_matrix(backbone, others)
 
-# Presence mode
-plot_phylorug(npm, mode = "presence")
+# Presence mode — which analyses recover each clade?
+plot_phylorug(backbone, npm, mode = "presence")
 
-# Support mode
-plot_phylorug(npm, mode = "support",
-              support_type <- c(
+# Support mode — how strongly?
+plot_phylorug(backbone, npm, mode = "support",
+              support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
                 "70p_ASTRAL_uce"               = "lpp",
                 "70p_ghost"                    = "ufboot",
                 "70p_partition_entropy"        = "ufboot"
-              ),)
+              ))
 ```
+
+### Core functions
+
+**phylorug** provides six functions that cover the full workflow from
+raw tree files to publication-ready figures:
+
+- `read_trees()` reads all Newick and Nexus tree files from a single
+  directory in one call. So you dont need to load each file
+  individually.
+- `check_taxa()` validates that the backbone and comparison trees share
+  the same taxa, reporting any missing or extra tips.
+- `node_presence_matrix()` builds the comparison matrix recording which
+  clades are recovered by which analyses, along with their support
+  values.
+- `plot_phylorug()` draws the rug plot on a reference tree in presence
+  or support mode, with automatic normalization of heterogeneous support
+  formats.
+
+That is the basic pipeline: read → check → matrix → plot. Two additional
+helpers are available when your data needs them:
+
+- `translate_tips()` maps tip labels between naming conventions using a
+  lookup table (e.g. specimen codes to species names).
+- `prune_to_shared()` prunes all trees to their shared taxon set when
+  overlap is incomplete.
+
+You can learn more about each step in `vignette("phylorug")`.
 
 ### Dependencies
 
@@ -117,15 +151,16 @@ plot_phylorug(npm, mode = "support",
 and [phangorn](https://cran.r-project.org/package=phangorn). No other
 external dependencies are required.
 
-### Help
+### Additional features
 
-An overview of the package with links to all function documentation:
-
-``` r
-?phylorug
-```
+- Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`) automatically
+- Treats a bare `multiPhylo` as one analysis (a pool of tied-optimal
+  trees)
+- Explicit errors over silent failures throughout
 
 ### Getting help
+
+An overview of the package: `?phylorug`
 
 If you find a bug or have a feature request, please open an issue on
 [GitHub](https://github.com/mdrifathahamed/phylorug/issues).
