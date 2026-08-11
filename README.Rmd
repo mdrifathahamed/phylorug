@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Codecov test coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
+[![R-CMD-check](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mdrifathahamed/phylorug/actions/workflows/R-CMD-check.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Codecov test coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
 <!-- badges: end -->
 

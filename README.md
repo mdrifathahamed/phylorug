@@ -12,8 +12,6 @@ MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/
 WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Codecov test
 coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
-[![Codecov test
-coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
 <!-- badges: end -->
 
 **phylorug** is an R package for comparing and visualizing clade
