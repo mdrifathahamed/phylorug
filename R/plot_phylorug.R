@@ -55,10 +55,8 @@
 #'
 #' @param legend Logical. Draw the legend. Default TRUE.
 #'
-#' @param show_support Logical or `NULL`. If `TRUE`, backbone node support
-#'   labels are drawn in red beside each node. Default `NULL` auto-resolves
-#'   to `TRUE` except when `mode = "support"` and `include_backbone = TRUE`,
-#'   where the backbone cell already carries that information.
+#' @param show_support Logical. If `TRUE`, backbone node support labels are
+#'   drawn beside each node. Default `FALSE`.
 #'
 #' @param cell_scale Numeric multiplier on cell height. Default 0.45.
 #'
