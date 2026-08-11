@@ -59,10 +59,18 @@ keep <- c(
   "Nanos_dubitatus_STL5001",
   "Epilissus_cuprarius_STL5011",
   "Scarabaeus_westwoodi_STL10034",
-  "Catharsius_sp._STL10033"
+  "Catharsius_sp._STL10033",
+  "Sisyphus_schaefferi_STL44",
+  "Sisyphus_muricatus__STL5",
+  "Nesosisyphus_pygmaeus__STL3",
+  "Coptorhina_klugii__STL10039",
+  "Frankenbergerius_armatus_STL10002",
+  "Circellium_bacchus__STL10270",
+  "Helictopleurus_fissicollis__STL28",
+  "Epactoides_hanski__STL29"
 )
 
-stopifnot(length(keep) == 7L)
+stopifnot(length(keep) == 15L)
 stopifnot(all(keep %in% trees[["70p_uce"]]$tip.label))
 
 # -- 3. Prune and save -------------------------------------------------------
@@ -72,7 +80,6 @@ sample_trees <- lapply(trees, function(tr) keep.tip(tr, keep))
 # analyses (lpp = 0.72 and 0.94). Setting 70p_ghost to 30/30 here adds a
 # yellow cell at a node where support genuinely varies, making the demo
 # figures more informative.
-sample_trees[["70p_ghost"]]$node.label[2] <- "30/30"
+sample_trees[["70p_ASTRAL_uce"]]$node.label[3] <- "0.3"
 
 usethis::use_data(sample_trees, overwrite = TRUE, compress = "bzip2")
-

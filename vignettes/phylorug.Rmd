@@ -98,7 +98,7 @@ npm$presence[1:5, ]
 The default plot shows presence/absence. Black cells mean the clade was
 recovered; white cells mean it was not:
 
-```{r quick-presence, fig.width = 15, fig.height = 9}
+```{r quick-presence, fig.width = 6.2, fig.height = 5.8}
 plot_phylorug(backbone, npm)
 ```
 
@@ -111,7 +111,7 @@ where analyses disagree — these are the interesting nodes.
 Switch to support mode to see how strongly each analysis supports each
 clade. Cells are shaded by binned support strength (darker = stronger):
 
-```{r quick-support, fig.width = 15, fig.height = 9}
+```{r quick-support,, fig.width = 6.2, fig.height = 5.8}
 plot_phylorug(
   backbone, npm,
   mode = "support",
@@ -155,8 +155,18 @@ and contentious regions of the tree.
 
 Try `hide_unsupported = TRUE` to clean up the display:
 
-```{r quick-hide, fig.width = 7, fig.height = 6}
-plot_phylorug(backbone, npm, hide_unsupported = TRUE)
+```{r quick-hide, fig.width = 6.2, fig.height = 5.8}
+plot_phylorug(
+  backbone, npm,
+  mode = "support",
+  support_type = c(
+    "70p_partition_entropy"        = "ufboot",
+    "70p_ghost"                    = "ufboot",
+    "70p_ASTRAL_uce"               = "lpp",
+    "70p_ASTRAL_partition_entropy" = "lpp"
+  ), 
+  hide_unsupported = TRUE,
+  cex = 1)
 ```
 
 ### Colour encoding in support mode
@@ -176,7 +186,7 @@ In **support mode**, cells use a greyscale gradient plus two special colours:
 By default, unanimous nodes get a dot and no rug. To see the per-tree
 support strength even at unanimous nodes, use `rug_on_identical = TRUE`:
 
-```{r quick-rug-identical, fig.width = 7, fig.height = 6}
+```{r quick-rug-identical, fig.width = 6.2, fig.height = 5.8}
 plot_phylorug(
   backbone, npm,
   mode = "support",
@@ -186,7 +196,8 @@ plot_phylorug(
     "70p_ASTRAL_uce"               = "lpp",
     "70p_ASTRAL_partition_entropy" = "lpp"
   ),
-  rug_on_identical = TRUE
+  rug_on_identical = TRUE,
+  cex = 1
 )
 ```
 
