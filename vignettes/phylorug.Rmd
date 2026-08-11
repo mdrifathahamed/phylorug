@@ -3,8 +3,11 @@ title: "Introduction to phylorug"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to phylorug}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r, include = FALSE}
@@ -17,37 +20,44 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r, echo = FALSE, out.width = "120px", fig.align = "right"}
+knitr::include_graphics("logo.png")
+```
+
 ```{r setup}
 library(phylorug)
 ```
+
 ## What problem does phylorug solve?
 
-Modern phylogenomic studies routinely produce multiple trees from the same
-set of taxa — different locus sets, alignment strategies, substitution models,
-and inference methods each yield a tree that may agree or disagree with the
-others. The question every systematist faces is: **which clades are robust
-across analyses, and which are sensitive to analytical choices?**
+Modern phylogenomic studies routinely produce multiple trees from the
+same set of taxa — different locus sets, alignment strategies,
+substitution models, and inference methods each yield a tree that may
+agree or disagree with the others. The question every systematist faces
+is: **which clades are robust across analyses, and which are sensitive
+to analytical choices?**
 
 Answering that question by flipping between tree files is tedious and
-error-prone. phylorug solves it by drawing a small grid of coloured cells —
-a **rug** — at every internal node of a single reference tree (the backbone).
-Each cell in the grid represents one analysis, and its colour tells you whether
-that analysis recovered the same clade, and how strongly it supported it.
+error-prone. phylorug solves it by drawing a small grid of coloured
+cells — a **rug** — at every internal node of a single reference tree
+(the backbone). Each cell in the grid represents one analysis, and its
+colour tells you whether that analysis recovered the same clade, and how
+strongly it supported it.
 
 The rug plot concept originates from Wheeler (1995), who first displayed
 clade stability across analyses on a reference topology. Subsequent
 implementations include Cladescan (Sanders, 2010) and YBYRÁ (Machado,
-2015). phylorug brings this idea into R as a native package, with automatic
-handling of heterogeneous support formats (UFBoot2, SH-aLRT, ASTRAL
-local posterior probability, Bayesian posterior probability) across
-independently run pipelines.
+2015). phylorug brings this idea into R as a native package, with
+automatic handling of heterogeneous support formats (UFBoot2, SH-aLRT,
+ASTRAL local posterior probability, Bayesian posterior probability)
+across independently run pipelines.
 
 ## Quick start
 
 The fastest way to see phylorug in action is with the built-in
 `sample_trees` dataset — a 20-taxon subset of the Tarasov Lab beetle
-phylogenomic data (Lopes et al., 2024), already rooted, pruned, and
-with tip labels translated to species names.
+phylogenomic data (Lopes et al., 2024), already rooted, pruned, and with
+tip labels translated to species names.
 
 ### Load the data
 
@@ -63,9 +73,9 @@ others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
 ### Check taxon consistency
 
-Before building a rug, verify that every comparison tree carries the same
-taxa as the backbone. `check_taxa()` reports the outcome and flags any
-mismatches:
+Before building a rug, verify that every comparison tree carries the
+same taxa as the backbone. `check_taxa()` reports the outcome and flags
+any mismatches:
 
 ```{r check-taxa}
 check_taxa(backbone, others)
@@ -124,10 +134,10 @@ plot_phylorug(
 )
 ```
 
-The `support_type` argument tells phylorug which support metric each tree
-uses, so the correct thresholds are applied. IQ-TREE UFBoot2 values are on
-a 0–100 scale; ASTRAL local posterior probabilities are on a 0–1 scale.
-phylorug normalises these automatically.
+The `support_type` argument tells phylorug which support metric each
+tree uses, so the correct thresholds are applied. IQ-TREE UFBoot2 values
+are on a 0–100 scale; ASTRAL local posterior probabilities are on a 0–1
+scale. phylorug normalises these automatically.
 
 ### Reading the plot: what you see at each node
 
@@ -139,14 +149,14 @@ comparison trees recover this clade unanimously. By default
 grid to reduce visual clutter.
 
 **Mixed grid (black + white cells)** — these are the interesting nodes.
-Some analyses recover the clade, others do not. The position legend at the
-bottom tells you which cell corresponds to which analysis, so you can see
-exactly which method or dataset disagrees.
+Some analyses recover the clade, others do not. The position legend at
+the bottom tells you which cell corresponds to which analysis, so you
+can see exactly which method or dataset disagrees.
 
 **All-white grid** — no comparison tree recovers this backbone clade.
-The clade is unique to the backbone topology. Set `hide_unsupported = TRUE`
-to leave these nodes bare (no rug drawn at all), which makes the remaining
-disagreements easier to read.
+The clade is unique to the backbone topology. Set
+`hide_unsupported = TRUE` to leave these nodes bare (no rug drawn at
+all), which makes the remaining disagreements easier to read.
 
 **Dot next to a rug** — adjacent nodes can differ in consensus. A deep
 node might show a dot (all agree) while the node just above it shows a
@@ -171,15 +181,18 @@ plot_phylorug(
 
 ### Colour encoding in support mode
 
-In **presence mode**, the encoding is binary: black (recovered) or
-white (absent).
+In **presence mode**, the encoding is binary: black (recovered) or white
+(absent).
 
-In **support mode**, cells use a greyscale gradient plus two special colours:
+In **support mode**, cells use a greyscale gradient plus two special
+colours:
 
-- **Black / dark grey**: very high support (e.g., UFBoot >= 95, LPP >= 0.95)
+- **Black / dark grey**: very high support (e.g., UFBoot \>= 95, LPP \>=
+  0.95)
 - **Medium grey**: high support
 - **Light grey**: moderate support
-- **Yellow**: low support (below moderate threshold, but clade is present)
+- **Yellow**: low support (below moderate threshold, but clade is
+  present)
 - **White**: clade not recovered (absent)
 - **Red**: not computed (the analysis did not evaluate this clade)
 
@@ -204,12 +217,13 @@ plot_phylorug(
 ## Working with real data: Culicomorpha
 
 The built-in Culicomorpha dataset contains 10 phylogenomic analyses of
-46 taxa from eight Diptera families (Fu et al., 2025), covering
-IQ-TREE partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
+46 taxa from eight Diptera families (Fu et al., 2025), covering IQ-TREE
+partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
 
 ### Read the trees
 
-`read_trees()` scans a directory for tree files and returns a named list:
+`read_trees()` scans a directory for tree files and returns a named
+list:
 
 ```{r read-culico}
 tree_dir <- system.file("extdata", "culicomorpha", package = "phylorug")
@@ -220,11 +234,10 @@ names(trees)
 ###Root and remove the outgroups
 
 The Culicomorpha trees include three outgroup taxa from outside the
-infraorder: Phlebotomus chinensis and Clogmia albipunctata
-(Psychodidae) and Coboldia fuscipes (Scatopsidae). Root on all
-three, then drop them. The order matters — you must root while the
-outgroup tips are still present, because ape::root() needs to find
-them in the tree:
+infraorder: Phlebotomus chinensis and Clogmia albipunctata (Psychodidae)
+and Coboldia fuscipes (Scatopsidae). Root on all three, then drop them.
+The order matters — you must root while the outgroup tips are still
+present, because ape::root() needs to find them in the tree:
 
 ```{r root-culico}
 trees <- lapply(trees, function(tr) {
@@ -259,9 +272,10 @@ npm <- node_presence_matrix(backbone, others)
 plot_phylorug(backbone, npm)
 ```
 
-With 9 comparison trees, phylorug automatically arranges the rug grid
-(3 columns by 3 rows in this case). The position legend at the bottom
-maps each cell position to an analysis name.
+With 9 comparison trees, phylorug automatically arranges the rug grid (3
+columns by 3 rows in this case). The position legend at the bottom maps
+each cell position to an analysis name.
+
 ```{r}
 # --- Map each comparison tree to its support metric ---
 support_type <- c(
@@ -291,16 +305,15 @@ plot_phylorug(backbone, npm,
               hide_unsupported   = TRUE)
 ```
 
-
 ## Full pipeline: beetles with tip translation
 
-The beetle dataset in `inst/extdata/beetles_50p/` contains 5 analyses
-of approximately 289 ingroup taxa, stored with specimen codes as tip
-labels (e.g., `"OntauST002"`). A lookup table (`biogeo.csv`) maps these
-codes to species names.
+The beetle dataset in `inst/extdata/beetles_50p/` contains 5 analyses of
+approximately 289 ingroup taxa, stored with specimen codes as tip labels
+(e.g., `"OntauST002"`). A lookup table (`biogeo.csv`) maps these codes
+to species names.
 
-This example demonstrates the complete phylorug workflow, including
-tip label translation.
+This example demonstrates the complete phylorug workflow, including tip
+label translation.
 
 ### Read the trees
 
@@ -326,8 +339,8 @@ trees <- lapply(trees, function(tr) {
 ### Translate tip labels
 
 **Critical ordering rule:** root and remove the outgroup *before*
-translating tip labels. Translation replaces the original specimen codes,
-so if you translate first, `"NicorbUCE"` no longer exists and
+translating tip labels. Translation replaces the original specimen
+codes, so if you translate first, `"NicorbUCE"` no longer exists and
 `ape::root()` cannot find it.
 
 Load the lookup table and translate:
@@ -405,9 +418,9 @@ support_type <- c(
 ### Hiding unsupported nodes
 
 Some backbone clades are not recovered by any comparison tree, producing
-all-white grids. Set `hide_unsupported = TRUE` to leave these nodes
-bare — the absence of both a dot and a rug signals that the clade is
-unique to the backbone:
+all-white grids. Set `hide_unsupported = TRUE` to leave these nodes bare
+— the absence of both a dot and a rug signals that the clade is unique
+to the backbone:
 
 ```{r hide-unsupported, fig.width = 7, fig.height = 6}
 plot_phylorug(backbone, npm, hide_unsupported = TRUE)
@@ -529,56 +542,40 @@ plot_phylorug(
 
 **Root and prune before translating.** `translate_tips()` replaces
 specimen codes with species names. Once translated, you cannot match
-outgroup names for rooting. Always: (1) root, (2) drop outgroup,
-(3) translate.
+outgroup names for rooting. Always: (1) root, (2) drop outgroup, (3)
+translate.
 
 **One file = one analysis.** `read_trees()` treats each file as one
-analysis. A file holding multiple equally optimal trees (as POY, TNT,
-or PAUP\* write them) is scored as a pool — the presence value becomes
-the proportion of pool trees recovering the clade. Do not pass posterior
+analysis. A file holding multiple equally optimal trees (as POY, TNT, or
+PAUP\* write them) is scored as a pool — the presence value becomes the
+proportion of pool trees recovering the clade. Do not pass posterior
 samples or bootstrap replicates; those are distributions, not analyses.
 
 **Wrap bare `multiPhylo` in a list.** If you construct comparison trees
 manually, each element of the list passed to `node_presence_matrix()`
-must be a single `phylo` or a `multiPhylo` (a pool from one search).
-A bare `multiPhylo` at the top level is interpreted as one analysis with
+must be a single `phylo` or a `multiPhylo` (a pool from one search). A
+bare `multiPhylo` at the top level is interpreted as one analysis with
 multiple tied-optimal trees, not as separate analyses.
 
 **Use `prune_to_shared()` when taxa differ.** If a comparison tree is
 missing some backbone taxa, `node_presence_matrix()` will refuse to
-proceed (a clade containing a missing taxon cannot be evaluated).
-Run `check_taxa()` first to see the discrepancies, then
-`prune_to_shared()` to reduce all trees to their common taxa.
+proceed (a clade containing a missing taxon cannot be evaluated). Run
+`check_taxa()` first to see the discrepancies, then `prune_to_shared()`
+to reduce all trees to their common taxa.
 
 ## References
 
-- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity,
-  and the phylogenetic analysis of molecular data. *Systematic Biology*,
+- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity, and
+  the phylogenetic analysis of molecular data. *Systematic Biology*,
   44(3), 321–331.
-- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
-  of consensus support in large data sets.
-  *Cladistics*, 26(6), 598–613.
-- Machado, D. J. (2015). YBYRÁ fossile: a command line system for
-  total evidence dating and sensitivity analysis.
-  *BMC Bioinformatics*, 16, 40.
+- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches of
+  consensus support in large data sets. *Cladistics*, 26(6), 598–613.
+- Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
+  evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
+  40.
 - Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-  phylogenomics clarifies the systematics of rare dung beetles.
-  *PLOS ONE*, 19(12), e0309596.
+  phylogenomics clarifies the systematics of rare dung beetles. *PLOS
+  ONE*, 19(12), e0309596.
 - Fu, Y. et al. (2025). Phylogenomic insights into the higher level
-  relationships within Culicomorpha (Diptera).
-  *Insect Systematics and Diversity*, 9(6), ixaf056.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  relationships within Culicomorpha (Diptera). *Insect Systematics and
+  Diversity*, 9(6), ixaf056.
