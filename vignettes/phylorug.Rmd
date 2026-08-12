@@ -20,13 +20,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r, echo = FALSE, out.width = "120px", fig.align = "right"}
-knitr::include_graphics("logo.png")
-```
-
-```{r setup}
-library(phylorug)
-```
 
 ## What problem does phylorug solve?
 
@@ -116,6 +109,9 @@ The fastest way to see phylorug in action is with the built-in
 `sample_trees` dataset — a 20-taxon subset of the Tarasov Lab beetle
 phylogenomic data (Lopes et al., 2024), already rooted, pruned, and with
 tip labels translated to species names.
+```{r setup}
+library(phylorug)
+```
 
 ### Load the data
 
