@@ -1,12 +1,5 @@
 # Introduction to phylorug
 
-![](logo.png)
-
-``` r
-
-library(phylorug)
-```
-
 ## What problem does phylorug solve?
 
 Phylogenetic trees represent best-supported, statistically convincing
@@ -95,6 +88,11 @@ The fastest way to see phylorug in action is with the built-in
 `sample_trees` dataset — a 20-taxon subset of the Tarasov Lab beetle
 phylogenomic data (Lopes et al., 2024), already rooted, pruned, and with
 tip labels translated to species names.
+
+``` r
+
+library(phylorug)
+```
 
 ### Load the data
 
