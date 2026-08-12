@@ -83,10 +83,8 @@ edited in a vector editor and every analysis must appear in the grid.}
 
 \item{legend}{Logical. Draw the legend. Default TRUE.}
 
-\item{show_support}{Logical or \code{NULL}. If \code{TRUE}, backbone node support
-labels are drawn in red beside each node. Default \code{NULL} auto-resolves
-to \code{TRUE} except when \code{mode = "support"} and \code{include_backbone = TRUE},
-where the backbone cell already carries that information.}
+\item{show_support}{Logical. If \code{TRUE}, backbone node support labels are
+drawn beside each node. Default \code{FALSE}.}
 
 \item{cell_scale}{Numeric multiplier on cell height. Default 0.45.}
 

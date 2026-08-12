@@ -30,15 +30,16 @@ library(phylorug)
 
 ## What problem does phylorug solve?
 
-Phylogenetic trees represent best-supported, statistically convincing hypotheses
-of evolutionary history, not ground truths (Steenwyk et al. 2023). Modern
-phylogenomic studies routinely produce multiple trees from the same set of taxa.
-Different data types (UCEs, transcriptomes, whole genomes), different
-analytical strategies (concatenation, coalescent methods, site-heterogeneous
-models), and different inference software (IQ-TREE, ASTRAL, MrBayes) each yield
-a tree with slightly different topology and its own support values in its
-own format. At the same time, no single tree inference method is proven to be
-the all-rounder that is immune to all sources of error.
+Phylogenetic trees represent best-supported, statistically convincing
+hypotheses of evolutionary history, not ground truths (Steenwyk et al.
+2023). Modern phylogenomic studies routinely produce multiple trees from
+the same set of taxa. Different data types (UCEs, transcriptomes, whole
+genomes), different analytical strategies (concatenation, coalescent
+methods, site-heterogeneous models), and different inference software
+(IQ-TREE, ASTRAL, MrBayes) each yield a tree with slightly different
+topology and its own support values in its own format. At the same time,
+no single tree inference method is proven to be the all-rounder that is
+immune to all sources of error.
 
 Incomplete lineage sorting, long-branch attraction, model
 misspecification, and compositional heterogeneity each affect different
@@ -54,56 +55,60 @@ Does this clade appear in all analyses, and how strongly does each one
 support it?
 
 Answering that by flipping between tree files is tedious, error-prone,
-and does not scale. **phylorug** solves it by drawing a compact coloured grid a
-**rug** at every internal node of a reference tree(backbone). Each cell 
-represents one tree, its colour shows whether that tree recovered the clade and 
-how strongly it supported it.
+and does not scale. **phylorug** solves it by drawing a compact coloured
+grid a **rug** at every internal node of a reference tree(backbone).
+Each cell represents one tree, its colour shows whether that tree
+recovered the clade and how strongly it supported it.
 
 ## Nodal support versus nodal stability
 
-Giribet (2003) drew a distinction that motivates the two modes of phylorug. 
-**Nodal support** measures how confident a single analysis is in a clade such as
-bootstrap, posterior probability, or LPP. 
-**Nodal stability** measures whether that clade is consistently recovered across
-different analytical strategies, data types, and inference methods ,extending 
-Wheeler's (1995) parameter-space sensitivity analysis framework. These can 
-decouple: a clade may receive 100% bootstrap under one model yet collapse under 
-all others, or carry only 30–50% support everywhere yet appear in every tree.
+Giribet (2003) drew a distinction that motivates the two modes of
+phylorug. **Nodal support** measures how confident a single analysis is
+in a clade such as bootstrap, posterior probability, or LPP. **Nodal
+stability** measures whether that clade is consistently recovered across
+different analytical strategies, data types, and inference methods
+,extending Wheeler's (1995) parameter-space sensitivity analysis
+framework. These can decouple: a clade may receive 100% bootstrap under
+one model yet collapse under all others, or carry only 30–50% support
+everywhere yet appear in every tree.
 
-phylorug shows both. 
-In `presence` mode, each node gets a black dot if every analysis recovers the 
-clade (stable) or a rug showing which analyses recover it and which do not. 
+phylorug shows both. In `presence` mode, each node gets a black dot if
+every analysis recovers the clade (stable) or a rug showing which
+analyses recover it and which do not.
 
-In `support` mode, contested nodes receive a rug where each cell gives a 
-quantitative visual of the support value in that analysis , not just presence or
-absence, but how strongly the clade is endorsed. Stable nodes receive a black 
-dot by default. Setting `rug_on_identical = TRUE` extends the rug to these 
-universally recovered nodes as well, revealing cases where a clade is stable 
-across all analyses but some analyses support it weakly.
+In `support` mode, contested nodes receive a rug where each cell gives a
+quantitative visual of the support value in that analysis , not just
+presence or absence, but how strongly the clade is endorsed. Stable
+nodes receive a black dot by default. Setting `rug_on_identical = TRUE`
+extends the rug to these universally recovered nodes as well, revealing
+cases where a clade is stable across all analyses but some analyses
+support it weakly.
 
 ## Brief history
 
-The rug plot concept originated with Wheeler (1995), who plotted clade recovery
-across gap and transversion–transition cost ratios in parsimony analysis under 
-direct optimization (POY). Giribet (2003) named these plots "Navajo rugs" and 
-showed that nodal support and nodal stability can tell different stories.
+The rug plot concept originated with Wheeler (1995), who plotted clade
+recovery across gap and transversion–transition cost ratios in parsimony
+analysis under direct optimization (POY). Giribet (2003) named these
+plots "Navajo rugs" and showed that nodal support and nodal stability
+can tell different stories.
 
-Sanders (2010) automated clade detection with Cladescan (Perl), and 
-Machado (2015) extended the approach with YBYRÁ (Python), which added 
-topological distance calculation and rogue taxon detection alongside sensitivity
-analysis. Both tools produce individual SVG plots per node that must be manually
-placed onto the tree in a vector editor. Cladescan is no longer available 
-online, and YBYRÁ has been archived by its developer and is no longer 
-maintained. More importantly, both were designed around sensitivity analysis 
-within a single analytical framework — varying parameters and cost schemes — 
-rather than comparing trees from fundamentally different inference pipelines 
-that report support in incompatible formats (e.g., UFBoot2, SH-aLRT, posterior 
+Sanders (2010) automated clade detection with Cladescan (Perl), and
+Machado (2015) extended the approach with YBYRÁ (Python), which added
+topological distance calculation and rogue taxon detection alongside
+sensitivity analysis. Both tools produce individual SVG plots per node
+that must be manually placed onto the tree in a vector editor. Cladescan
+is no longer available online, and YBYRÁ has been archived by its
+developer and is no longer maintained. More importantly, both were
+designed around sensitivity analysis within a single analytical
+framework — varying parameters and cost schemes — rather than comparing
+trees from fundamentally different inference pipelines that report
+support in incompatible formats (e.g., UFBoot2, SH-aLRT, posterior
 probability, ASTRAL LPP).
 
-phylorug extends this lineage into R. It reads trees from any pipeline, bins 
-support values against metric-specific thresholds rather than rescaling them 
-numerically, and draws rugs directly on the reference tree — no manual 
-placement, no external software.
+phylorug extends this lineage into R. It reads trees from any pipeline,
+bins support values against metric-specific thresholds rather than
+rescaling them numerically, and draws rugs directly on the reference
+tree — no manual placement, no external software.
 
 ## Quick start
 
@@ -173,12 +178,13 @@ where analyses disagree — these are the interesting nodes.
 
 Switch to support mode to see how strongly each analysis supports each
 clade. Cells are shaded by binned support strength (darker = stronger)
-Support values are binned against thresholds specific to their own metric. A 
-tree with LPP 0.95 and a tree with LPP 0.65 are compared to LPP thresholds, 
-yielding different shades on the rug. A third tree carrying UFBoot2 values is 
-binned against UFBoot2 thresholds independently — phylorug never cross-compares 
-values from different support metrics, because LPP 0.95 and UFBoot2 95 do not 
-measure the same thing despite looking numerically identical.
+Support values are binned against thresholds specific to their own
+metric. A tree with LPP 0.95 and a tree with LPP 0.65 are compared to
+LPP thresholds, yielding different shades on the rug. A third tree
+carrying UFBoot2 values is binned against UFBoot2 thresholds
+independently — phylorug never cross-compares values from different
+support metrics, because LPP 0.95 and UFBoot2 95 do not measure the same
+thing despite looking numerically identical.
 
 ```{r quick-support,, fig.width = 6.2, fig.height = 5.8}
 plot_phylorug(
@@ -631,7 +637,7 @@ to reduce all trees to their common taxa.
   consensus support in large data sets. *Cladistics*, 26(6), 598–613.
 - Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
   evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
-  40.
+  40. 
 - Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
   phylogenomics clarifies the systematics of rare dung beetles. *PLOS
   ONE*, 19(12), e0309596.
