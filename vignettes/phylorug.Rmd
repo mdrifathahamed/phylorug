@@ -126,7 +126,7 @@ backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 ```
 
-### Check taxon consistency
+## Check taxon consistency
 
 Before building a rug, verify that every comparison tree carries the same taxa 
 as the backbone. `check_taxa()` reports the outcome and flags any mismatches:
@@ -251,13 +251,13 @@ the backbone's own support labels on the tree. `cex` and `font` are passed
 directly to the tree plotter. For publication output, add `file = "output.pdf"`
 along with `width` and `height` to produce a properly scaled figure.
 
-```{r support-refined, fig.width = 11, fig.height = 5}
+```{r support-refined}
 # For publication output, add:
 # file = "my_support_plot.pdf"
  plot_phylorug(
    backbone, npm,
-   width             = 11,
-   height            = 5,
+   width             = 8,
+   height            = 5.8,
    mode              = "support",
    support_type      = support_type,
    rug_position      = "inside",
@@ -290,7 +290,7 @@ trees    <- read_trees(tree_dir)
 names(trees)
 ```
 
-###Root and remove the outgroups
+##Root and remove the outgroups
 
 The Culicomorpha trees include three outgroup taxa from outside the
 infraorder: Phlebotomus chinensis and Clogmia albipunctata (Psychodidae)
@@ -310,7 +310,11 @@ trees <- lapply(trees, function(tr) {
 })
 ```
 
-### Choose a backbone and check taxa
+The Culicomorpha trees already carry species names as tip labels, so no 
+translation is needed here. For trees with specimen codes, see 
+`translate_tips()` in the beetles example below.
+
+## Choose a backbone 
 
 Pick one analysis as the backbone. The remaining trees are comparisons:
 
@@ -318,6 +322,9 @@ Pick one analysis as the backbone. The remaining trees are comparisons:
 backbone <- trees[["Matrix1-kpi_PMSF(H1.guide)"]]
 others   <- trees[names(trees) != "Matrix1-kpi_PMSF(H1.guide)"]
 
+```
+## Check taxon consistency
+```{r check-taxon-consistency-culico}
 check_taxa(backbone, others)
 ```
 
@@ -326,6 +333,7 @@ check_taxa(backbone, others)
 ```{r npm-culico}
 npm <- node_presence_matrix(backbone, others)
 ```
+##plot the phylorug-presence
 
 ```{r plot-culico, fig.width = 8, fig.height = 10}
 plot_phylorug(backbone, npm)
@@ -335,7 +343,7 @@ With 9 comparison trees, phylorug automatically arranges the rug grid (3
 columns by 3 rows in this case). The position legend at the bottom maps
 each cell position to an analysis name.
 
-```{r}
+```{r support-type-culico}
 # --- Map each comparison tree to its support metric ---
 support_type <- c(
   "Matrix1-kpi_ASTRAL"            = "lpp",
@@ -343,13 +351,18 @@ support_type <- c(
   "Matrix1-kpi_partitioning"      = "sh_alrt",
   "Matrix1-kpi_PMSF(H2.guide)"    = "sh_alrt",
   "Matrix1_LG_C20_F_R"            = "sh_alrt",
-  "Matrix1-smart_partitioning"    = "sh_alrt",   # added — now a comparison tree
+  "Matrix1-smart_partitioning"    = "sh_alrt",
   "Matrix1-smart_PMSF(H1.guide)"  = "sh_alrt",
   "Matrix1-smart_PMSF(H2.guide)"  = "sh_alrt",
   "Matrix2_partitioning"          = "sh_alrt"
-  # "Matrix1-kpi_PMSF(H1.guide)" removed — it's the backbone now, not a comparison
 )
 ```
+
+##support-mode plot phylorug
+Here we use show_support = TRUE to overlay the backbone's own node labels in red
+for cross-referencing, cell_scale = 0.35 to shrink the rug cells slightly for a 
+denser tree, and hide_unsupported = TRUE to remove all-white rugs so only 
+contested and stable nodes remain visible
 
 ```{r plot-culico-support,fig.width = 8, fig.height = 10}
 plot_phylorug(backbone, npm,
@@ -364,67 +377,146 @@ plot_phylorug(backbone, npm,
               hide_unsupported   = TRUE)
 ```
 
+## What the rug reveals?
+
+The **rugs** immediately separates stable from contested regions of the 
+*Culicomorpha* tree. Most family-level clades carry black dots, meaning those 
+clades are recovered by unanimously  all 9 analyses. *Culicidae* (mosquitoes), 
+*Chironomidae* (non-biting midges), *Ceratopogonidae* (biting midges), and the 
+*Simuliidae* + *Thaumaleidae* clade all show complete agreement across every 
+inference method and dataset. Fu et al. (2025) reported the same, full support 
+for these clades regardless of model or matrix.
+
+The interesting nodes are the contested ones. The central question in 
+*Culicomorpha* phylogenetics is where *Ceratopogonidae* and *Chironomidae* sit 
+relative to the rest of the infraorder. Fu et al. (2025) tested multiple 
+hypotheses. Their preferred topology (H1) places *Chironomidae* + 
+*Ceratopogonidae* together as sister to all remaining families. The alternative 
+(H2) breaks this pairing and places *Ceratopogonidae* elsewhere, nested closer 
+to the other families. On the rug, the node defining the *Chironomidae* + 
+*Ceratopogonidae* clade shows a mixed grid. The two ASTRAL cells (cells 1 and 4 
+in the position legend) are white at this node, meaning the coalescent-based 
+analyses did not recover this grouping. The IQ-TREE concatenation cells are 
+mostly black, meaning the concatenation analyses did recover it. This is a 
+textbook example of gene-tree/species-tree conflict made visible on a single 
+figure: concatenation says these two families group together, coalescent methods
+say they do not.
+
+Within *Chironomidae*, the subfamily-level relationships are largely stable, 
+with black dots on most internal nodes. A few nodes near *Potthastia* and 
+*Paraheptagyia* show mixed grids with red cells. Red means the analysis 
+recovered the clade but carried no computable support value. These nodes sit on 
+short internal branches where rapid diversification left little phylogenetic 
+signal, making resolution sensitive to model choice. Fu et al. (2025) noted 
+similar instability around the placement of *Telmatogetoninae* within 
+*Diamesinae* depending on the analytical model used.
+
+This is the core value of the phylorug, patterns that required comparing 10 
+separate tree files and a topology test table in the original study are 
+condensed onto a single figure. A reader can immediately see which nodes are 
+robust to analytical choice and which deserve further investigation.
+
+
+
 ## Full pipeline: beetles with tip translation
 
-The beetle dataset in `inst/extdata/beetles_50p/` contains 5 analyses of
-approximately 289 ingroup taxa, stored with specimen codes as tip labels
-(e.g., `"OntauST002"`). A lookup table (`biogeo.csv`) maps these codes
-to species names.
-
-This example demonstrates the complete phylorug workflow, including tip
-label translation.
+The built-in Culicomorpha dataset contains 10 phylogenomic analyses of 46 taxa 
+from eight Diptera families (Fu et al., 2025), covering IQ-TREE partitioned, 
+PMSF, LG+C20+F+R, and ASTRAL strategies. This section walks through the full 
+pipeline and demonstrates how to read the output.
 
 ### Read the trees
-
+`read_trees()` scans a directory for tree files and returns a named list:
 ```{r read-beetles}
-tree_dir <- system.file("extdata", "beetles_50p", package = "phylorug")
+tree_dir <- system.file("extdata", "culicomorpha", package = "phylorug")
 trees    <- read_trees(tree_dir)
 names(trees)
 ```
 
 ### Root and remove outgroups
 
-The beetle trees have two outgroup taxa: `NicorbUCE` and `NicvesUCE`.
-Root on them, then drop them:
+The Culicomorpha trees include three outgroup taxa from outside the infraorder:
+Phlebotomus chinensis and Clogmia albipunctata (Psychodidae) and Coboldia fuscipes (Scatopsidae). 
+We will root on all three, then drop them. The order matters: you must root 
+while the outgroup tips are still present, because `ape::root()` needs to find 
+them in the tree.
 
 ```{r root-beetles}
 trees <- lapply(trees, function(tr) {
-  tr <- ape::root(tr, outgroup = c("NicorbUCE", "NicvesUCE"),
+  tr <- ape::root(tr, outgroup = c("Coboldia_fuscipes",
+                                    "Phlebotomus_chinensis",
+                                    "Clogmia_albipunctata"),
                   resolve.root = TRUE)
-  ape::drop.tip(tr, c("NicorbUCE", "NicvesUCE"))
+  ape::drop.tip(tr, c("Coboldia_fuscipes",
+                       "Phlebotomus_chinensis",
+                       "Clogmia_albipunctata"))
 })
 ```
 
-### Translate tip labels
+The Culicomorpha trees already carry species names as tip labels, so no 
+translation step is needed. When your trees use specimen codes instead (as in 
+the beetles example below), use `translate_tips()` to map them to species names 
+before building the matrix.
+##Choose a backbone
 
-**Critical ordering rule:** root and remove the outgroup *before*
-translating tip labels. Translation replaces the original specimen
-codes, so if you translate first, `"NicorbUCE"` no longer exists and
-`ape::root()` cannot find it.
+Now we will pick one analysis as the backbone. The remaining trees become 
+comparison trees. 
+```{r backbone and comparison selection}
+backbone <- trees[["Matrix1-kpi_PMSF(H1.guide)"]]
+others   <- trees[names(trees) != "Matrix1-kpi_PMSF(H1.guide)"]
+```
+##Check taxa
+Before comparing trees, verify that every comparison tree carries the same taxa 
+as the backbone. check_taxa() flags any mismatches. If taxa differ, use 
+prune_to_shared() to reduce all trees to their common set.
+```{r checktaxa-culicomorpha}
+check_taxa(backbone, others)
+```
+##Build the node presence matrix
+```{r npm-culicomorpha}
+npm <- node_presence_matrix(backbone, others)
+```
+##Presence mode
 
-Load the lookup table and translate:
+```{r presence-mode-culicomorpha}
+plot_phylorug(backbone, npm)
+```
+With 9 comparison trees, phylorug automatically arranges the rug grid (3 columns
+by 3 rows). Black dots mark nodes where all 9 analyses agree. Mixed grids mark 
+the contested nodes. Look at the deeper backbone nodes, the monophyly of the 
+infraorder Culicomorpha and its major families should be unanimously recovered 
+(black dots), while the interrelationships among families are where the 
+disagreements appear.
 
-```{r translate-beetles}
-biogeo_path <- system.file("extdata", "beetles_50p", "biogeo.csv",
-                           package = "phylorug")
-biogeo <- read.csv(biogeo_path)
-
-head(biogeo)
-
-trees <- translate_tips(trees, biogeo,
-                        from_col = "specimen_code",
-                        to_col   = "species_name")
+##Support mode
+Now we will define the support metric for each comparison tree. The two ASTRAL 
+trees carry local posterior probabilities (`"lpp"`), while all IQ-TREE analyses 
+carry `SH-aLRT values (`"sh_alrt"`):
+```{r define-support-type-culicomorpha}
+support_type <- c(
+  "Matrix1-kpi_ASTRAL"            = "lpp",
+  "Matrix1-smart_ASTRAL"          = "lpp",
+  "Matrix1-kpi_partitioning"      = "sh_alrt",
+  "Matrix1-kpi_PMSF(H2.guide)"    = "sh_alrt",
+  "Matrix1_LG_C20_F_R"            = "sh_alrt",
+  "Matrix1-smart_partitioning"    = "sh_alrt",
+  "Matrix1-smart_PMSF(H1.guide)"  = "sh_alrt",
+  "Matrix1-smart_PMSF(H2.guide)"  = "sh_alrt",
+  "Matrix2_partitioning"          = "sh_alrt"
+)
 ```
 
-### Check taxa and build the matrix
-
-```{r npm-beetles}
-backbone <- trees[["50p_uce"]]
-others   <- trees[names(trees) != "50p_uce"]
-
-check_taxa(backbone, others)
-
-npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+```{r support-mode-culicomorpha}
+plot_phylorug(backbone, npm,
+              mode               = "support",
+              support_type       = support_type,
+              show_support       = TRUE,
+              support_label_cex  = 0.25,
+              support_label_col  = "red",
+              cell_scale         = 0.35,
+              rug_position       = "inside",
+              rug_on_identical   = FALSE,
+              hide_unsupported   = TRUE)
 ```
 
 ### Presence mode
