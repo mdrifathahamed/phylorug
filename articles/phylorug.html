@@ -235,7 +235,7 @@ three matter most.</p>
 <div class="section level2">
 <h2 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
 </h2>
-<p>Switch to support mode to see how strongly each analysis supports
+<p>Lets switch to support mode to see how strongly each tree supports
 each clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
 own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
@@ -243,154 +243,93 @@ to LPP thresholds, while a tree carrying UFBoot2 values is binned
 against UFBoot2 thresholds independently. <code>phylorug</code> never
 cross-compares values from different support metrics, because LPP 0.95
 and UFBoot2 95 do not measure the same thing despite looking numerically
-identical. &gt; &gt; The <code>support_type</code> argument tells
-<code>phylorug</code> which support metric each tree uses, so the
-correct thresholds are applied. IQ-TREE UFBoot2 values are on a 0–100
-scale; ASTRAL local posterior probabilities are on a 0–1 scale.
-<code>phylorug</code> normalises these automatically. Define it once and
-reuse across plot calls: &gt; &gt; &gt;
-<code>r &gt; support_type &lt;- c( &gt;   "70p_ASTRAL_partition_entropy" = "lpp", &gt;   "70p_ASTRAL_uce"               = "lpp", &gt;   "70p_ghost"                    = "ufboot", &gt;   "70p_partition_entropy"        = "ufboot" &gt; ) &gt;</code>
-&gt; &gt; &gt;
-<code>r &gt; plot_phylorug( &gt;   backbone, npm, &gt;   mode         = "support", &gt;   support_type = support_type &gt; ) &gt;</code>
-&gt; &gt;
-<img src="phylorug_files/figure-html/support-default-1.png" class="r-plt" alt="" width="595.2">
-&gt; &gt; ### Reading the plot &gt; &gt; The plot carries two legends.
-The <strong>position legend</strong> (top-left) maps each numbered cell
-to an analysis — cell 1 is the first tree, cell 2 the second, and so on.
-The <strong>threshold legend</strong> (top-right, support mode only)
-shows what each shade means. &gt; &gt; At each node you will see one of
-these patterns: &gt; &gt; - <strong>Black dot</strong>: all analyses
-recover this clade unanimously (<code>dot_identical = TRUE</code>, the
-default). No rug is drawn to reduce clutter. &gt; - <strong>Mixed
-grid</strong>: some cells filled, some white. These are the interesting
-nodes — the position legend tells you which analysis agrees and which
-disagrees. &gt; - <strong>All-white grid</strong>: no comparison tree
-recovers this backbone clade. It is unique to the backbone topology.
-&gt; &gt; In support mode, filled cells use a greyscale gradient plus
-two special colours. <strong>Black</strong> is very high support (e.g.,
+quite similar and it can be tempting to convert them by dividing.</p>
+<p>The <code>support_type</code> argument tells <code>phylorug</code>
+which support metric each tree uses, so the correct thresholds are
+applied. IQ-TREE UFBoot2 values are on a 0–100 scale; ASTRAL local
+posterior probabilities are on a 0–1 scale. Define it once and reuse
+across plot calls:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>   <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>   <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>   <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>   <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
+<span>   <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span> <span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
+<span>   <span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>   mode         <span class="op">=</span> <span class="st">"support"</span>,</span>
+<span>   support_type <span class="op">=</span> <span class="va">support_type</span></span>
+<span> <span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/support-default-1.png" class="r-plt" alt="" width="595.2"></p>
+</div>
+<div class="section level2">
+<h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a>
+</h2>
+<p>The plot carries two legends. The <strong>position legend</strong>
+(top-left) maps each numbered cell to an tree.For example, cell 1 is the
+first tree, cell 2 the second, and so on. The <strong>threshold
+legend</strong> (top-right, support mode only) shows what each shade
+means.</p>
+<p>At each node you will see one of these patterns:</p>
+<p><strong>Black dot</strong>: all analyses recover this clade
+unanimously (<code>dot_identical = TRUE</code>, the default). No rug is
+drawn to reduce clutter. <strong>Mixed grid</strong>: some cells filled
+with solid black, some white. These are the interesting nodes, the
+position legend tells you which analysis agrees and which disagrees.
+<strong>All-white grid</strong>: No comparison tree recovers this
+backbone clade. It exists only in the backbone topology. Setting
+<code>hide_unsupported = TRUE</code> removes these all-white rugs for a
+cleaner figure. A node with neither a dot nor a rug then signals a clade
+found only in the backbone.</p>
+<p>In support mode, filled cells use a greyscale gradient plus two
+special colours. <strong>Black</strong> is very high support (e.g.,
 UFBoot &gt;= 95, LPP &gt;= 0.95), <strong>dark grey</strong> is high,
 <strong>light grey</strong> is moderate, and <strong>yellow</strong> is
 low support. <strong>White</strong> means the clade was not recovered.
 <strong>Red</strong> means the clade was recovered but carries no
-computable support value. &gt; &gt; ### Fine-tuning the figure &gt; &gt;
-The following example shows how optional arguments refine the plot.
+computable support value.</p>
+</div>
+<div class="section level2">
+<h2 id="fine-tuning-the-figure">Fine-tuning the figure<a class="anchor" aria-label="anchor" href="#fine-tuning-the-figure"></a>
+</h2>
+<p>The following example shows how optional arguments refine the plot.
 <code>rug_on_identical = TRUE</code> extends the rug to unanimous nodes,
 revealing per-tree support strength even at stable clades.
-<code>hide_unsupported = TRUE</code> leaves nodes where no analysis
-recovers the clade bare, making genuine disagreements easier to spot.
-<code>cex</code> controls tip label size. &gt; &gt; &gt;
-<code>r &gt; plot_phylorug( &gt;   backbone, npm, &gt;   mode             = "support", &gt;   support_type     = support_type, &gt;   rug_on_identical = TRUE, &gt;   hide_unsupported = TRUE, &gt;   cex              = 1 &gt; ) &gt;</code>
-&gt; &gt;
-<img src="phylorug_files/figure-html/support-refined-1.png" class="r-plt" alt="" width="595.2"></p>
-<div class="section level3">
-<h3 id="support-mode-1">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
-</h3>
-<p>Switch to support mode to see how strongly each analysis supports
-each clade. Cells are shaded by binned support strength (darker =
-stronger) Support values are binned against thresholds specific to their
-own metric. A tree with LPP 0.95 and a tree with LPP 0.65 are compared
-to LPP thresholds, yielding different shades on the rug. A third tree
-carrying UFBoot2 values is binned against UFBoot2 thresholds
-independently — phylorug never cross-compares values from different
-support metrics, because LPP 0.95 and UFBoot2 95 do not measure the same
-thing despite looking numerically identical.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
-<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/quick-support,-1.png" class="r-plt" alt="" width="595.2"></p>
-<p>The <code>support_type</code> argument tells phylorug which support
-metric each tree uses, so the correct thresholds are applied. IQ-TREE
-UFBoot2 values are on a 0–100 scale; ASTRAL local posterior
-probabilities are on a 0–1 scale. phylorug normalises these
-automatically.</p>
-</div>
-<div class="section level3">
-<h3 id="reading-the-plot-what-you-see-at-each-node">Reading the plot: what you see at each node<a class="anchor" aria-label="anchor" href="#reading-the-plot-what-you-see-at-each-node"></a>
-</h3>
-<p>Look at the output. Several distinct patterns appear at the
-nodes:</p>
-<p><strong>Black dot</strong> — the most common pattern on
-well-supported trees. All comparison trees recover this clade
-unanimously. By default (<code>dot_identical = TRUE</code>), phylorug
-draws a compact dot instead of a full grid to reduce visual clutter.</p>
-<p><strong>Mixed grid (black + white cells)</strong> — these are the
-interesting nodes. Some analyses recover the clade, others do not. The
-position legend at the bottom tells you which cell corresponds to which
-analysis, so you can see exactly which method or dataset disagrees.</p>
-<p><strong>All-white grid</strong> — no comparison tree recovers this
-backbone clade. The clade is unique to the backbone topology. Set
-<code>hide_unsupported = TRUE</code> to leave these nodes bare (no rug
-drawn at all), which makes the remaining disagreements easier to
-read.</p>
-<p><strong>Dot next to a rug</strong> — adjacent nodes can differ in
-consensus. A deep node might show a dot (all agree) while the node just
-above it shows a mixed grid. This pattern often marks the boundary
-between well-resolved and contentious regions of the tree.</p>
-<p>Try <code>hide_unsupported = TRUE</code> to clean up the display:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
-<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
-<span>  <span class="op">)</span>, </span>
-<span>  hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cex <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/quick-hide-1.png" class="r-plt" alt="" width="595.2"></p>
-</div>
-<div class="section level3">
-<h3 id="colour-encoding-in-support-mode">Colour encoding in support mode<a class="anchor" aria-label="anchor" href="#colour-encoding-in-support-mode"></a>
-</h3>
-<p>In <strong>presence mode</strong>, the encoding is binary: black
-(recovered) or white (absent).</p>
-<p>In <strong>support mode</strong>, cells use a greyscale gradient plus
-two special colours:</p>
-<ul>
-<li>
-<strong>Black / dark grey</strong>: very high support (e.g., UFBoot
-&gt;= 95, LPP &gt;= 0.95)</li>
-<li>
-<strong>Medium grey</strong>: high support</li>
-<li>
-<strong>Light grey</strong>: moderate support</li>
-<li>
-<strong>Yellow</strong>: low support (below moderate threshold, but
-clade is present)</li>
-<li>
-<strong>White</strong>: clade not recovered (absent)</li>
-<li>
-<strong>Red</strong>: not computed (the analysis did not evaluate
-this clade)</li>
-</ul>
-<p>By default, unanimous nodes get a dot and no rug. To see the per-tree
-support strength even at unanimous nodes, use
-<code>rug_on_identical = TRUE</code>:</p>
+<code>hide_unsupported = TRUE</code> removes all-white rugs for a
+cleaner figure. <code>cell_scale</code> adjusts the size of each rug
+cell, <code>rug_position</code> controls whether rugs sit toward the
+root (<code>"inside"</code>) or toward the tips
+(<code>"outside"</code>). <code>dot_cex</code> scales the unanimous-node
+dot, and <code>show_support = TRUE</code> with
+<code>support_label_cex</code> and <code>support_label_col</code>
+overlays the backbone’s own support labels on the tree. <code>cex</code>
+and <code>font</code> are passed directly to the tree plotter. For
+publication output, add <code>file = "output.pdf"</code> along with
+<code>width</code> and <code>height</code> to produce a properly scaled
+figure.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
-<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>    <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  rug_on_identical <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cex <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/quick-rug-identical-1.png" class="r-plt" alt="" width="595.2"></p>
-</div>
+<code class="sourceCode R"><span><span class="co"># For publication output, add:</span></span>
+<span><span class="co"># file = "my_support_plot.pdf"</span></span>
+<span> <span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
+<span>   <span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>   width             <span class="op">=</span> <span class="fl">11</span>,</span>
+<span>   height            <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>   mode              <span class="op">=</span> <span class="st">"support"</span>,</span>
+<span>   support_type      <span class="op">=</span> <span class="va">support_type</span>,</span>
+<span>   rug_position      <span class="op">=</span> <span class="st">"inside"</span>,</span>
+<span>   cell_scale        <span class="op">=</span> <span class="fl">0.38</span>,</span>
+<span>   rug_on_identical  <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>   hide_unsupported  <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>   cex               <span class="op">=</span> <span class="fl">0.90</span>,</span>
+<span>   font              <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>   dot_cex           <span class="op">=</span> <span class="fl">1.3</span>,</span>
+<span>   show_support      <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>   support_label_col <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>   support_label_cex <span class="op">=</span> <span class="fl">0.4</span></span>
+<span> <span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/support-refined-1.png" class="r-plt" alt="" width="1056"></p>
 </div>
 <div class="section level2">
 <h2 id="working-with-real-data-culicomorpha">Working with real data: Culicomorpha<a class="anchor" aria-label="anchor" href="#working-with-real-data-culicomorpha"></a>
@@ -585,7 +524,7 @@ cannot find it.</p>
 <p><img src="phylorug_files/figure-html/plot-beetles-presence-1.png" class="r-plt" alt="" width="864"></p>
 </div>
 <div class="section level3">
-<h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
+<h3 id="support-mode-1">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
 </h3>
 <p>The 50p beetle trees use compound node labels
 (<code>"SH-aLRT/UFBoot2"</code> for IQ-TREE, local posterior probability
