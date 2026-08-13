@@ -85,9 +85,9 @@ tree — no manual placement, no external software.
 ## Quick start
 
 The fastest way to see phylorug in action is with the built-in
-`sample_trees` dataset — a 20-taxon subset of the Tarasov Lab beetle
-phylogenomic data (Lopes et al., 2024), already rooted, pruned, and with
-tip labels translated to species names.
+`sample_trees` dataset — a 15-taxon subset of the beetle data (Lopes et
+al., 2024), already rooted, pruned, and with tip labels translated to
+species names. Lets start with attaching the package :
 
 ``` r
 
@@ -97,7 +97,8 @@ library(phylorug)
 ### Load the data
 
 `sample_trees` is a named list of five `phylo` objects, all sharing the
-same 20 taxa. Pick one as the backbone and use the rest as comparisons:
+same 15 taxa. Pick one as the backbone and use the rest as comparisons.
+In the original study `70p_uce` is used as a backbone tree.
 
 ``` r
 
@@ -130,41 +131,47 @@ check_taxa(backbone, others)
 #> 4        70p_partition_entropy identical     15
 ```
 
-All trees share the same 20 taxa, so we can proceed.
+All trees share the same 20 taxa, so we can proceed. IF a missmatch is
+reported the helper function
+[`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
+can be used to get identical taxa set.
 
-### Build the node presence matrix
+## Build the node presence matrix
 
+Once the trees share the same taxa, the next question is: which clades
+from the backbone appear in which comparison trees, and how strongly are
+they supported?
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-compares the backbone topology against each comparison tree. For every
-internal node of the backbone, it records whether the same clade (the
-same set of descendant tips) appears in each comparison tree, and
-extracts any support values stored as node labels:
+answers this by walking every internal node of the backbone and checking
+each comparison tree for the same clade. It returns two matrices: a
+**presence matrix** (1 = clade recovered, 0 = absent) and a **support
+matrix** containing the support values extracted from the node labels of
+each tree. By default, the first support value in each node label is
+used. If your trees carry compound labels like `100/98` (e.g.,
+SH-aLRT/UFBoot2 from IQ-TREE), `support_col` lets you select which value
+to extract, `support_col = 1` takes the first, `support_col = 2` takes
+the second. These two matrices are what
 
 ``` r
 
 npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 ```
 
-The result is a named list. `npm$presence` is a matrix of 1s (clade
-recovered) and 0s (clade absent). `npm$support_1` and `npm$support_2`
-hold the raw support values (first and second metric from compound node
-labels like `"95/80"`), with `NA` where the clade was not recovered.
+The result is a named list.
+``` npm$presence``is a matrix of 1s and 0s. ```npm\$support_1\` and
+\`npm\$support_2`hold the raw support values, with NA where the clade was not recovered. These matrices are what`plot_phylorug()\`
+uses to draw the **rug**, presence determines whether a cell is filled
+or empty, support determines its shade
 
-``` r
+## Plot the rug
 
-npm$presence[1:5, ]
-#>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy
-#> 16                            1              1         1                     1
-#> 17                            1              1         0                     1
-#> 18                            1              1         0                     1
-#> 19                            0              0         0                     1
-#> 20                            0              0         0                     1
-```
-
-### Presence mode
-
-The default plot shows presence/absence. Black cells mean the clade was
-recovered; white cells mean it was not:
+With the node presence matrix ready,
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+draws the rug on the backbone. In its simplest form, all arguments are
+defaults: `mode = "presence"`, `dot_identical = TRUE` (unanimous nodes
+get a black dot), `legend = TRUE`, and `rug_position = "inside"`. The
+internal scaling engine sizes the canvas, fonts, and cell dimensions
+automatically based on tree size.
 
 ``` r
 
@@ -173,9 +180,58 @@ plot_phylorug(backbone, npm)
 
 ![](phylorug_files/figure-html/quick-presence-1.png)
 
-Nodes where all analyses agree get a solid black dot instead of a grid
-(controlled by `dot_identical = TRUE`, the default). Grids appear only
-where analyses disagree — these are the interesting nodes.
+For publication-quality output, setting `file`, `width`, and `height` is
+strongly recommended. All other arguments are worth exploring to
+fine-tune your figure, but these three matter most.
+
+``` r
+
+plot_phylorug(backbone, npm, file = "presence.pdf", width = 12, height = 8)
+```
+
+## Support mode
+
+Switch to support mode to see how strongly each analysis supports each
+clade. Cells are shaded by binned support strength, darker means
+stronger. Support values are binned against thresholds specific to their
+own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
+to LPP thresholds, while a tree carrying UFBoot2 values is binned
+against UFBoot2 thresholds independently. `phylorug` never
+cross-compares values from different support metrics, because LPP 0.95
+and UFBoot2 95 do not measure the same thing despite looking numerically
+identical. \> \> The `support_type` argument tells `phylorug` which
+support metric each tree uses, so the correct thresholds are applied.
+IQ-TREE UFBoot2 values are on a 0–100 scale; ASTRAL local posterior
+probabilities are on a 0–1 scale. `phylorug` normalises these
+automatically. Define it once and reuse across plot calls: \> \> \>
+`r > support_type <- c( > "70p_ASTRAL_partition_entropy" = "lpp", > "70p_ASTRAL_uce" = "lpp", > "70p_ghost" = "ufboot", > "70p_partition_entropy" = "ufboot" > ) >`
+\> \> \>
+`r > plot_phylorug( > backbone, npm, > mode = "support", > support_type = support_type > ) >`
+\> \> ![](phylorug_files/figure-html/support-default-1.png) \> \> \###
+Reading the plot \> \> The plot carries two legends. The **position
+legend** (top-left) maps each numbered cell to an analysis — cell 1 is
+the first tree, cell 2 the second, and so on. The **threshold legend**
+(top-right, support mode only) shows what each shade means. \> \> At
+each node you will see one of these patterns: \> \> - **Black dot**: all
+analyses recover this clade unanimously (`dot_identical = TRUE`, the
+default). No rug is drawn to reduce clutter. \> - **Mixed grid**: some
+cells filled, some white. These are the interesting nodes — the position
+legend tells you which analysis agrees and which disagrees. \> -
+**All-white grid**: no comparison tree recovers this backbone clade. It
+is unique to the backbone topology. \> \> In support mode, filled cells
+use a greyscale gradient plus two special colours. **Black** is very
+high support (e.g., UFBoot \>= 95, LPP \>= 0.95), **dark grey** is high,
+**light grey** is moderate, and **yellow** is low support. **White**
+means the clade was not recovered. **Red** means the clade was recovered
+but carries no computable support value. \> \> \### Fine-tuning the
+figure \> \> The following example shows how optional arguments refine
+the plot. `rug_on_identical = TRUE` extends the rug to unanimous nodes,
+revealing per-tree support strength even at stable clades.
+`hide_unsupported = TRUE` leaves nodes where no analysis recovers the
+clade bare, making genuine disagreements easier to spot. `cex` controls
+tip label size. \> \> \>
+`r > plot_phylorug( > backbone, npm, > mode = "support", > support_type = support_type, > rug_on_identical = TRUE, > hide_unsupported = TRUE, > cex = 1 > ) >`
+\> \> ![](phylorug_files/figure-html/support-refined-1.png)
 
 ### Support mode
 
