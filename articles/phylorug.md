@@ -608,27 +608,29 @@ support_type <- c(
 )
 ```
 
-With ~289 taxa, the canvas dimensions matter. `width = 25` and
+With ~314 taxa, the canvas dimensions matter. `width = 25` and
 `height = 65` give each tip enough vertical space to remain legible, and
 `cell_scale = 0.25` shrinks the rug cells to avoid overlap in dense
-regions. `show_support = TRUE` with `support_label_col = "black"`
-overlays the backbone’s own support values for cross-referencing against
-the **rug** shading. For a tree this size, always write to a file (file
-= “beetles_support.pdf”) rather than rendering in the GUI.
+regions. `show_support = TRUE` with `support_label_col = "red"` overlays
+the backbone’s own support values for cross-referencing against the
+**rug** shading. For a tree this size, always write to a file (file =
+“beetles_support.pdf”) rather than rendering in the GUI.
 
 ``` r
 
 # For publication output, add:
 # file = "beetles_support.pdf"
 plot_phylorug(
-  backbone, npm,
+  backbone, 
+  npm,
   width              = 25,
   height             = 65,
   mode               = "support",
   support_type       = support_type,
   show_support       = TRUE,
-  support_label_col  = "black",
-  cell_scale         = 0.25,
+  support_label_col  = "red",
+  support_label_cex  = 0.34,
+  cell_scale         = 0.35,
   rug_on_identical   = FALSE,
   hide_unsupported   = TRUE,
   cex                = 0.8
@@ -638,53 +640,65 @@ plot_phylorug(
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
 \## What the rug reveals
 
-\[Run the code, look at the output, and tell me what you see at 2-3
-interesting nodes. We write this part together.\] \##still need to
-explain after this
+The rug on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
+recurring split between coalescent and concatenation methods. At several
+nodes the two ASTRAL analyses (cells 1–2) and the two concatenation
+analyses (cells 3–4, GHOST and partitioned IQ-TREE) tell opposite
+stories.
 
-### Hiding unsupported nodes
+The node uniting *Coptorhina* and *Frankenbergerius* (backbone support
+100/100) is a clear example. Both IQ-TREE trees recover the clade with
+maximum support (black), but both ASTRAL trees either fail to recover it
+altogether (white) or place it with very low posterior probability
+(yellow). The inverse pattern appears at a deeper backbone node (30/52):
+ASTRAL weakly recovers the grouping (dark and light grey), while neither
+concatenation tree finds it at all (white). These two nodes sit on short
+internal branches, exactly where incomplete lineage sorting is expected
+to overwhelm the species-tree signal in individual gene trees.
 
-Some backbone clades are not recovered by any comparison tree, producing
-all-white grids. Set `hide_unsupported = TRUE` to leave these nodes bare
-— the absence of both a dot and a rug signals that the clade is unique
-to the backbone:
+The node grouping *Gyronotus*, *Circellium*, *Scarabaeus*, and *Kheper*
+(98.9/98) is recovered by three of four analyses, but GHOST disagrees.
+Because GHOST explicitly models among-site rate variation that standard
+partitioned models may absorb, its failure to recover the clade raises
+the possibility that the grouping in the other trees is partly driven by
+unmodelled heterotachy rather than genuine phylogenetic signal.
+
+The *Onthophagus* clade (100/99, 100/100) is one of the few nodes where
+all four cells are black or near-black, a pattern consistent with the
+strong molecular support for *Onthophagini* monophyly reported across
+beetle phylogenomic studies generally.
+
+Near the base of the outgroup (63.5/44), only a single cell is black;
+the remaining three are white. This is the weakest node in the tree, and
+the rug makes immediately visible what a single pair of support numbers
+can obscure: one method’s confidence does not translate into consensus.
+
+The overall pattern, concatenation and coalescent methods systematically
+disagreeing at short branches, agreeing at long ones, is precisely the
+kind of method-space comparison phylorug was designed to display. A
+table of support values would record the same numbers, but the rug
+places the conflict directly on the tree, at the node where it matters,
+making it legible at a glance.
+
+## Customisation
+
+The remaining examples use the compact `sample_trees` dataset to
+demonstrate optional arguments. Reload the backbone and rebuild the node
+presence matrix:
 
 ``` r
 
-plot_phylorug(backbone, npm, hide_unsupported = TRUE)
-```
+backbone <- sample_trees[["70p_uce"]]
+others   <- sample_trees[names(sample_trees) != "70p_uce"]
+npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 
-![](phylorug_files/figure-html/hide-unsupported-1.png)
-
-### Showing rugs on unanimous nodes
-
-By default, unanimous nodes get a dot and no rug. To see per-tree
-support strength even where every analysis agrees, add
-`rug_on_identical = TRUE`:
-
-``` r
-
-plot_phylorug(
-  backbone, npm,
-  mode = "support",
-  support_type = support_type,
-  rug_on_identical = TRUE
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
 )
 ```
-
-![](phylorug_files/figure-html/rug-on-identical-1.png)
-
-### Cleanest figure: combining options
-
-For the cleanest output — dots on unanimous nodes, rugs only where
-analyses disagree, nothing where no analysis recovers the clade:
-
-``` r
-
-plot_phylorug(backbone, npm, hide_unsupported = TRUE, dot_identical = TRUE)
-```
-
-![](phylorug_files/figure-html/cleanest-1.png)
 
 ### Grid dimensions
 
@@ -697,25 +711,6 @@ plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
 ```
 
-### File output
-
-For publication-quality figures, export to a file. The internal scaling
-engine calculates optimal canvas dimensions automatically:
-
-``` r
-
-plot_phylorug(backbone, npm, file = "my_rug_plot.pdf")
-plot_phylorug(backbone, npm, file = "my_rug_plot.png")
-```
-
-Override dimensions for journal requirements:
-
-``` r
-
-plot_phylorug(backbone, npm, file = "figure_1.pdf",
-              width = 12, height = 16)
-```
-
 ### Tree appearance
 
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
@@ -725,19 +720,7 @@ Common options:
 
 ``` r
 
-# Tip label size, font style, branch width
 plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
-```
-
-The backbone support labels (red numbers beside nodes) are controlled by
-`show_support`, `support_label_cex`, and `support_label_col`:
-
-``` r
-
-plot_phylorug(backbone, npm,
-              show_support = TRUE,
-              support_label_cex = 0.4,
-              support_label_col = "black")
 ```
 
 ### Including the backbone
@@ -753,17 +736,6 @@ plot_phylorug(backbone, npm, include_backbone = TRUE)
 
 In support mode with `include_backbone = TRUE`, you must also include
 `"backbone"` in the `support_type` vector.
-
-### Rug position
-
-By default, rugs tuck into the crook above-left of each node
-(`rug_position = "inside"`). Set `rug_position = "outside"` to place
-them to the right of the node, toward the tips:
-
-``` r
-
-plot_phylorug(backbone, npm, rug_position = "outside")
-```
 
 ### Custom thresholds
 
@@ -820,17 +792,23 @@ to reduce all trees to their common taxa.
 
 ## References
 
-- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity, and
-  the phylogenetic analysis of molecular data. *Systematic Biology*,
-  44(3), 321–331.
-- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches of
-  consensus support in large data sets. *Cladistics*, 26(6), 598–613.
-- Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
-  evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
-  40. 
-- Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-  phylogenomics clarifies the systematics of rare dung beetles. *PLOS
-  ONE*, 19(12), e0309596.
 - Fu, Y. et al. (2025). Phylogenomic insights into the higher level
   relationships within Culicomorpha (Diptera). *Insect Systematics and
   Diversity*, 9(6), ixaf056.
+- Giribet, G. (2003). Stability in phylogenetic formulations and its
+  relationship to nodal support. *Systematic Biology*, 52(4), 554–564.
+- Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
+  phylogenomics clarifies the systematics of rare dung beetles
+  (Coleoptera: Scarabaeinae) from museum collections. *PLOS ONE*,
+  19(12), e0309596.
+- Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
+  evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
+  40.
+- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches of
+  consensus support in large data sets. *Cladistics*, 26(6), 598–613.
+- Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. & Rokas, A. (2023).
+  Incongruence in the phylogenomics era. *Nature Reviews Genetics*,
+  24(12), 834–850.
+- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity, and
+  the phylogenetic analysis of molecular data. *Systematic Biology*,
+  44(3), 321–331.

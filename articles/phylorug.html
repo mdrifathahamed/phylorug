@@ -589,7 +589,7 @@ height avoids the distortion that GUI windows introduce on large
 trees.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level2">
 <h2 id="support-mode-1">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
@@ -604,11 +604,11 @@ UFBoot2:</p>
 <span>  <span class="st">"50p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"50p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>With ~289 taxa, the canvas dimensions matter. <code>width = 25</code>
+<p>With ~314 taxa, the canvas dimensions matter. <code>width = 25</code>
 and <code>height = 65</code> give each tip enough vertical space to
 remain legible, and <code>cell_scale = 0.25</code> shrinks the rug cells
 to avoid overlap in dense regions. <code>show_support = TRUE</code> with
-<code>support_label_col = "black"</code> overlays the backbone’s own
+<code>support_label_col = "red"</code> overlays the backbone’s own
 support values for cross-referencing against the <strong>rug</strong>
 shading. For a tree this size, always write to a file (file =
 “beetles_support.pdf”) rather than rendering in the GUI.</p>
@@ -616,96 +616,93 @@ shading. For a tree this size, always write to a file (file =
 <code class="sourceCode R"><span><span class="co"># For publication output, add:</span></span>
 <span><span class="co"># file = "beetles_support.pdf"</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
-<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>  <span class="va">backbone</span>, </span>
+<span>  <span class="va">npm</span>,</span>
 <span>  width              <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>  height             <span class="op">=</span> <span class="fl">65</span>,</span>
 <span>  mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  support_type       <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>  show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  support_label_col  <span class="op">=</span> <span class="st">"black"</span>,</span>
-<span>  cell_scale         <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span>  support_label_cex  <span class="op">=</span> <span class="fl">0.34</span>,</span>
+<span>  cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>  rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="672">
+<p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="2400">
 ## What the rug reveals</p>
-<p>[Run the code, look at the output, and tell me what you see at 2-3
-interesting nodes. We write this part together.] ##still need to explain
-after this</p>
-<div class="section level3">
-<h3 id="hiding-unsupported-nodes">Hiding unsupported nodes<a class="anchor" aria-label="anchor" href="#hiding-unsupported-nodes"></a>
-</h3>
-<p>Some backbone clades are not recovered by any comparison tree,
-producing all-white grids. Set <code>hide_unsupported = TRUE</code> to
-leave these nodes bare — the absence of both a dot and a rug signals
-that the clade is unique to the backbone:</p>
+<p>The rug on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
+recurring split between coalescent and concatenation methods. At several
+nodes the two ASTRAL analyses (cells 1–2) and the two concatenation
+analyses (cells 3–4, GHOST and partitioned IQ-TREE) tell opposite
+stories.</p>
+<p>The node uniting <em>Coptorhina</em> and <em>Frankenbergerius</em>
+(backbone support 100/100) is a clear example. Both IQ-TREE trees
+recover the clade with maximum support (black), but both ASTRAL trees
+either fail to recover it altogether (white) or place it with very low
+posterior probability (yellow). The inverse pattern appears at a deeper
+backbone node (30/52): ASTRAL weakly recovers the grouping (dark and
+light grey), while neither concatenation tree finds it at all (white).
+These two nodes sit on short internal branches, exactly where incomplete
+lineage sorting is expected to overwhelm the species-tree signal in
+individual gene trees.</p>
+<p>The node grouping <em>Gyronotus</em>, <em>Circellium</em>,
+<em>Scarabaeus</em>, and <em>Kheper</em> (98.9/98) is recovered by three
+of four analyses, but GHOST disagrees. Because GHOST explicitly models
+among-site rate variation that standard partitioned models may absorb,
+its failure to recover the clade raises the possibility that the
+grouping in the other trees is partly driven by unmodelled heterotachy
+rather than genuine phylogenetic signal.</p>
+<p>The <em>Onthophagus</em> clade (100/99, 100/100) is one of the few
+nodes where all four cells are black or near-black, a pattern consistent
+with the strong molecular support for <em>Onthophagini</em> monophyly
+reported across beetle phylogenomic studies generally.</p>
+<p>Near the base of the outgroup (63.5/44), only a single cell is black;
+the remaining three are white. This is the weakest node in the tree, and
+the rug makes immediately visible what a single pair of support numbers
+can obscure: one method’s confidence does not translate into
+consensus.</p>
+<p>The overall pattern, concatenation and coalescent methods
+systematically disagreeing at short branches, agreeing at long ones, is
+precisely the kind of method-space comparison phylorug was designed to
+display. A table of support values would record the same numbers, but
+the rug places the conflict directly on the tree, at the node where it
+matters, making it legible at a glance.</p>
+</div>
+<div class="section level2">
+<h2 id="customisation">Customisation<a class="anchor" aria-label="anchor" href="#customisation"></a>
+</h2>
+<p>The remaining examples use the compact <code>sample_trees</code>
+dataset to demonstrate optional arguments. Reload the backbone and
+rebuild the node presence matrix:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/hide-unsupported-1.png" class="r-plt" alt="" width="672"></p>
-</div>
-<div class="section level3">
-<h3 id="showing-rugs-on-unanimous-nodes">Showing rugs on unanimous nodes<a class="anchor" aria-label="anchor" href="#showing-rugs-on-unanimous-nodes"></a>
-</h3>
-<p>By default, unanimous nodes get a dot and no rug. To see per-tree
-support strength even where every analysis agrees, add
-<code>rug_on_identical = TRUE</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
-<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="va">support_type</span>,</span>
-<span>  rug_on_identical <span class="op">=</span> <span class="cn">TRUE</span></span>
+<code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span>
+<span><span class="va">npm</span>      <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/rug-on-identical-1.png" class="r-plt" alt="" width="672"></p>
-</div>
-<div class="section level3">
-<h3 id="cleanest-figure-combining-options">Cleanest figure: combining options<a class="anchor" aria-label="anchor" href="#cleanest-figure-combining-options"></a>
-</h3>
-<p>For the cleanest output — dots on unanimous nodes, rugs only where
-analyses disagree, nothing where no analysis recovers the clade:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span>, dot_identical <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/cleanest-1.png" class="r-plt" alt="" width="672"></p>
-</div>
 <div class="section level3">
 <h3 id="grid-dimensions">Grid dimensions<a class="anchor" aria-label="anchor" href="#grid-dimensions"></a>
 </h3>
 <p>By default, phylorug chooses a roughly square grid. Override with
 <code>n_rows</code> and <code>n_cols</code>:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">1</span>, n_cols <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">2</span>, n_cols <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="file-output">File output<a class="anchor" aria-label="anchor" href="#file-output"></a>
-</h3>
-<p>For publication-quality figures, export to a file. The internal
-scaling engine calculates optimal canvas dimensions automatically:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="st">"my_rug_plot.pdf"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="st">"my_rug_plot.png"</span><span class="op">)</span></span></code></pre></div>
-<p>Override dimensions for journal requirements:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="st">"figure_1.pdf"</span>,</span>
-<span>              width <span class="op">=</span> <span class="fl">12</span>, height <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="tree-appearance">Tree appearance<a class="anchor" aria-label="anchor" href="#tree-appearance"></a>
 </h3>
 <p><code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> passes additional arguments through
 <code>...</code> to <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code>. Common options:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Tip label size, font style, branch width</span></span>
-<span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, cex <span class="op">=</span> <span class="fl">0.6</span>, font <span class="op">=</span> <span class="fl">3</span>, edge.width <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
-<p>The backbone support labels (red numbers beside nodes) are controlled
-by <code>show_support</code>, <code>support_label_cex</code>, and
-<code>support_label_col</code>:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>              show_support <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>              support_label_cex <span class="op">=</span> <span class="fl">0.4</span>,</span>
-<span>              support_label_col <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, cex <span class="op">=</span> <span class="fl">0.6</span>, font <span class="op">=</span> <span class="fl">3</span>, edge.width <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="including-the-backbone">Including the backbone<a class="anchor" aria-label="anchor" href="#including-the-backbone"></a>
@@ -713,27 +710,17 @@ by <code>show_support</code>, <code>support_label_cex</code>, and
 <p>By default, the backbone does not occupy a cell in the rug (it
 trivially recovers every clade, since it defines the topology). Set
 <code>include_backbone = TRUE</code> to add it as cell 1:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, include_backbone <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>In support mode with <code>include_backbone = TRUE</code>, you must
 also include <code>"backbone"</code> in the <code>support_type</code>
 vector.</p>
 </div>
 <div class="section level3">
-<h3 id="rug-position">Rug position<a class="anchor" aria-label="anchor" href="#rug-position"></a>
-</h3>
-<p>By default, rugs tuck into the crook above-left of each node
-(<code>rug_position = "inside"</code>). Set
-<code>rug_position = "outside"</code> to place them to the right of the
-node, toward the tips:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, rug_position <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
 </h3>
 <p>Override the default support bins with your own cutoffs:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  ufboot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">98</span>, high <span class="op">=</span> <span class="fl">90</span>, moderate <span class="op">=</span> <span class="fl">70</span><span class="op">)</span>,</span>
 <span>  lpp    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">0.99</span>, high <span class="op">=</span> <span class="fl">0.90</span>, moderate <span class="op">=</span> <span class="fl">0.70</span><span class="op">)</span></span>
@@ -778,24 +765,28 @@ taxa.</p>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
-<li>Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity,
-and the phylogenetic analysis of molecular data. <em>Systematic
-Biology</em>, 44(3), 321–331.</li>
-<li>Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
-of consensus support in large data sets. <em>Cladistics</em>, 26(6),
-598–613.</li>
-<li>Machado, D. J. (2015). YBYRÁ fossile: a command line system for
-total evidence dating and sensitivity analysis. <em>BMC
-Bioinformatics</em>, 16,
-<ol start="40" style="list-style-type: decimal"><li>
-</li></ol>
-</li>
-<li>Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-phylogenomics clarifies the systematics of rare dung beetles. <em>PLOS
-ONE</em>, 19(12), e0309596.</li>
 <li>Fu, Y. et al. (2025). Phylogenomic insights into the higher level
 relationships within Culicomorpha (Diptera). <em>Insect Systematics and
 Diversity</em>, 9(6), ixaf056.</li>
+<li>Giribet, G. (2003). Stability in phylogenetic formulations and its
+relationship to nodal support. <em>Systematic Biology</em>, 52(4),
+554–564.</li>
+<li>Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
+phylogenomics clarifies the systematics of rare dung beetles
+(Coleoptera: Scarabaeinae) from museum collections. <em>PLOS ONE</em>,
+19(12), e0309596.</li>
+<li>Machado, D. J. (2015). YBYRÁ fossile: a command line system for
+total evidence dating and sensitivity analysis. <em>BMC
+Bioinformatics</em>, 16, 40.</li>
+<li>Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
+of consensus support in large data sets. <em>Cladistics</em>, 26(6),
+598–613.</li>
+<li>Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. &amp; Rokas, A.
+(2023). Incongruence in the phylogenomics era. <em>Nature Reviews
+Genetics</em>, 24(12), 834–850.</li>
+<li>Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity,
+and the phylogenetic analysis of molecular data. <em>Systematic
+Biology</em>, 44(3), 321–331.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
