@@ -704,7 +704,7 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 
   grid_right <- x0 + n_cols * cell_w
   key_x      <- grid_right + cell_w * 0.5
-  key_lines  <- paste0(seq_len(n_an), " \u2013 ", analyses)
+  key_lines  <- paste0(seq_len(n_an), " - ", analyses)
   graphics::text(key_x, y0,
                  labels = paste(key_lines, collapse = "\n"),
                  adj = c(0, 1), cex = text_cex, family = "sans")
