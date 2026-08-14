@@ -203,10 +203,6 @@ npm <- node_presence_matrix(backbone, others, support_col = 1)
 # Writing to a file uses the internal scaling engine for a clean figure.
 tmp <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm, file = tmp)
-#> Warning: for '1 – 70p_ASTRAL_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '2 – 70p_ASTRAL_uce' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '3 – 70p_ghost' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '4 – 70p_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
 unlink(tmp)
 
 # --- Support mode ---------------------------------------------------------
@@ -225,10 +221,6 @@ plot_phylorug(backbone, npm,
               mode         = "support",
               support_idx  = 1,
               support_type = support_type)
-#> Warning: for '1 – 70p_ASTRAL_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '2 – 70p_ASTRAL_uce' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '3 – 70p_ghost' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '4 – 70p_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
 unlink(tmp2)
 
 # --- Some optional controls -----------------------------------------------
@@ -240,10 +232,5 @@ plot_phylorug(backbone, npm,
               file             = tmp3,
               include_backbone = TRUE,
               rug_position     = "outside")
-#> Warning: for '1 – backbone' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '2 – 70p_ASTRAL_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '3 – 70p_ASTRAL_uce' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '4 – 70p_ghost' in 'mbcsToSbcs': - substituted for – (U+2013)
-#> Warning: for '5 – 70p_partition_entropy' in 'mbcsToSbcs': - substituted for – (U+2013)
 unlink(tmp3)
 ```
