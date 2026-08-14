@@ -288,7 +288,7 @@ properly scaled figure.
 # file = "my_support_plot.pdf"
  plot_phylorug(
    backbone, npm,
-   width             = 6.2,
+   width             = 6.5,
    height            = 5.8,
    mode              = "support",
    support_type      = support_type,
