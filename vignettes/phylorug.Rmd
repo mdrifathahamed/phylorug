@@ -203,7 +203,7 @@ support_type <- c(
    )
 ```
 
-```{r support-default, fig.width = 6.2, fig.height = 5.8}
+```{r support-default}
  plot_phylorug(
    backbone, npm,
    mode         = "support",
@@ -255,13 +255,13 @@ Customisation section below):
 The following example shows how optional arguments refine the plot. 
 `rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing per-tree
 support strength even at stable clades. `hide_unsupported = TRUE` removes 
-all-white rugs for a cleaner figure. `cell_scale` adjusts the size of each rug 
-cell, `rug_position` controls whether rugs sit toward the root (`"inside"`) or 
-toward the tips (`"outside"`). `dot_cex` scales the unanimous-node dot, and 
-`show_support = TRUE` with `support_label_cex` and `support_label_col` overlays 
-the backbone's own support labels on the tree. `cex` and `font` are passed 
-directly to the tree plotter. For publication output, add `file = "output.pdf"`
-along with `width` and `height` to produce a properly scaled figure.
+all-white rugs for a cleaner figure. `cell_scale` adjusts the size of 
+each rug cell, `rug_position` controls whether rugs sit toward the root 
+(`"inside"`) or toward the tips (`"outside"`). `dot_cex` scales the 
+unanimous-node dot, and `show_support = TRUE` with `support_label_cex` and `support_label_col` overlays the backbone's own support labels on the tree. 
+`cex` and `font` are passed directly to the tree plotter. For publication 
+output, add `file = "output.pdf"` along with `width` and `height` to produce a 
+properly scaled figure.
 
 ```{r support-refined}
 # For publication output, add:
@@ -287,14 +287,13 @@ along with `width` and `height` to produce a properly scaled figure.
 
 ## Working with real data: Culicomorpha
 
-The built-in Culicomorpha dataset contains 10 phylogenomic analyses of
-46 taxa from eight Diptera families (Fu et al., 2025), covering IQ-TREE
-partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
+The built-in Culicomorpha dataset contains 10 phylogenomic analyses of 46 taxa 
+from eight Diptera families (Fu et al., 2025), covering IQ-TREE partitioned, 
+PMSF, LG+C20+F+R, and ASTRAL strategies.
 
 ### Read the trees
 
-`read_trees()` scans a directory for tree files and returns a named
-list:
+`read_trees()` scans a directory for tree files and returns a named list:
 
 ```{r read-culico}
 tree_dir <- system.file("extdata", "culicomorpha", package = "phylorug")
