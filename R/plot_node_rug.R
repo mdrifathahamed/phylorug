@@ -99,7 +99,11 @@ plot_node_rug <- function(npm,
   for (i in seq_len(n_nodes)) {
     node_id <- node_ids[i]
     p_vals  <- as.numeric(npm[i, ])
-    s_vals  <- if (is.null(support)) rep(NA_real_, n_tree) else as.numeric(support[i, ])
+    s_vals  <- if (is.null(support)) {
+      rep(NA_real_, n_tree)
+    } else {
+      as.numeric(support[i, ])
+    }
 
     x_center <- last_pp$xx[node_id] + dx_offset
     y_center <- last_pp$yy[node_id] + dy_offset
@@ -125,7 +129,11 @@ plot_node_rug <- function(npm,
       ytop    <- y0 - (row_idx - 1) * cell_h
       ybottom <- ytop - cell_h
 
-      st <- if (is.null(support_type)) NA_character_ else support_type[[tree_names[k]]]
+      st <- if (is.null(support_type)) {
+        NA_character_
+      } else {
+        support_type[[tree_names[k]]]
+      }
 
       cell <- resolve_cell(
         p            = p_vals[k],

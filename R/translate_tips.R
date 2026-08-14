@@ -42,7 +42,8 @@
 #' # them into the environment, then tell translate_tips() which column holds
 #' # the current labels and which holds the replacements:
 #' dir  <- system.file("extdata", "beetles_50p", package = "phylorug")
-#' file <- system.file("extdata", "beetles_50p", "biogeo.csv", package = "phylorug")
+#' file <- system.file("extdata", "beetles_50p", "biogeo.csv",
+#'                     package = "phylorug")
 #'
 #' trees <- read_trees(dir)
 #' dict  <- utils::read.csv(file)
@@ -64,8 +65,8 @@ translate_tips <- function(trees,
   if (!inherits(trees, "list")) {
     stop("`trees` must be a list of `phylo` and/or `multiPhylo` objects, ",
          "one element per analysis (as returned by `read_trees()`). A pool of ",
-         "tied-optimal trees (POY/TNT/PAUP*) is a `multiPhylo` element *inside* ",
-         "this list, representing a single analysis.",
+         "tied-optimal trees (POY/TNT/PAUP*) is a `multiPhylo` element",
+         " *inside* this list, representing a single analysis.",
          call. = FALSE)
   }
   if (length(trees) == 0L) {

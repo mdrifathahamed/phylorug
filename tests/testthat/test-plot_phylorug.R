@@ -61,7 +61,10 @@ make_npm_partial_na_support <- function() {
 on_null_device <- function(code) {
   tmp <- tempfile(fileext = ".pdf")
   grDevices::pdf(tmp)
-  on.exit({ grDevices::dev.off(); unlink(tmp) })
+  on.exit({
+    grDevices::dev.off()
+    unlink(tmp)
+  })
   force(code)
 }
 
@@ -252,7 +255,7 @@ test_that("show_support = FALSE hides node labels", {
   )
 })
 
-test_that("show_support auto-resolves to FALSE when support + include_backbone", {
+test_that("show_support auto-resolves to FALSE when support + include_backbone", { # nolint: line_length_linter.
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone_with_labels(), make_npm(),
@@ -263,7 +266,7 @@ test_that("show_support auto-resolves to FALSE when support + include_backbone",
     )
   )
 })
-test_that("include_backbone + support mode errors without backbone in support_type", {
+test_that("include_backbone + support mode errors without backbone in support_type", { # nolint: line_length_linter.
   expect_error(
     on_null_device(
       plot_phylorug(make_backbone_with_labels(), make_npm(),
@@ -535,8 +538,8 @@ test_that("choose_grid returns near-square for small counts", {
 
 test_that("choose_grid handles non-square counts", {
   g5 <- choose_grid(5)
-  expect_equal(g5$n_cols, 3L)   # ceiling(sqrt(5)) = 3
-  expect_equal(g5$n_rows, 2L)   # ceiling(5/3) = 2
+  expect_equal(g5$n_cols, 3L)
+  expect_equal(g5$n_rows, 2L)
 })
 
 test_that("choose_grid handles 1 cell", {
@@ -579,10 +582,14 @@ test_that("auto_canvas width increases with legend", {
   without_leg <- auto_canvas(bb, ntip = 5L, has_legend = FALSE)
   expect_true(with_leg$width > without_leg$width)
 })
-
 test_that("auto_canvas width accounts for long tip labels", {
   bb1 <- make_backbone()
-  bb2 <- ape::read.tree(text = "(((Very_Long_Species_Name_A,Very_Long_Species_Name_B),Very_Long_Species_Name_C),(Very_Long_Species_Name_D,Very_Long_Species_Name_E));")
+  long_tips <- paste0("Very_Long_Species_Name_", LETTERS[1:5])
+  bb2 <- ape::read.tree(text = paste0(
+    "(((", long_tips[1], ",", long_tips[2], "),",
+    long_tips[3], "),(", long_tips[4], ",",
+    long_tips[5], "));"
+  ))
   short <- auto_canvas(bb1, ntip = 5L)
   long  <- auto_canvas(bb2, ntip = 5L)
   expect_true(long$width > short$width)

@@ -127,10 +127,10 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
- # every trees must carry the same  set of taxa
+  # every trees must carry the same  set of taxa
   bb_taxa <- sort(backbone$tip.label)
   assert_shared_taxa(bb_taxa, trees, nm)
- #setup the empty matrix
+  #setup the empty matrix
   ntip     <- ape::Ntip(backbone)
   bb_nodes <- (ntip + 1L):(ntip + backbone$Nnode)
   bb_keys  <- clade_keys(backbone)
@@ -153,7 +153,7 @@ node_presence_matrix <- function(backbone,
     )
   })
 
- #Double loop begins -to fill each cell of the matrix
+  #Double loop begins -to fill each cell of the matrix
   #outer loop: j iterates over trees(columns)
   #inner loop: i iterates over backbone nodes(rows)
   # Double loop begins - to fill each cell of the matrix
@@ -181,7 +181,9 @@ node_presence_matrix <- function(backbone,
             as.numeric(supp[[col]][idx])
           }, numeric(1))
 
-          support_matrices[[s]][i, j] <- if (all(is.na(vals))) NA_real_ else mean(vals, na.rm = TRUE)
+          support_matrices[[s]][i, j] <-
+            if (all(is.na(vals))) NA_real_
+            else mean(vals, na.rm = TRUE)
         }
       } else {
         # If no hits, explicitly set support to NA
@@ -203,7 +205,7 @@ node_presence_matrix <- function(backbone,
   result <- c(list(presence = presence_matrix), support_named)
 
   attr(result, "node_id")    <- bb_nodes
-  attr(result, "pool_sizes") <- vapply(trees, pool_size, integer(1))
+  attr(result, "pool_sizes") <- pool_sizes
 
   result
 }

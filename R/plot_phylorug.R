@@ -232,8 +232,8 @@ plot_phylorug <- function(backbone, npm,
         "(`support_", support_idx, "`) contains no support values (all NA). ",
         "This happens when the trees carry no node support, for example a ",
         "topology-only tree, or a BEAST/TreeAnnotator tree whose bracket ",
-        "annotations ape could not import. Use `mode = \"presence\"` for these ",
-        "trees, or supply trees whose node labels hold support values.",
+        "annotations ape could not import. Use `mode = \"presence\"` for",
+        " these trees, or supply trees whose node labels hold support values.",
         call. = FALSE
       )
     }
@@ -297,24 +297,24 @@ plot_phylorug <- function(backbone, npm,
   per_tip <- min(0.20, max(0.18, 0.35 - 0.041 * log(ntip)))
 
   # Tree ratios (per_tip * constant)
-  R_CEX     <- 4.0
-  R_EDGE    <- 10.0
-  R_SUPPORT <- 3.0
+  r_cex     <- 4.0
+  r_edge    <- 10.0
+  r_support <- 3.0
 
   if (is.null(dots$cex))
-    dots$cex <- min(0.80, max(0.55, per_tip * R_CEX))
+    dots$cex <- min(0.80, max(0.55, per_tip * r_cex))
   taxa_cex <- dots$cex
 
   if (is.null(dots$edge.width))
-    dots$edge.width <- min(2.0, max(1.5, per_tip * R_EDGE))
- #--------------support_cex------------------------------------------------
+    dots$edge.width <- min(2.0, max(1.5, per_tip * r_edge))
+  #--------------support_cex------------------------------------------------
   support_cex <- if (is.null(support_label_cex)) {
-    min(0.60, max(0.40, per_tip * R_SUPPORT))
+    min(0.60, max(0.40, per_tip * r_support))
   } else {
     support_label_cex
   }
- #----------------------dot_cex-------------------------------------------
-   dot_scale <- if (is.null(dot_cex)){
+  #----------------------dot_cex-------------------------------------------
+  dot_scale <- if (is.null(dot_cex)) {
     min(1.2, max(0.80, per_tip * 4.5))
   } else {
     dot_cex
@@ -323,10 +323,10 @@ plot_phylorug <- function(backbone, npm,
   # --- SOURCE 2: canvas width (for legend elements, computed after device) ---
   # Legend ratios (canvas_width * constant). These are applied later
   # in section 10 once we know par("din")[1].
-  R_LEG_CELL <- 0.018                                            #  RATIO 4
-  R_TH_SQ    <- 0.008                                            #  RATIO 5
-  R_LEG_TEXT <- 0.045                                             #  RATIO 6
-  R_TH_TEXT  <- 0.041                                             #  RATIO 7
+  r_leg_cell <- 0.018                                            #  RATIO 4
+  r_th_sq <- 0.008                                            #  RATIO 5
+  r_leg_text <- 0.045                                             #  RATIO 6
+  r_th_text  <- 0.041                                             #  RATIO 7
 
   # --- Margins ---
   if (is.null(dots$mar)) dots$mar <- c(0.5, 0.5, 0.5, 2.5)
@@ -380,8 +380,8 @@ plot_phylorug <- function(backbone, npm,
 
     # Estimate legend text cex from canvas width
     w_ref <- din[1]
-    est_pos_cex  <- min(0.55, max(0.20, w_ref * R_LEG_TEXT))
-    est_th_cex   <- min(0.50, max(0.18, w_ref * R_TH_TEXT))
+    est_pos_cex  <- min(0.55, max(0.20, w_ref * r_leg_text))
+    est_th_cex   <- min(0.50, max(0.18, w_ref * r_th_text))
 
     pos_line_h <- 0.2 * est_pos_cex
     th_line_h  <- 0.2 * est_th_cex
@@ -492,10 +492,10 @@ plot_phylorug <- function(backbone, npm,
     din   <- graphics::par("din")
     w_ref <- din[1]
 
-    leg_cell_in  <- w_ref * R_LEG_CELL
-    th_sq_in     <- w_ref * R_TH_SQ
-    pos_text_cex <- min(0.55, max(0.20, w_ref * R_LEG_TEXT))
-    th_text_cex  <- min(0.50, max(0.18, w_ref * R_TH_TEXT))
+    leg_cell_in  <- w_ref * r_leg_cell
+    th_sq_in     <- w_ref * r_th_sq
+    pos_text_cex <- min(0.55, max(0.20, w_ref * r_leg_text))
+    th_text_cex  <- min(0.50, max(0.18, w_ref * r_th_text))
 
     # --- Tree-size adjustment ---
     # On large trees, shrink the legend squares and enlarge the legend text
@@ -660,11 +660,11 @@ choose_grid <- function(n_cells) {
 #'
 #' @details
 #' Cells are laid out left-to-right, top-to-bottom. For cell `k`, `row_idx` and
-#' `col_idx` give its position, `xleft`/`xright` span one `cell_w` from `x0`, and
-#' `ytop`/`ybottom` drop one `cell_h` per row downward from `y0` (y decreases
-#' going down in user coordinates). Each cell is a white box with its number
-#' centred inside. The text key is drawn to the right of the grid, starting half
-#' a cell past the grid's right edge and top-aligned to `y0`.
+#' `col_idx` give its position, `xleft`/`xright` span one `cell_w` from `x0`,
+#' and `ytop`/`ybottom` drop one `cell_h` per row downward from `y0`
+#' (y decreases going down in user coordinates). Each cell is a white box with
+#' its number centred inside. The text key is drawn to the right of the grid,
+#' starting half a cell past the grid's right edge and top-aligned to `y0`.
 #'
 #' All coordinates are in user units; the caller ([plot_phylorug()]) converts
 #' inches to user units before passing `cell_w`, `cell_h`, `x0`, and `y0`.
@@ -725,8 +725,8 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #' `#000000` very high, `#5F5E5A` high, `#B4B2A9` moderate, `#E8C547` low, white
 #' not recovered, and `#D64545` not computed.
 #'
-#' Rows stack downward from `y0`: row `i` sits `(i - 1) * (sq_h + gap)` below the
-#' top, where `gap` is 40 percent of a square's height. Each row is a filled
+#' Rows stack downward from `y0`: row `i` sits `(i - 1) * (sq_h + gap)` below
+#' the top, where `gap` is 40 percent of a square's height. Each row is a filled
 #' square on the left plus its label, vertically centred, `text_gap` (30 percent
 #' of a square's width) to its right. All coordinates are in user units; the
 #' caller converts inches to user units before passing `x0`, `y0`, `sq_h`, and
@@ -746,38 +746,39 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #'
 #' @noRd
 draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
-gap      <- sq_h * 0.4
-text_gap <- sq_w * 0.3
+  gap      <- sq_h * 0.4
+  text_gap <- sq_w * 0.3
 
-rows <- list(
-  list(fill = "#000000",
-       label = ">=98 (SH-aLRT/UFBoot2) or >=0.99 (ASTRAL)"),
-  list(fill = "#5F5E5A",
-       label = ">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) or >=0.95-0.98 (ASTRAL)"),
-  list(fill = "#B4B2A9",
-       label = ">=50-79.9 (SH-aLRT) or >=50-94 (UFBoot2) or >=0.5-0.95 (ASTRAL)"),
-  list(fill = "#E8C547",
-       label = "<50 (SH-aLRT/UFBoot2) or <0.5 (ASTRAL)"),
-  list(fill = "white",
-       label = "monophyly not supported"),
-  list(fill = "#D64545",
-       label = "not computed")
-)
+  rows <- list(
+    list(fill = "#000000",
+         label = ">=98 (SH-aLRT/UFBoot2) or >=0.99 (ASTRAL)"),
+    list(fill = "#5F5E5A",
+         label = paste0(">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) ",
+                        "or >=0.95-0.98 (ASTRAL)")),
+    list(fill = "#B4B2A9",
+         label = paste0(">=50-79.9 (SH-aLRT) or >=50-94 (UFBoot2) ",
+                        "or >=0.5-0.95 (ASTRAL)")),
+    list(fill = "#E8C547",
+         label = "<50 (SH-aLRT/UFBoot2) or <0.5 (ASTRAL)"),
+    list(fill = "white",
+         label = "monophyly not supported"),
+    list(fill = "#D64545",
+         label = "not computed")
+  )
+  # Draw each row: a filled square on the left, its label to the right.
+  # Rows stack downward from (x0, y0), one square plus a gap per row.
+  for (i in seq_along(rows)) {
+    r       <- rows[[i]]
+    ytop    <- y0 - (i - 1) * (sq_h + gap)
+    ybottom <- ytop - sq_h
+    xright  <- x0 + sq_w
 
-# Draw each row: a filled square on the left, its label to the right.
-# Rows stack downward from (x0, y0), one square plus a gap per row.
-for (i in seq_along(rows)) {
-  r       <- rows[[i]]
-  ytop    <- y0 - (i - 1) * (sq_h + gap)
-  ybottom <- ytop - sq_h
-  xright  <- x0 + sq_w
+    graphics::rect(x0, ybottom, xright, ytop,
+                   col = r$fill, border = "black", lwd = 0.5)
+    graphics::text(xright + text_gap, (ytop + ybottom) / 2,
+                   labels = r$label, adj = c(0, 0.5),
+                   cex = text_cex, family = "sans")
+  }
 
-  graphics::rect(x0, ybottom, xright, ytop,
-                 col = r$fill, border = "black", lwd = 0.5)
-  graphics::text(xright + text_gap, (ytop + ybottom) / 2,
-                 labels = r$label, adj = c(0, 0.5),
-                 cex = text_cex, family = "sans")
-}
-
-invisible(y0 - length(rows) * (sq_h + gap))
+  invisible(y0 - length(rows) * (sq_h + gap))
 }

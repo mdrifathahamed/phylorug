@@ -115,7 +115,7 @@ test_that("backbone with duplicate tip labels does not crash", {
 
 test_that("single-tip backbone works", {
   bb <- ape::read.tree(text = "(Sp_1:1);")
-  tr <- ape::read.tree(text = "(Sp_1:2);")  # different edge length, not identical()
+  tr <- ape::read.tree(text = "(Sp_1:2);")
   expect_true(check_taxa(bb, list(single = tr), verbose = FALSE))
 })
 
@@ -218,11 +218,10 @@ test_that("an analysis with extra taxa is classified as superset", {
   expect_equal(diag$extra[diag$comparison == "big"], "Sp_EXTRA")
 })
 
-test_that("an analysis both missing and gaining taxa is classified as missing", {
-  # A missing backbone taxon is the serious case, and takes precedence.
+test_that("an analysis both missing and gaining taxa is classified as missing", { # nolint: line_length_linter.
   bb <- make_tree(5L)
   tr <- ape::rtree(5L)
-  tr$tip.label <- c(paste0("Sp_", 2:5), "Sp_EXTRA")   # no Sp_1, plus an extra
+  tr$tip.label <- c(paste0("Sp_", 2:5), "Sp_EXTRA")
   ok   <- check_taxa(bb, list(odd = tr), verbose = FALSE)
   diag <- attr(ok, "diagnostics")
   expect_equal(diag$status, "missing")

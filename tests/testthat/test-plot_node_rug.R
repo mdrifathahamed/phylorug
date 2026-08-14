@@ -424,7 +424,7 @@ test_that("NA presence values draw without error", {
   unlink(tmp)
 })
 
-test_that("multi-column grid (n_cols > 1) with many trees draws without error", {
+test_that("multi-column grid (n_cols > 1) with many trees draws without error", { # nolint: line_length_linter.
   skip_if_not_installed("ape")
   backbone <- ape::read.tree(text = "(((A,B),C),(D,E));")
   npm <- matrix(
@@ -496,7 +496,7 @@ test_that("draw_cell draws without error on a device", {
   grDevices::pdf(tmp)
   plot.new()
   expect_no_error(
-    draw_cell(0, 0, 1, 1, list(fill = "black", pattern = "none", border = "grey40"))
+    draw_cell(0, 0, 1, 1, list(fill = "black", pattern = "none", border = "grey40")) # nolint: line_length_linter.
   )
   grDevices::dev.off()
   unlink(tmp)

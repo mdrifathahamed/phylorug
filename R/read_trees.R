@@ -210,14 +210,15 @@ read_one_analysis <- function(f, format) {
   if (identical(fmt, "none")) {
     return(NULL)
   }
-  reader <- switch(fmt,
-                   nexus  = ape::read.nexus,
-                   newick = ape::read.tree,
-                   stop("Unrecognised format \"",
-                        fmt,
-                        "\" for file: ",
-                        basename(f),
-                        call. = FALSE)
+  reader <- switch(
+    fmt,
+    nexus  = ape::read.nexus,
+    newick = ape::read.tree,
+    stop(
+      "Unrecognised format \"", fmt,
+      "\" for file: ", basename(f),
+      call. = FALSE
+    )
   )
   tr <- tryCatch(
     suppressWarnings(reader(f)),

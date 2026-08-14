@@ -108,7 +108,7 @@ test_that("trailing separator produces NA for missing part", {
   expect_equal(result$support_2[2], 92)
 })
 
-test_that("leading separator: empty piece is dropped, value shifts to support_1", {
+test_that("leading separator: empty piece is dropped, value shifts to support_1", { # nolint: line_length_linter.
   tree   <- make_labeled_tree(c("/95", "88/92"))
   result <- node_support(tree)
   expect_equal(result$support_1[1], 95)

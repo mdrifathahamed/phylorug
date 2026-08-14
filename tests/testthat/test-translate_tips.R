@@ -119,7 +119,7 @@ test_that("matched tips are translated correctly", {
                            from_col = "from", to_col = "to",
                            verbose = FALSE)
   translated <- result[[1]]$tip.label
-  expect_true(all(c("Species_one", "Species_two", "Species_three") %in% translated))
+  expect_true(all(c("Species_one", "Species_two", "Species_three") %in% translated)) # nolint: line_length_linter.
 })
 
 test_that("unmatched tips are left unchanged", {

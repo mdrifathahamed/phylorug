@@ -125,7 +125,7 @@ test_that("drops taxa missing from one comparison tree", {
   expect_equal(attr(result, "dropped"), "Sp_1")
 })
 
-test_that("drops multiple taxa when different trees are missing different ones", {
+test_that("drops multiple taxa when different trees are missing different ones", { # nolint: line_length_linter.
   bb    <- make_backbone(5L)
   trees <- list(
     no_1 = make_tree_missing(5L, "Sp_1"),

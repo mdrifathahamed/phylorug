@@ -565,7 +565,7 @@ test_that("BEAST-annotated file emits message and has NULL node.label", {
   dir.create(tmp)
   # Mimics a TreeAnnotator MCC tree with bracket annotations
   writeLines(
-    "((A:0.1[&posterior=0.99],B:0.2[&posterior=0.95]):0.3[&posterior=0.98],C:0.4);",
+    "((A:0.1[&posterior=0.99],B:0.2[&posterior=0.95]):0.3[&posterior=0.98],C:0.4);", # nolint: line_length_linter.
     file.path(tmp, "beast.tre")
   )
   expect_message(
@@ -596,7 +596,7 @@ test_that("has_beast_annotations detects [& in file text", {
   expect_false(phylorug:::has_beast_annotations(tmp_no))
 })
 
-test_that("BEAST message does not fire when ape reads labels despite brackets", {
+test_that("BEAST message does not fire when ape reads labels despite brackets", { # nolint: line_length_linter.
   tmp <- tempfile("phylorug_brackets_labels_")
   dir.create(tmp)
   # A file that has [& but also has real node labels ape can read.

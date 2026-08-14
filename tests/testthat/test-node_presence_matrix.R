@@ -68,29 +68,40 @@ test_that("stops when trees is empty", {
 })
 
 test_that("stops when support_col is out of range", {
-  msg <- "`support_col` must be an integer or integer vector with values 1, 2, or 3."
+  msg <- paste0(
+    "`support_col` must be an integer or integer vector ",
+    "with values 1, 2, or 3."
+  )
   expect_error(
-    node_presence_matrix(make_backbone(), make_comparisons(), support_col = 4),
+    node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_col = 4
+    ),
     regexp = msg, fixed = TRUE
   )
   expect_error(
-    node_presence_matrix(make_backbone(), make_comparisons(), support_col = 0),
+    node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_col = 0
+    ),
     regexp = msg, fixed = TRUE
   )
 })
 
 test_that("stops when support_col is non-numeric", {
   expect_error(
-    node_presence_matrix(make_backbone(), make_comparisons(), support_col = "one"),
-    "must be an integer"
-  )
+               node_presence_matrix(make_backbone(),
+                                    make_comparisons(),
+                                    support_col = "one"),
+               "must be an integer")
 })
 
 test_that("support_col with decimal is rejected", {
   expect_error(
-  node_presence_matrix(make_backbone(), make_comparisons(), support_col = 1.5),
-    "must be an integer"
-  )
+               node_presence_matrix(make_backbone(),
+                                    make_comparisons(),
+                                    support_col = 1.5),
+               "must be an integer")
 })
 
 test_that("support_col with duplicates produces duplicate matrices", {
@@ -338,18 +349,17 @@ test_that("support_col = 3 gives NA when the tree has fewer values", {
   expect_true(all(is.na(result$support_1)))
 })
 
-test_that("support values are averaged across pool trees that recover the clade", {
-  # Two pool trees both recover (A,B) with support 80 and 100 → average = 90
+test_that("support values are averaged across pool trees that recover the clade", { # nolint: line_length_linter.
   t1 <- ape::read.tree(text = "(((A,B)80,C),(D,E));")
   t2 <- ape::read.tree(text = "(((A,B)100,C),(D,E));")
   pool <- structure(list(t1, t2), class = "multiPhylo")
-  result <- node_presence_matrix(make_backbone(), list(pool = pool))
-  # Find the (A,B) clade row and check the average
+  result <- node_presence_matrix(
+    make_backbone(), list(pool = pool)
+  )
   ab_support <- result$support_1[, "pool"]
   ab_val <- ab_support[!is.na(ab_support)]
   expect_true(90 %in% ab_val)
 })
-
 
 # ---- multi-column behaviour -------------------------------------------------
 test_that("support_col = c(1,2) returns support_1 and support_2", {

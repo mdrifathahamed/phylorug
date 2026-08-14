@@ -76,10 +76,10 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   }
   if (!inherits(trees, "list")) {
     stop(
-      "`trees` must be a list of `phylo` and/or `multiPhylo` objects, one ",
-      "element per analysis, as returned by `read_trees()`. A single ",
-    "`multiPhylo` is a pool of trees from ONE analysis and should be wrapped ",
-      "in a list.",
+      "`trees` must be a list of `phylo` and/or `multiPhylo` ",
+      "objects, one element per analysis, as returned by ",
+      "`read_trees()`. A single `multiPhylo` is a pool of ",
+      "trees from ONE analysis and should be wrapped in a list.",
       call. = FALSE
     )
   }
@@ -89,7 +89,8 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   }
   if (any(vapply(trees, is.null, logical(1)))) {
     stop(
-    "`trees` contains NULL elements. Ensure every tree was read successfully.",
+      "`trees` contains NULL elements. Ensure every tree was ",
+      "read successfully.",
       call. = FALSE
     )
   }
@@ -123,7 +124,8 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
   }
   if (length(trees) == 0L) {
     stop(
-    "`trees` contains only the backbone. Supply at least one comparison tree.",
+      "`trees` contains only the backbone. Supply at least ",
+      "one comparison tree.",
       call. = FALSE
     )
   }
@@ -184,21 +186,21 @@ check_taxa <- function(backbone, trees, verbose = TRUE) {
       }
       if (any(is_missing)) {
         message(
-          sum(is_missing), " comparison tree(s) are MISSING backbone taxa: ",
+          sum(is_missing), " comparison tree(s) are MISSING ",
+          "backbone taxa: ",
           paste(nm[is_missing], collapse = ", "),
-        ". Any backbone clade containing a missing taxon cannot be evaluated ",
-         "in those trees. Use `prune_to_shared()` to reduce the backbone and ",
+          ". Any backbone clade containing a missing taxon ",
+          "cannot be evaluated in those trees. Use ",
+          "`prune_to_shared()` to reduce the backbone and ",
           "the comparison trees to their common taxa. See ",
           "`attr(result, \"diagnostics\")` for the taxa involved."
         )
       }
     }
   }
-
   attr(ok, "diagnostics") <- diagnostics
   ok
 }
-
 
 #' Tip labels of one comparison tree
 #'

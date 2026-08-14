@@ -48,7 +48,8 @@ labels are unaffected.
 # them into the environment, then tell translate_tips() which column holds
 # the current labels and which holds the replacements:
 dir  <- system.file("extdata", "beetles_50p", package = "phylorug")
-file <- system.file("extdata", "beetles_50p", "biogeo.csv", package = "phylorug")
+file <- system.file("extdata", "beetles_50p", "biogeo.csv",
+                    package = "phylorug")
 
 trees <- read_trees(dir)
 dict  <- utils::read.csv(file)

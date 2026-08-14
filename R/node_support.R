@@ -45,7 +45,7 @@ node_support <- function(tree,
   n_node <- ape::Nnode(tree)
   n_col  <- 3L
   lbl <- tree$node.label
- # No labels: return all NA, one row per internal node
+  # No labels: return all NA, one row per internal node
   if (is.null(lbl)) {
     out <- as.data.frame(matrix(NA_real_, nrow = n_node, ncol = n_col))
     names(out) <- paste0("support_", seq_len(n_col))
