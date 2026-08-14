@@ -167,7 +167,7 @@ backbone. In its simplest form, all arguments are defaults: `mode = "presence"`,
 `rug_position = "inside"`. The internal scaling engine sizes the canvas, fonts, 
 and cell dimensions automatically based on tree size.
  
-```{r quick-presence, fig.width = 6.2, fig.height = 5.8}
+```{r quick-presence,  fig.height=5.8, fig.width= 6.5, fig.dpi=300}
 plot_phylorug(backbone, npm)
 ```
 
@@ -203,7 +203,7 @@ support_type <- c(
    )
 ```
 
-```{r support-default}
+```{r support-default, fig.height=5.8, fig.width= 6.5, fig.dpi=300}
  plot_phylorug(
    backbone, npm,
    mode         = "support",
@@ -263,12 +263,12 @@ unanimous-node dot, and `show_support = TRUE` with `support_label_cex` and `supp
 output, add `file = "output.pdf"` along with `width` and `height` to produce a 
 properly scaled figure.
 
-```{r support-refined}
+```{r support-refined, fig.height=5.8, fig.width= 6.5, fig.dpi=300}
 # For publication output, add:
 # file = "my_support_plot.pdf"
  plot_phylorug(
    backbone, npm,
-   width             = 6.2,
+   width             = 6.5,
    height            = 5.8,
    mode              = "support",
    support_type      = support_type,
