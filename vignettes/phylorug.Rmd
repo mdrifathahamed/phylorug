@@ -1,12 +1,15 @@
 ---
 title: "Introduction to phylorug"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Introduction to phylorug}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
@@ -21,7 +24,7 @@ knitr::opts_chunk$set(
 ```
 
 
-## What problem does phylorug solve?
+# What problem does phylorug solve?
 
 Phylogenetic trees represent best-supported, statistically convincing
 hypotheses of evolutionary history, not ground truths (Steenwyk et al.
@@ -101,7 +104,7 @@ bins support values against metric-specific thresholds rather than
 rescaling them numerically, and draws rugs directly on the reference
 tree — no manual placement, no external software.
 
-## Quick start
+# Quick start
 
 The fastest way to see phylorug in action is with the built-in `sample_trees` 
 dataset, a 15-taxon subset of the  beetle  data (Lopes et al., 2024), already 
@@ -111,7 +114,7 @@ attaching the package :
 library(phylorug)
 ```
 
-### Load the data
+## Load the data
 
 `sample_trees` is a named list of five `phylo` objects, all sharing the same 15 
 taxa. Pick one as the backbone and use the rest as comparisons. In the original
@@ -211,7 +214,7 @@ plot_phylorug(
 )
 ```
 
-## Reading the plot
+# Reading the plot
 
 The plot carries two legends. The **position legend** (top-left) maps each 
 numbered cell to a tree. For example, cell 1 is the first tree, cell 2 the 
@@ -250,7 +253,7 @@ Customisation section below):
   means the tree file had no node labels, or the label was not a parseable
   number.
  
-## Fine-tuning the figure
+# Fine-tuning the figure
  
 The following example shows how optional arguments refine the plot. 
 `rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing per-tree
@@ -285,7 +288,7 @@ plot_phylorug(
 )
 ```
 
-## Working with real data: Culicomorpha
+# Working with real data: Culicomorpha
 
 The built-in Culicomorpha dataset contains 10 phylogenomic analyses of 46 taxa 
 from eight Diptera families (Fu et al., 2025), covering IQ-TREE partitioned, 
@@ -427,7 +430,7 @@ tree files side by side in the original study are condensed onto a single
 figure. A reader can immediately see which nodes are robust to analytical choice
 and which deserve further investigation.
 
-## Full pipeline: beetles with tip translation
+# Full pipeline: beetles with tip translation
 The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains two 
 sets of trees from Lopes et al. (2024): `beetles_50p/` and `beetles_70p/`, each
 with 5 analyses of 314 ingroup dung beetle taxa (316 tips including 2 outgroups)
@@ -580,7 +583,7 @@ method-space comparison `phylorug` was designed to display. A table of support
 values would record the same numbers, but the rug places the conflict directly 
 on the tree, at the node where it matters, making it legible at a glance.
 
-## Customisation
+# Customisation
 
 The remaining examples use the compact `sample_trees` dataset to 
 demonstrate optional arguments. Reload the backbone and rebuild the 
@@ -599,7 +602,7 @@ support_type <- c(
 )
 ```
 
-### Grid dimensions
+## Grid dimensions
 
 By default, phylorug chooses a roughly square grid. Override with 
 `n_rows` and `n_cols`:
@@ -613,7 +616,7 @@ plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
 ```
 
-### Tree appearance
+## Tree appearance
 
 `plot_phylorug()` passes additional arguments through `...` to 
 `ape::plot.phylo()`. Common options:
@@ -622,7 +625,7 @@ plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
 plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
 ```
 
-### Including the backbone
+## Including the backbone
 
 By default, the backbone does not occupy a cell in the rug (it trivially 
 recovers every clade, since it defines the topology). Set 
@@ -635,7 +638,7 @@ plot_phylorug(backbone, npm, include_backbone = TRUE)
 In support mode with `include_backbone = TRUE`, you must also include 
 `"backbone"` in the `support_type` vector.
 
-### Custom thresholds
+## Custom thresholds
 
 Override the default support bins with your own cutoffs:
 
@@ -652,7 +655,7 @@ plot_phylorug(
   thresholds = my_thresholds
 )
 ```
-## Tips and best practices
+# Tips and best practices
 
 **Root and prune before translating.** `translate_tips()` replaces
 specimen codes with species names. Once translated, you cannot match
@@ -688,7 +691,7 @@ proceed (a clade containing a missing taxon cannot be evaluated). Run
 `check_taxa()` first to see the discrepancies, then `prune_to_shared()`
 to reduce all trees to their common taxa.
 
-## References
+# References
 
 - Fu, Y. et al. (2025). Phylogenomic insights into the higher level
   relationships within Culicomorpha (Diptera). *Insect Systematics and
