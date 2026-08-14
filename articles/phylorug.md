@@ -38,8 +38,8 @@ Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. **Nodal support** measures how confident a single analysis is
 in a clade such as bootstrap, posterior probability, or LPP. **Nodal
 stability** measures whether that clade is consistently recovered across
-different analytical strategies, data types, and inference methods
-,extending Wheeler’s (1995) parameter-space sensitivity analysis
+different analytical strategies, data types, and inference methods,
+extending Wheeler’s (1995) parameter-space sensitivity analysis
 framework. These can decouple: a clade may receive 100% bootstrap under
 one model yet collapse under all others, or carry only 30–50% support
 everywhere yet appear in every tree.
@@ -65,17 +65,15 @@ plots “Navajo rugs” and showed that nodal support and nodal stability
 can tell different stories.
 
 Sanders (2010) automated clade detection with Cladescan (Perl), and
-Machado (2015) extended the approach with YBYRÁ (Python), which added
-topological distance calculation and rogue taxon detection alongside
-sensitivity analysis. Both tools produce individual SVG plots per node
-that must be manually placed onto the tree in a vector editor. Cladescan
-is no longer available online, and YBYRÁ has been archived by its
-developer and is no longer maintained. More importantly, both were
-designed around sensitivity analysis within a single analytical
-framework — varying parameters and cost schemes — rather than comparing
-trees from fundamentally different inference pipelines that report
-support in incompatible formats (e.g., UFBoot2, SH-aLRT, posterior
-probability, ASTRAL LPP).
+Machado (2015) extended the approach with YBYRÁ (Python). Both tools
+produce individual SVG plots per node that must be manually placed onto
+the tree in a vector editor. Cladescan is no longer available online,
+and YBYRÁ has been archived by its developer and is no longer
+maintained. More importantly, both were designed around sensitivity
+analysis within a single analytical framework, varying parameters and
+cost schemes, rather than comparing trees from fundamentally different
+inference pipelines that report support in incompatible formats (e.g.,
+UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP).
 
 phylorug extends this lineage into R. It reads trees from any pipeline,
 bins support values against metric-specific thresholds rather than
@@ -85,7 +83,7 @@ tree — no manual placement, no external software.
 ## Quick start
 
 The fastest way to see phylorug in action is with the built-in
-`sample_trees` dataset — a 15-taxon subset of the beetle data (Lopes et
+`sample_trees` dataset, a 15-taxon subset of the beetle data (Lopes et
 al., 2024), already rooted, pruned, and with tip labels translated to
 species names. Lets start with attaching the package :
 
@@ -131,7 +129,7 @@ check_taxa(backbone, others)
 #> 4        70p_partition_entropy identical     15
 ```
 
-All trees share the same 20 taxa, so we can proceed. IF a missmatch is
+All trees share the same 15 taxa, so we can proceed. IF a missmatch is
 reported the helper function
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
 can be used to get identical taxa set.
@@ -150,7 +148,7 @@ each tree. By default, the first support value in each node label is
 used. If your trees carry compound labels like `100/98` (e.g.,
 SH-aLRT/UFBoot2 from IQ-TREE), `support_col` lets you select which value
 to extract, `support_col = 1` takes the first, `support_col = 2` takes
-the second. These two matrices are what
+the second.
 
 ``` r
 
@@ -230,27 +228,42 @@ support_type <- c(
 ## Reading the plot
 
 The plot carries two legends. The **position legend** (top-left) maps
-each numbered cell to an tree.For example, cell 1 is the first tree,
+each numbered cell to a tree. For example, cell 1 is the first tree,
 cell 2 the second, and so on. The **threshold legend** (top-right,
 support mode only) shows what each shade means.
 
 At each node you will see one of these patterns:
 
-**Black dot**: all analyses recover this clade unanimously
-(`dot_identical = TRUE`, the default). No rug is drawn to reduce
-clutter. **Mixed grid**: some cells filled with solid black, some white.
-These are the interesting nodes, the position legend tells you which
-analysis agrees and which disagrees. **All-white grid**: No comparison
-tree recovers this backbone clade. It exists only in the backbone
-topology. Setting `hide_unsupported = TRUE` removes these all-white rugs
-for a cleaner figure. A node with neither a dot nor a rug then signals a
-clade found only in the backbone.
+- **Black dot**: all analyses recover this clade unanimously
+  (`dot_identical = TRUE`, the default). No rug is drawn to reduce
+  clutter. -**Mixed grid**: some cells filled with solid black, some
+  white. These are the interesting nodes, the position legend tells you
+  which analysis agrees and which disagrees. -**All-white grid**: No
+  comparison tree recovers this backbone clade. It exists only in the
+  backbone topology. Setting `hide_unsupported = TRUE` removes these
+  all-white rugs for a cleaner figure. A node with neither a dot nor a
+  rug then signals a clade found only in the backbone.
 
-In support mode, filled cells use a greyscale gradient plus two special
-colours. **Black** is very high support (e.g., UFBoot \>= 95, LPP \>=
-0.95), **dark grey** is high, **light grey** is moderate, and **yellow**
-is low support. **White** means the clade was not recovered. **Red**
-means the clade was recovered but carries no computable support value.
+In support mode, filled cells are shaded by how strongly each analysis
+supports the clade. The colour scheme uses a greyscale gradient for
+recovered clades plus two special colours for absent and unparseable
+cases. The thresholds shown below are the package defaults. Different
+fields and journals apply different cutoffs, so we recommend defining
+your own via the `thresholds` argument (see the Customisation section
+below):
+
+- **Black**: very high support (UFBoot2 \>= 98, SH-aLRT \>= 98, LPP \>=
+  0.99). Nodes that most researchers would treat as resolved.
+- **Dark grey**: high support (UFBoot2 95-97, SH-aLRT 80-97, LPP
+  0.95-0.98). Well supported but not at the strongest threshold.
+- **Light grey**: moderate support (UFBoot2 50-94, SH-aLRT 50-79, LPP
+  0.50-0.94). The clade is recovered but confidence is limited.
+- **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for
+  LPP). Present but weakly endorsed.
+- **White**: clade not recovered by that analysis.
+- **Red**: clade recovered but no support value could be read. This
+  typically means the tree file had no node labels, or the label was not
+  a parseable number.
 
 ## Fine-tuning the figure
 
@@ -273,7 +286,7 @@ properly scaled figure.
 # file = "my_support_plot.pdf"
  plot_phylorug(
    backbone, npm,
-   width             = 8,
+   width             = 6.2,
    height            = 5.8,
    mode              = "support",
    support_type      = support_type,
@@ -638,7 +651,8 @@ plot_phylorug(
 ```
 
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
-\## What the rug reveals
+
+## What the rug reveals ?
 
 The rug on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
 recurring split between coalescent and concatenation methods. At several
