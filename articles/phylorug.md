@@ -236,13 +236,15 @@ At each node you will see one of these patterns:
 
 - **Black dot**: all analyses recover this clade unanimously
   (`dot_identical = TRUE`, the default). No rug is drawn to reduce
-  clutter. -**Mixed grid**: some cells filled with solid black, some
-  white. These are the interesting nodes, the position legend tells you
-  which analysis agrees and which disagrees. -**All-white grid**: No
-  comparison tree recovers this backbone clade. It exists only in the
-  backbone topology. Setting `hide_unsupported = TRUE` removes these
-  all-white rugs for a cleaner figure. A node with neither a dot nor a
-  rug then signals a clade found only in the backbone.
+  clutter.
+- **Mixed grid**: some cells filled with solid black, some white. These
+  are the interesting nodes, the position legend tells you which
+  analysis agrees and which disagrees.
+- **All-white grid**: No comparison tree recovers this backbone clade.
+  It exists only in the backbone topology. Setting
+  `hide_unsupported = TRUE` removes these all-white rugs for a cleaner
+  figure. A node with neither a dot nor a rug then signals a clade found
+  only in the backbone.
 
 In support mode, filled cells are shaded by how strongly each analysis
 supports the clade. The colour scheme uses a greyscale gradient for
