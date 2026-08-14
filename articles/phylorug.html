@@ -378,12 +378,17 @@ returns a named list:</p>
 <span><span class="co">#&gt;  [5] "Matrix1-kpi_PMSF(H2.guide)"   "Matrix1-smart_ASTRAL"        </span></span>
 <span><span class="co">#&gt;  [7] "Matrix1-smart_partitioning"   "Matrix1-smart_PMSF(H1.guide)"</span></span>
 <span><span class="co">#&gt;  [9] "Matrix1-smart_PMSF(H2.guide)" "Matrix2_partitioning"</span></span></code></pre></div>
-<p>##Root and remove the outgroups</p>
-<p>The Culicomorpha trees include three outgroup taxa from outside the
-infraorder: Phlebotomus chinensis and Clogmia albipunctata (Psychodidae)
-and Coboldia fuscipes (Scatopsidae). Root on all three, then drop them.
-The order matters — you must root while the outgroup tips are still
-present, because ape::root() needs to find them in the tree:</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="root-and-remove-the-outgroups">Root and remove the outgroups<a class="anchor" aria-label="anchor" href="#root-and-remove-the-outgroups"></a>
+</h2>
+<p>The <em>Culicomorpha</em> trees include three outgroup taxa from
+outside the infraorder: <em>Phlebotomus chinensis</em> and <em>Clogmia
+albipunctata (Psychodidae)</em> and <em>Coboldia fuscipes
+(Scatopsidae)</em>. Root on all three, then drop them. The order matters
+— you must root while the outgroup tips are still present, because
+<code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> needs to find them in the tree:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trees</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">trees</span>, <span class="kw">function</span><span class="op">(</span><span class="va">tr</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">root</a></span><span class="op">(</span><span class="va">tr</span>, outgroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Coboldia_fuscipes"</span>,</span>
@@ -397,7 +402,6 @@ present, because ape::root() needs to find them in the tree:</p>
 <p>The Culicomorpha trees already carry species names as tip labels, so
 no translation is needed here. For trees with specimen codes, see
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> in the beetles example below.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="choose-a-backbone">Choose a backbone<a class="anchor" aria-label="anchor" href="#choose-a-backbone"></a>
@@ -431,13 +435,17 @@ comparisons:</p>
 </h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></code></pre></div>
-<p>##plot the phylorug-presence</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
+</h2>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
 <p>With 9 comparison trees, phylorug automatically arranges the rug grid
-(3 columns by 3 rows in this case). The position legend at the bottom
-maps each cell position to an analysis name.</p>
+(3 columns by 3 rows in this case). The position legend maps each cell
+position to an analysis name.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- Map each comparison tree to its support metric ---</span></span>
 <span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -451,11 +459,15 @@ maps each cell position to an analysis name.</p>
 <span>  <span class="st">"Matrix1-smart_PMSF(H2.guide)"</span>  <span class="op">=</span> <span class="st">"sh_alrt"</span>,</span>
 <span>  <span class="st">"Matrix2_partitioning"</span>          <span class="op">=</span> <span class="st">"sh_alrt"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>##support-mode plot phylorug Here we use show_support = TRUE to
-overlay the backbone’s own node labels in red for cross-referencing,
-cell_scale = 0.35 to shrink the rug cells slightly for a denser tree,
-and hide_unsupported = TRUE to remove all-white rugs so only contested
-and stable nodes remain visible</p>
+</div>
+<div class="section level2">
+<h2 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
+</h2>
+<p>Here we use show_support = TRUE to overlay the backbone’s own node
+labels in red for cross-referencing, <code>cell_scale = 0.35</code> to
+shrink the rug cells slightly for a denser tree, and hide_unsupported =
+TRUE to remove all-white rugs so only contested and stable nodes remain
+visible.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
@@ -468,7 +480,6 @@ and stable nodes remain visible</p>
 <span>              rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>              hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="what-the-rug-reveals">What the rug reveals?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
@@ -507,23 +518,32 @@ where rapid diversification left little phylogenetic signal, making
 resolution sensitive to model choice. Fu et al. (2025) noted similar
 instability around the placement of <em>Telmatogetoninae</em> within
 <em>Diamesinae</em> depending on the analytical model used.</p>
-<p>This is the core value of the phylorug, patterns that required
-comparing 10 separate tree files and a topology test table in the
-original study are condensed onto a single figure. A reader can
-immediately see which nodes are robust to analytical choice and which
-deserve further investigation.</p>
+<p>This is the core value of <code>phylorug</code>: patterns that
+required opening 10 separate tree files side by side in the original
+study are condensed onto a single figure. A reader can immediately see
+which nodes are robust to analytical choice and which deserve further
+investigation.</p>
 </div>
 <div class="section level2">
 <h2 id="full-pipeline-beetles-with-tip-translation">Full pipeline: beetles with tip translation<a class="anchor" aria-label="anchor" href="#full-pipeline-beetles-with-tip-translation"></a>
 </h2>
-<p>The beetle dataset ships with phylorug in
-<code>inst/extdata/beetles_50p/</code>. It contains 5 analyses of
-approximately 289 ingroup dung beetle taxa from Lopes et al. (2024).
-Unlike the <em>Culicomorpha</em> trees, these trees store specimen codes
-as tip labels (e.g., <code>"OntauST002"</code> rather than a species
-name), so this example adds one extra step: translating tip labels using
-a lookup table before building the <em>phylorug</em>.</p>
-<p>##Read the trees</p>
+<p>The beetle dataset ships with <code>phylorug</code> in
+<code>inst/extdata/</code>. It contains two sets of trees from Lopes et
+al. (2024): <code>beetles_50p/</code> and <code>beetles_70p/</code>,
+each with 5 analyses of 314 ingroup dung beetle taxa (316 tips including
+2 outgroups) built from UCE loci retained at different completeness
+thresholds (50% and 70%). The two datasets produce slightly different
+topologies, making them a good test case for exploring how data
+filtering affects clade recovery. For this vignette we use the 50p set,
+but users are encouraged to try both. Unlike the <em>Culicomorpha</em>
+trees, these trees store specimen codes as tip labels (e.g.,
+<code>"OntauST002"</code> rather than a species name), so this example
+adds one extra step: translating tip labels using a lookup table before
+building the rug.</p>
+</div>
+<div class="section level2">
+<h2 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
+</h2>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_50p"</span>, package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
 <span><span class="va">trees</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_trees.html">read_trees</a></span><span class="op">(</span><span class="va">tree_dir</span><span class="op">)</span></span>
@@ -618,7 +638,7 @@ trees.</p>
 <p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level2">
-<h2 id="support-mode-1">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
+<h2 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
 </h2>
 <p>Map each comparison tree to its support metric. The two ASTRAL trees
 carry local posterior probabilities, the two IQ-TREE trees carry

@@ -331,13 +331,15 @@ names(trees)
 #>  [9] "Matrix1-smart_PMSF(H2.guide)" "Matrix2_partitioning"
 ```
 
-\##Root and remove the outgroups
+## Root and remove the outgroups
 
-The Culicomorpha trees include three outgroup taxa from outside the
-infraorder: Phlebotomus chinensis and Clogmia albipunctata (Psychodidae)
-and Coboldia fuscipes (Scatopsidae). Root on all three, then drop them.
-The order matters — you must root while the outgroup tips are still
-present, because ape::root() needs to find them in the tree:
+The *Culicomorpha* trees include three outgroup taxa from outside the
+infraorder: *Phlebotomus chinensis* and *Clogmia albipunctata
+(Psychodidae)* and *Coboldia fuscipes (Scatopsidae)*. Root on all three,
+then drop them. The order matters — you must root while the outgroup
+tips are still present, because
+[`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) needs to find
+them in the tree:
 
 ``` r
 
@@ -394,7 +396,7 @@ check_taxa(backbone, others)
 npm <- node_presence_matrix(backbone, others)
 ```
 
-\##plot the phylorug-presence
+## plot the phylorug-presence
 
 ``` r
 
@@ -404,8 +406,8 @@ plot_phylorug(backbone, npm)
 ![](phylorug_files/figure-html/plot-culico-1.png)
 
 With 9 comparison trees, phylorug automatically arranges the rug grid (3
-columns by 3 rows in this case). The position legend at the bottom maps
-each cell position to an analysis name.
+columns by 3 rows in this case). The position legend maps each cell
+position to an analysis name.
 
 ``` r
 
@@ -423,11 +425,12 @@ support_type <- c(
 )
 ```
 
-\##support-mode plot phylorug Here we use show_support = TRUE to overlay
-the backbone’s own node labels in red for cross-referencing, cell_scale
-= 0.35 to shrink the rug cells slightly for a denser tree, and
-hide_unsupported = TRUE to remove all-white rugs so only contested and
-stable nodes remain visible
+## support-mode
+
+Here we use show_support = TRUE to overlay the backbone’s own node
+labels in red for cross-referencing, `cell_scale = 0.35` to shrink the
+rug cells slightly for a denser tree, and hide_unsupported = TRUE to
+remove all-white rugs so only contested and stable nodes remain visible.
 
 ``` r
 
@@ -482,22 +485,27 @@ sensitive to model choice. Fu et al. (2025) noted similar instability
 around the placement of *Telmatogetoninae* within *Diamesinae* depending
 on the analytical model used.
 
-This is the core value of the phylorug, patterns that required comparing
-10 separate tree files and a topology test table in the original study
-are condensed onto a single figure. A reader can immediately see which
-nodes are robust to analytical choice and which deserve further
-investigation.
+This is the core value of `phylorug`: patterns that required opening 10
+separate tree files side by side in the original study are condensed
+onto a single figure. A reader can immediately see which nodes are
+robust to analytical choice and which deserve further investigation.
 
 ## Full pipeline: beetles with tip translation
 
-The beetle dataset ships with phylorug in `inst/extdata/beetles_50p/`.
-It contains 5 analyses of approximately 289 ingroup dung beetle taxa
-from Lopes et al. (2024). Unlike the *Culicomorpha* trees, these trees
-store specimen codes as tip labels (e.g., `"OntauST002"` rather than a
-species name), so this example adds one extra step: translating tip
-labels using a lookup table before building the *phylorug*.
+The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains
+two sets of trees from Lopes et al. (2024): `beetles_50p/` and
+`beetles_70p/`, each with 5 analyses of 314 ingroup dung beetle taxa
+(316 tips including 2 outgroups) built from UCE loci retained at
+different completeness thresholds (50% and 70%). The two datasets
+produce slightly different topologies, making them a good test case for
+exploring how data filtering affects clade recovery. For this vignette
+we use the 50p set, but users are encouraged to try both. Unlike the
+*Culicomorpha* trees, these trees store specimen codes as tip labels
+(e.g., `"OntauST002"` rather than a species name), so this example adds
+one extra step: translating tip labels using a lookup table before
+building the rug.
 
-\##Read the trees
+## Read the trees
 
 ``` r
 
