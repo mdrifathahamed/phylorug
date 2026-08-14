@@ -363,9 +363,9 @@ figure.</p>
 <p>The built-in Culicomorpha dataset contains 10 phylogenomic analyses
 of 46 taxa from eight Diptera families (Fu et al., 2025), covering
 IQ-TREE partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.</p>
-<div class="section level4">
-<h4 id="read-the-trees">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees"></a>
-</h4>
+<div class="section level3">
+<h3 id="read-the-trees">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees"></a>
+</h3>
 <p><code><a href="../reference/read_trees.html">read_trees()</a></code> scans a directory for tree files and
 returns a named list:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -429,12 +429,12 @@ comparisons:</p>
 <span><span class="co">#&gt; 7 Matrix1-smart_PMSF(H1.guide) identical     43              </span></span>
 <span><span class="co">#&gt; 8 Matrix1-smart_PMSF(H2.guide) identical     43              </span></span>
 <span><span class="co">#&gt; 9         Matrix2_partitioning identical     43</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="build-the-matrix-and-plot">Build the matrix and plot<a class="anchor" aria-label="anchor" href="#build-the-matrix-and-plot"></a>
-</h4>
+</div>
+<div class="section level3">
+<h3 id="build-the-matrix-and-plot">Build the matrix and plot<a class="anchor" aria-label="anchor" href="#build-the-matrix-and-plot"></a>
+</h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></code></pre></div>
-</div>
 </div>
 <div class="section level3">
 <h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
@@ -788,8 +788,12 @@ vector.</p>
 <span>  support_type <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>  thresholds <span class="op">=</span> <span class="va">my_thresholds</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100">
-# Tips and best practices</p>
+<p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="tips-and-best-practices">Tips and best practices<a class="anchor" aria-label="anchor" href="#tips-and-best-practices"></a>
+</h2>
 <p><strong>Root and prune before translating.</strong>
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> replaces specimen codes with species
 names. Once translated, you cannot match outgroup names for rooting.
@@ -825,7 +829,6 @@ containing a missing taxon cannot be evaluated). Run
 <code><a href="../reference/check_taxa.html">check_taxa()</a></code> first to see the discrepancies, then
 <code><a href="../reference/prune_to_shared.html">prune_to_shared()</a></code> to reduce all trees to their common
 taxa.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

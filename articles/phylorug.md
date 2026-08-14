@@ -313,7 +313,7 @@ The built-in Culicomorpha dataset contains 10 phylogenomic analyses of
 46 taxa from eight Diptera families (Fu et al., 2025), covering IQ-TREE
 partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
 
-#### Read the trees
+### Read the trees
 
 [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
 scans a directory for tree files and returns a named list:
@@ -389,7 +389,7 @@ check_taxa(backbone, others)
 #> 9         Matrix2_partitioning identical     43
 ```
 
-#### Build the matrix and plot
+### Build the matrix and plot
 
 ``` r
 
@@ -794,8 +794,9 @@ plot_phylorug(
 )
 ```
 
-![](phylorug_files/figure-html/custom-thresh-1.png) \# Tips and best
-practices
+![](phylorug_files/figure-html/custom-thresh-1.png)
+
+## Tips and best practices
 
 **Root and prune before translating.**
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
