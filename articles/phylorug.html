@@ -92,10 +92,9 @@ drawing a compact coloured grid a <strong>rug</strong> at every internal
 node of a reference tree(backbone). Each cell represents one tree, its
 colour shows whether that tree recovered the clade and how strongly it
 supported it.</p>
-</div>
-<div class="section level2">
-<h2 id="nodal-support-versus-nodal-stability">Nodal support versus nodal stability<a class="anchor" aria-label="anchor" href="#nodal-support-versus-nodal-stability"></a>
-</h2>
+<div class="section level3">
+<h3 id="nodal-support-versus-nodal-stability">Nodal support versus nodal stability<a class="anchor" aria-label="anchor" href="#nodal-support-versus-nodal-stability"></a>
+</h3>
 <p>Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. <strong>Nodal support</strong> measures how confident a single
 analysis is in a clade such as bootstrap, posterior probability, or LPP.
@@ -116,9 +115,9 @@ endorsed. Stable nodes receive a black dot by default. Setting
 universally recovered nodes as well, revealing cases where a clade is
 stable across all analyses but some analyses support it weakly.</p>
 </div>
-<div class="section level2">
-<h2 id="brief-history">Brief history<a class="anchor" aria-label="anchor" href="#brief-history"></a>
-</h2>
+<div class="section level3">
+<h3 id="brief-history">Brief history<a class="anchor" aria-label="anchor" href="#brief-history"></a>
+</h3>
 <p>The rug plot concept originated with Wheeler (1995), who plotted
 clade recovery across gap and transversion–transition cost ratios in
 parsimony analysis under direct optimization (POY). Giribet (2003) named
@@ -138,6 +137,7 @@ UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP).</p>
 pipeline, bins support values against metric-specific thresholds rather
 than rescaling them numerically, and draws rugs directly on the
 reference tree — no manual placement, no external software.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -164,10 +164,9 @@ used as a backbone tree.</p>
 <span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="check-taxon-consistency">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency"></a>
-</h2>
+<div class="section level3">
+<h3 id="check-taxon-consistency">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency"></a>
+</h3>
 <p>Before building a rug, verify that every comparison tree carries the
 same taxa as the backbone. <code><a href="../reference/check_taxa.html">check_taxa()</a></code> reports the outcome
 and flags any mismatches:</p>
@@ -185,9 +184,9 @@ and flags any mismatches:</p>
 is reported the helper function <code><a href="../reference/prune_to_shared.html">prune_to_shared()</a></code> can be
 used to get identical taxa set.</p>
 </div>
-<div class="section level2">
-<h2 id="build-the-node-presence-matrix">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix"></a>
-</h2>
+<div class="section level3">
+<h3 id="build-the-node-presence-matrix">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix"></a>
+</h3>
 <p>Once the trees share the same taxa, the next question is: which
 clades from the backbone appear in which comparison trees, and how
 strongly are they supported? <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> answers
@@ -209,9 +208,9 @@ in each node label is used. If your trees carry compound labels like
 uses to draw the <strong>rug</strong>, presence determines whether a
 cell is filled or empty, support determines its shade</p>
 </div>
-<div class="section level2">
-<h2 id="plot-the-rug">Plot the rug<a class="anchor" aria-label="anchor" href="#plot-the-rug"></a>
-</h2>
+<div class="section level3">
+<h3 id="plot-the-rug">Plot the rug<a class="anchor" aria-label="anchor" href="#plot-the-rug"></a>
+</h3>
 <p>With the node presence matrix ready, <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code>
 draws the rug on the backbone. In its simplest form, all arguments are
 defaults: <code>mode = "presence"</code>,
@@ -229,9 +228,9 @@ three matter most.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="st">"presence.pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, height <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
-</h2>
+<div class="section level3">
+<h3 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
+</h3>
 <p>Lets switch to support mode to see how strongly each tree supports
 each clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
@@ -260,6 +259,7 @@ across plot calls:</p>
 <span>  support_type <span class="op">=</span> <span class="va">support_type</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/support-default-1.png" class="r-plt" alt="" width="1950"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a>
@@ -363,9 +363,9 @@ figure.</p>
 <p>The built-in Culicomorpha dataset contains 10 phylogenomic analyses
 of 46 taxa from eight Diptera families (Fu et al., 2025), covering
 IQ-TREE partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.</p>
-<div class="section level3">
-<h3 id="read-the-trees">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees"></a>
-</h3>
+<div class="section level4">
+<h4 id="read-the-trees">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees"></a>
+</h4>
 <p><code><a href="../reference/read_trees.html">read_trees()</a></code> scans a directory for tree files and
 returns a named list:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -379,10 +379,9 @@ returns a named list:</p>
 <span><span class="co">#&gt;  [7] "Matrix1-smart_partitioning"   "Matrix1-smart_PMSF(H1.guide)"</span></span>
 <span><span class="co">#&gt;  [9] "Matrix1-smart_PMSF(H2.guide)" "Matrix2_partitioning"</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="root-and-remove-the-outgroups">Root and remove the outgroups<a class="anchor" aria-label="anchor" href="#root-and-remove-the-outgroups"></a>
-</h2>
+<div class="section level3">
+<h3 id="root-and-remove-the-outgroups">Root and remove the outgroups<a class="anchor" aria-label="anchor" href="#root-and-remove-the-outgroups"></a>
+</h3>
 <p>The <em>Culicomorpha</em> trees include three outgroup taxa from
 outside the infraorder: <em>Phlebotomus chinensis</em> and <em>Clogmia
 albipunctata (Psychodidae)</em> and <em>Coboldia fuscipes
@@ -403,18 +402,18 @@ albipunctata (Psychodidae)</em> and <em>Coboldia fuscipes
 no translation is needed here. For trees with specimen codes, see
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> in the beetles example below.</p>
 </div>
-<div class="section level2">
-<h2 id="choose-a-backbone">Choose a backbone<a class="anchor" aria-label="anchor" href="#choose-a-backbone"></a>
-</h2>
+<div class="section level3">
+<h3 id="choose-a-backbone">Choose a backbone<a class="anchor" aria-label="anchor" href="#choose-a-backbone"></a>
+</h3>
 <p>Pick one analysis as the backbone. The remaining trees are
 comparisons:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[[</span><span class="st">"Matrix1-kpi_PMSF(H1.guide)"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"Matrix1-kpi_PMSF(H1.guide)"</span><span class="op">]</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="check-taxon-consistency-1">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="check-taxon-consistency-1">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency-1"></a>
+</h3>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All 9 comparison trees share the same 43 taxa as the backbone.</span></span>
@@ -430,16 +429,16 @@ comparisons:</p>
 <span><span class="co">#&gt; 7 Matrix1-smart_PMSF(H1.guide) identical     43              </span></span>
 <span><span class="co">#&gt; 8 Matrix1-smart_PMSF(H2.guide) identical     43              </span></span>
 <span><span class="co">#&gt; 9         Matrix2_partitioning identical     43</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="build-the-matrix-and-plot">Build the matrix and plot<a class="anchor" aria-label="anchor" href="#build-the-matrix-and-plot"></a>
-</h3>
+<div class="section level4">
+<h4 id="build-the-matrix-and-plot">Build the matrix and plot<a class="anchor" aria-label="anchor" href="#build-the-matrix-and-plot"></a>
+</h4>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level2">
-<h2 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
-</h2>
+<div class="section level3">
+<h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
+</h3>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
@@ -460,9 +459,9 @@ position to an analysis name.</p>
 <span>  <span class="st">"Matrix2_partitioning"</span>          <span class="op">=</span> <span class="st">"sh_alrt"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
+</h3>
 <p>Here we use show_support = TRUE to overlay the backbone’s own node
 labels in red for cross-referencing, <code>cell_scale = 0.35</code> to
 shrink the rug cells slightly for a denser tree, and hide_unsupported =
@@ -481,9 +480,9 @@ visible.</p>
 <span>              hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
 </div>
-<div class="section level2">
-<h2 id="what-the-rug-reveals">What the rug reveals?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
-</h2>
+<div class="section level3">
+<h3 id="what-the-rug-reveals">What the rug reveals?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
+</h3>
 <p>The <strong>rugs</strong> immediately separates stable from contested
 regions of the <em>Culicomorpha</em> tree. Most family-level clades
 carry black dots, meaning those clades are recovered by unanimously all
@@ -524,6 +523,7 @@ study are condensed onto a single figure. A reader can immediately see
 which nodes are robust to analytical choice and which deserve further
 investigation.</p>
 </div>
+</div>
 <div class="section level2">
 <h2 id="full-pipeline-beetles-with-tip-translation">Full pipeline: beetles with tip translation<a class="anchor" aria-label="anchor" href="#full-pipeline-beetles-with-tip-translation"></a>
 </h2>
@@ -540,10 +540,9 @@ trees, these trees store specimen codes as tip labels (e.g.,
 <code>"OntauST002"</code> rather than a species name), so this example
 adds one extra step: translating tip labels using a lookup table before
 building the rug.</p>
-</div>
-<div class="section level2">
-<h2 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
+</h3>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tree_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_50p"</span>, package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
 <span><span class="va">trees</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_trees.html">read_trees</a></span><span class="op">(</span><span class="va">tree_dir</span><span class="op">)</span></span>
@@ -553,9 +552,9 @@ building the rug.</p>
 <span><span class="co">#&gt; [3] "50p_ghost"                    "50p_partition_entropy"       </span></span>
 <span><span class="co">#&gt; [5] "50p_uce"</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="root-and-remove-outgroups">Root and remove outgroups<a class="anchor" aria-label="anchor" href="#root-and-remove-outgroups"></a>
-</h2>
+<div class="section level3">
+<h3 id="root-and-remove-outgroups">Root and remove outgroups<a class="anchor" aria-label="anchor" href="#root-and-remove-outgroups"></a>
+</h3>
 <p>The beetle trees include two outgroup taxa, <em>NicorbUCE</em> and
 <em>NicvesUCE</em>. We ill root on them first, then drop them. As
 before, rooting must happen while the outgroup tips are still in the
@@ -567,9 +566,9 @@ tree.</p>
 <span>  <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">drop.tip</a></span><span class="op">(</span><span class="va">tr</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NicorbUCE"</span>, <span class="st">"NicvesUCE"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="translate-tip-labels">Translate tip labels<a class="anchor" aria-label="anchor" href="#translate-tip-labels"></a>
-</h2>
+<div class="section level3">
+<h3 id="translate-tip-labels">Translate tip labels<a class="anchor" aria-label="anchor" href="#translate-tip-labels"></a>
+</h3>
 <p>The trees still carry specimen codes at this point. A CSV file
 <code>biogeo.csv</code> included with the package maps each code to its
 species name. Lets load it and check the first few rows:</p>
@@ -600,9 +599,9 @@ translation.</p>
 <span><span class="co">#&gt; 50p_partition_entropy: 314 tips translated, 0 unchanged</span></span>
 <span><span class="co">#&gt; 50p_uce: 314 tips translated, 0 unchanged</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="choose-a-backbone-and-check-taxa">Choose a backbone and check taxa<a class="anchor" aria-label="anchor" href="#choose-a-backbone-and-check-taxa"></a>
-</h2>
+<div class="section level3">
+<h3 id="choose-a-backbone-and-check-taxa">Choose a backbone and check taxa<a class="anchor" aria-label="anchor" href="#choose-a-backbone-and-check-taxa"></a>
+</h3>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[[</span><span class="st">"50p_uce"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"50p_uce"</span><span class="op">]</span></span>
@@ -616,18 +615,18 @@ translation.</p>
 <span><span class="co">#&gt; 3                    50p_ghost identical    314              </span></span>
 <span><span class="co">#&gt; 4        50p_partition_entropy identical    314</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="build-the-node-presence-matrix-1">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="build-the-node-presence-matrix-1">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix-1"></a>
+</h3>
 <p>The beetle trees carry compound node labels
 (<code>SH-aLRT/UFBoot2</code> for <code>IQ-TREE trees</code>). Extract
 both support values with <code>support_col = c(1, 2)</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
-</h2>
+<div class="section level3">
+<h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
+</h3>
 <p>At ~316 taxa the tree is dense. For a clean figure,
 <code>hide_unsupported = TRUE</code> removes all-white rugs that would
 clutter the backbone, and writing to a file with explicit width and
@@ -637,9 +636,9 @@ trees.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
-<div class="section level2">
-<h2 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
-</h2>
+<div class="section level3">
+<h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
+</h3>
 <p>Map each comparison tree to its support metric. The two ASTRAL trees
 carry local posterior probabilities, the two IQ-TREE trees carry
 UFBoot2:</p>
@@ -678,9 +677,9 @@ shading. For a tree this size, always write to a file (file =
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
-<div class="section level2">
-<h2 id="what-the-rug-reveals-1">What the rug reveals ?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals-1"></a>
-</h2>
+<div class="section level3">
+<h3 id="what-the-rug-reveals-1">What the rug reveals ?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals-1"></a>
+</h3>
 <p>The <strong>rug</strong> on the 20-taxon beetle subset (Lopes et
 al. 2024) exposes a recurring split between coalescent and concatenation
 methods. At several nodes the two ASTRAL analyses (cells 1–2) and the
@@ -718,6 +717,7 @@ precisely the kind of method-space comparison <code>phylorug</code> was
 designed to display. A table of support values would record the same
 numbers, but the rug places the conflict directly on the tree, at the
 node where it matters, making it legible at a glance.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="customisation">Customisation<a class="anchor" aria-label="anchor" href="#customisation"></a>
@@ -789,7 +789,7 @@ vector.</p>
 <span>  thresholds <span class="op">=</span> <span class="va">my_thresholds</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100">
-## Tips and best practices</p>
+# Tips and best practices</p>
 <p><strong>Root and prune before translating.</strong>
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> replaces specimen codes with species
 names. Once translated, you cannot match outgroup names for rooting.

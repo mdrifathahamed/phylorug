@@ -32,7 +32,7 @@ grid a **rug** at every internal node of a reference tree(backbone).
 Each cell represents one tree, its colour shows whether that tree
 recovered the clade and how strongly it supported it.
 
-## Nodal support versus nodal stability
+### Nodal support versus nodal stability
 
 Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. **Nodal support** measures how confident a single analysis is
@@ -56,7 +56,7 @@ extends the rug to these universally recovered nodes as well, revealing
 cases where a clade is stable across all analyses but some analyses
 support it weakly.
 
-## Brief history
+### Brief history
 
 The rug plot concept originated with Wheeler (1995), who plotted clade
 recovery across gap and transversion–transition cost ratios in parsimony
@@ -109,7 +109,7 @@ backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 ```
 
-## Check taxon consistency
+### Check taxon consistency
 
 Before building a rug, verify that every comparison tree carries the
 same taxa as the backbone.
@@ -134,7 +134,7 @@ reported the helper function
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
 can be used to get identical taxa set.
 
-## Build the node presence matrix
+### Build the node presence matrix
 
 Once the trees share the same taxa, the next question is: which clades
 from the backbone appear in which comparison trees, and how strongly are
@@ -161,7 +161,7 @@ The result is a named list.
 uses to draw the **rug**, presence determines whether a cell is filled
 or empty, support determines its shade
 
-## Plot the rug
+### Plot the rug
 
 With the node presence matrix ready,
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
@@ -187,7 +187,7 @@ fine-tune your figure, but these three matter most.
 plot_phylorug(backbone, npm, file = "presence.pdf", width = 12, height = 8)
 ```
 
-## Support mode
+### Support mode
 
 Lets switch to support mode to see how strongly each tree supports each
 clade. Cells are shaded by binned support strength, darker means
@@ -313,7 +313,7 @@ The built-in Culicomorpha dataset contains 10 phylogenomic analyses of
 46 taxa from eight Diptera families (Fu et al., 2025), covering IQ-TREE
 partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
 
-### Read the trees
+#### Read the trees
 
 [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
 scans a directory for tree files and returns a named list:
@@ -331,7 +331,7 @@ names(trees)
 #>  [9] "Matrix1-smart_PMSF(H2.guide)" "Matrix2_partitioning"
 ```
 
-## Root and remove the outgroups
+### Root and remove the outgroups
 
 The *Culicomorpha* trees include three outgroup taxa from outside the
 infraorder: *Phlebotomus chinensis* and *Clogmia albipunctata
@@ -359,7 +359,7 @@ translation is needed here. For trees with specimen codes, see
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
 in the beetles example below.
 
-## Choose a backbone
+### Choose a backbone
 
 Pick one analysis as the backbone. The remaining trees are comparisons:
 
@@ -369,7 +369,7 @@ backbone <- trees[["Matrix1-kpi_PMSF(H1.guide)"]]
 others   <- trees[names(trees) != "Matrix1-kpi_PMSF(H1.guide)"]
 ```
 
-## Check taxon consistency
+### Check taxon consistency
 
 ``` r
 
@@ -389,14 +389,14 @@ check_taxa(backbone, others)
 #> 9         Matrix2_partitioning identical     43
 ```
 
-### Build the matrix and plot
+#### Build the matrix and plot
 
 ``` r
 
 npm <- node_presence_matrix(backbone, others)
 ```
 
-## plot the phylorug-presence
+### plot the phylorug-presence
 
 ``` r
 
@@ -425,7 +425,7 @@ support_type <- c(
 )
 ```
 
-## support-mode
+### support-mode
 
 Here we use show_support = TRUE to overlay the backbone’s own node
 labels in red for cross-referencing, `cell_scale = 0.35` to shrink the
@@ -448,7 +448,7 @@ plot_phylorug(backbone, npm,
 
 ![](phylorug_files/figure-html/plot-culico-support-1.png)
 
-## What the rug reveals?
+### What the rug reveals?
 
 The **rugs** immediately separates stable from contested regions of the
 *Culicomorpha* tree. Most family-level clades carry black dots, meaning
@@ -505,7 +505,7 @@ we use the 50p set, but users are encouraged to try both. Unlike the
 one extra step: translating tip labels using a lookup table before
 building the rug.
 
-## Read the trees
+### Read the trees
 
 ``` r
 
@@ -518,7 +518,7 @@ names(trees)
 #> [5] "50p_uce"
 ```
 
-## Root and remove outgroups
+### Root and remove outgroups
 
 The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*.
 We ill root on them first, then drop them. As before, rooting must
@@ -533,7 +533,7 @@ trees <- lapply(trees, function(tr) {
 })
 ```
 
-## Translate tip labels
+### Translate tip labels
 
 The trees still carry specimen codes at this point. A CSV file
 `biogeo.csv` included with the package maps each code to its species
@@ -573,7 +573,7 @@ trees <- translate_tips(trees, biogeo,
 #> 50p_uce: 314 tips translated, 0 unchanged
 ```
 
-## Choose a backbone and check taxa
+### Choose a backbone and check taxa
 
 ``` r
 
@@ -590,7 +590,7 @@ check_taxa(backbone, others)
 #> 4        50p_partition_entropy identical    314
 ```
 
-## Build the node presence matrix
+### Build the node presence matrix
 
 The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
 `IQ-TREE trees`). Extract both support values with
@@ -601,7 +601,7 @@ The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
 npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 ```
 
-## Presence mode
+### Presence mode
 
 At ~316 taxa the tree is dense. For a clean figure,
 `hide_unsupported = TRUE` removes all-white rugs that would clutter the
@@ -615,7 +615,7 @@ plot_phylorug(backbone, npm, hide_unsupported = TRUE)
 
 ![](phylorug_files/figure-html/plot%20phylorug%20-1.png)
 
-## Support mode
+### Support mode
 
 Map each comparison tree to its support metric. The two ASTRAL trees
 carry local posterior probabilities, the two IQ-TREE trees carry
@@ -662,7 +662,7 @@ plot_phylorug(
 
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
 
-## What the rug reveals ?
+### What the rug reveals ?
 
 The **rug** on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
 recurring split between coalescent and concatenation methods. At several
@@ -794,7 +794,7 @@ plot_phylorug(
 )
 ```
 
-![](phylorug_files/figure-html/custom-thresh-1.png) \## Tips and best
+![](phylorug_files/figure-html/custom-thresh-1.png) \# Tips and best
 practices
 
 **Root and prune before translating.**
