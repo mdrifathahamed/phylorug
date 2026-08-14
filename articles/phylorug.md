@@ -207,20 +207,20 @@ scale. Define it once and reuse across plot calls:
 ``` r
 
 support_type <- c(
-   "70p_ASTRAL_partition_entropy" = "lpp",
-   "70p_ASTRAL_uce"               = "lpp",
-   "70p_ghost"                    = "ufboot",
-   "70p_partition_entropy"        = "ufboot"
-   )
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
 ```
 
 ``` r
 
- plot_phylorug(
-   backbone, npm,
-   mode         = "support",
-   support_type = support_type
- )
+plot_phylorug(
+  backbone, npm,
+  mode         = "support",
+  support_type = support_type
+)
 ```
 
 ![](phylorug_files/figure-html/support-default-1.png)
@@ -286,23 +286,23 @@ properly scaled figure.
 
 # For publication output, add:
 # file = "my_support_plot.pdf"
- plot_phylorug(
-   backbone, npm,
-   width             = 6.5,
-   height            = 5.8,
-   mode              = "support",
-   support_type      = support_type,
-   rug_position      = "inside",
-   cell_scale        = 0.38,
-   rug_on_identical  = TRUE,
-   hide_unsupported  = TRUE,
-   cex               = 0.90,
-   font              = 3,
-   dot_cex           = 1.3,
-   show_support      = TRUE,
-   support_label_col = "red",
-   support_label_cex = 0.4
- )
+plot_phylorug(
+  backbone, npm,
+  width             = 6.5,
+  height            = 5.8,
+  mode              = "support",
+  support_type      = support_type,
+  rug_position      = "inside",
+  cell_scale        = 0.38,
+  rug_on_identical  = TRUE,
+  hide_unsupported  = TRUE,
+  cex               = 0.90,
+  font              = 3,
+  dot_cex           = 1.3,
+  show_support      = TRUE,
+  support_label_col = "red",
+  support_label_cex = 0.4
+)
 ```
 
 ![](phylorug_files/figure-html/support-refined-1.png)
@@ -345,12 +345,12 @@ them in the tree:
 
 trees <- lapply(trees, function(tr) {
   tr <- ape::root(tr, outgroup = c("Coboldia_fuscipes",
-                                    "Phlebotomus_chinensis",
-                                    "Clogmia_albipunctata"),
+                                   "Phlebotomus_chinensis",
+                                   "Clogmia_albipunctata"),
                   resolve.root = TRUE)
   ape::drop.tip(tr, c("Coboldia_fuscipes",
-                       "Phlebotomus_chinensis",
-                       "Clogmia_albipunctata"))
+                      "Phlebotomus_chinensis",
+                      "Clogmia_albipunctata"))
 })
 ```
 
@@ -593,7 +593,7 @@ check_taxa(backbone, others)
 ## Build the node presence matrix
 
 The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
-IQ-TREE trees). Extract both support values with
+`IQ-TREE trees`). Extract both support values with
 `support_col = c(1, 2)`:
 
 ``` r
@@ -603,10 +603,10 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 
 ## Presence mode
 
-At ~289 taxa the tree is dense. For a clean figure,
+At ~316 taxa the tree is dense. For a clean figure,
 `hide_unsupported = TRUE` removes all-white rugs that would clutter the
-deep backbone, and writing to a file with explicit width and height
-avoids the distortion that GUI windows introduce on large trees.
+backbone, and writing to a file with explicit width and height avoids
+the distortion that GUI windows introduce on large trees.
 
 ``` r
 
@@ -631,7 +631,7 @@ support_type <- c(
 )
 ```
 
-With ~314 taxa, the canvas dimensions matter. `width = 25` and
+With ~316 taxa, the canvas dimensions matter. `width = 25` and
 `height = 65` give each tip enough vertical space to remain legible, and
 `cell_scale = 0.25` shrinks the rug cells to avoid overlap in dense
 regions. `show_support = TRUE` with `support_label_col = "red"` overlays
@@ -644,7 +644,7 @@ the backbone’s own support values for cross-referencing against the
 # For publication output, add:
 # file = "beetles_support.pdf"
 plot_phylorug(
-  backbone, 
+  backbone,
   npm,
   width              = 25,
   height             = 65,
@@ -664,7 +664,7 @@ plot_phylorug(
 
 ## What the rug reveals ?
 
-The rug on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
+The **rug** on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
 recurring split between coalescent and concatenation methods. At several
 nodes the two ASTRAL analyses (cells 1–2) and the two concatenation
 analyses (cells 3–4, GHOST and partitioned IQ-TREE) tell opposite
@@ -699,7 +699,7 @@ can obscure: one method’s confidence does not translate into consensus.
 
 The overall pattern, concatenation and coalescent methods systematically
 disagreeing at short branches, agreeing at long ones, is precisely the
-kind of method-space comparison phylorug was designed to display. A
+kind of method-space comparison `phylorug` was designed to display. A
 table of support values would record the same numbers, but the rug
 places the conflict directly on the tree, at the node where it matters,
 making it legible at a glance.
@@ -731,9 +731,19 @@ By default, phylorug chooses a roughly square grid. Override with
 
 ``` r
 
+#rug with flatend grid
 plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
+```
+
+![](phylorug_files/figure-html/grid-demo-1.png)
+
+``` r
+
+#rug with squired grid
 plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
 ```
+
+![](phylorug_files/figure-html/unnamed-chunk-2-1.png)
 
 ### Tree appearance
 
@@ -747,6 +757,8 @@ Common options:
 plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
 ```
 
+![](phylorug_files/figure-html/tree-appearance-1.png)
+
 ### Including the backbone
 
 By default, the backbone does not occupy a cell in the rug (it trivially
@@ -757,6 +769,8 @@ recovers every clade, since it defines the topology). Set
 
 plot_phylorug(backbone, npm, include_backbone = TRUE)
 ```
+
+![](phylorug_files/figure-html/include-bb-1.png)
 
 In support mode with `include_backbone = TRUE`, you must also include
 `"backbone"` in the `support_type` vector.
@@ -780,7 +794,8 @@ plot_phylorug(
 )
 ```
 
-## Tips and best practices
+![](phylorug_files/figure-html/custom-thresh-1.png) \## Tips and best
+practices
 
 **Root and prune before translating.**
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
@@ -790,11 +805,23 @@ match outgroup names for rooting. Always: (1) root, (2) drop outgroup,
 
 **One file = one analysis.**
 [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
-treats each file as one analysis. A file holding multiple equally
-optimal trees (as POY, TNT, or PAUP\* write them) is scored as a pool —
-the presence value becomes the proportion of pool trees recovering the
-clade. Do not pass posterior samples or bootstrap replicates; those are
-distributions, not analyses.
+treats each file as one analysis. A single-tree file returns a `phylo`;
+a file with multiple equally optimal trees (as POY, TNT, or PAUP\* write
+them) returns a `multiPhylo` scored as a pool.
+
+**Pool scoring in presence mode.** The presence value is the proportion
+of pool trees recovering the clade. If 2 out of 3 tied optima contain a
+clade, the cell records 0.67. A single-tree analysis records 1 or 0.
+
+**Support mode is not available for pools.** Node labels on tied optima
+are not independent support values. Meaningful support (bootstrap,
+posterior, SH-aLRT) comes only from explicit resampling or model-based
+procedures. To visualize support for a parsimony analysis, compute it
+externally (e.g., map bootstrap replicates onto the strict consensus,
+per Simmons and Freudenstein 2011), save the summarized tree, and pass
+that single file to phylorug. Passing raw tied optima into support mode
+would display arbitrary node labels as though they were support values,
+producing an artifactual rug.
 
 **Wrap bare `multiPhylo` in a list.** If you construct comparison trees
 manually, each element of the list passed to
