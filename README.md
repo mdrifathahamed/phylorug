@@ -83,8 +83,8 @@ real data before applying it to their own.
 GitHub:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("mdrifathahamed/phylorug")
+# install.packages("pak")
+pak::pak("mdrifathahamed/phylorug")
 library(phylorug)
 ```
 
