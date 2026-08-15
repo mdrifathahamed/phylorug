@@ -71,8 +71,8 @@ GitHub:
 
 ``` r
 
-# install.packages("devtools")
-devtools::install_github("mdrifathahamed/phylorug")
+# install.packages("pak")
+pak::pak("mdrifathahamed/phylorug")
 library(phylorug)
 ```
 
