@@ -40,7 +40,7 @@ immune to all sources of error.
 Incomplete lineage sorting, long-branch attraction, model
 misspecification, and compositional heterogeneity each affect different
 methods differently (Fleming et al. 2023). Accordingly, exploring
-multiple strategies , on different data types and different infrence
+multiple strategies , on different data types and different inference
 pipelines is the way researchers detect nodes that may be artifacts of a
 particular analytical choice versus nodes that hold up regardless of
 method.
