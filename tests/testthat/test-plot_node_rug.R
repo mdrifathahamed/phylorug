@@ -75,22 +75,22 @@ test_that("tier 2: present but no support value is red (not-computed)", {
 })
 
 test_that("tier 2: present with support is shaded by bin", {
-  # UFBoot 99 >= 98 → very high → bin 4
+  # UFBoot 99 >= 95 -> very high -> bin 4
   cell <- resolve_cell(1, 99, "ufboot", NULL, 2L)
   expect_equal(cell$fill, bin_fill(4L)$fill)
   expect_equal(cell$pattern, bin_fill(4L)$pattern)
 })
 
 test_that("tier 2: low support uses yellow fill", {
-  # UFBoot 40 < 50 → low → bin 1
+  # UFBoot 40 < 50 -> low -> bin 1
   cell <- resolve_cell(1, 40, "ufboot", NULL, 2L)
   expect_equal(cell$fill, "#E8C547")
 })
 
 test_that("tier 2: pool proportion with support still uses binned fill", {
   # p=0.67 (partial pool recovery) with support value
-  cell <- resolve_cell(0.67, 96, "ufboot", NULL, 2L)
-  expect_equal(cell$fill, bin_fill(3L)$fill)  # 96 >= 95 → high → bin 3
+  cell <- resolve_cell(0.67, 85, "ufboot", NULL, 2L)
+  expect_equal(cell$fill, bin_fill(3L)$fill)  # 85 >= 80 -> high -> bin 3
 })
 
 
@@ -99,33 +99,31 @@ test_that("bin_support returns NA for NA input", {
   expect_true(is.na(bin_support(NA_real_, "ufboot", NULL)))
 })
 
-
-# ---- bin_support: UFBoot thresholds (very_high=98, high=95, moderate=50) ----
+# ---- bin_support: UFBoot thresholds (very_high=95, high=80, moderate=50) ----
 test_that("UFBoot binning follows the default thresholds", {
-  expect_equal(bin_support(99, "ufboot", NULL), 4L)   # >= 98 very high
-  expect_equal(bin_support(98, "ufboot", NULL), 4L)   # boundary: exactly 98
-  expect_equal(bin_support(97, "ufboot", NULL), 3L)   # < 98, >= 95 high
-  expect_equal(bin_support(95, "ufboot", NULL), 3L)   # boundary: exactly 95
-  expect_equal(bin_support(70, "ufboot", NULL), 2L)   # < 95, >= 50 moderate
+  expect_equal(bin_support(99, "ufboot", NULL), 4L)   # >= 95 very high
+  expect_equal(bin_support(95, "ufboot", NULL), 4L)   # boundary: exactly 95
+  expect_equal(bin_support(94, "ufboot", NULL), 3L)   # < 95, >= 80 high
+  expect_equal(bin_support(80, "ufboot", NULL), 3L)   # boundary: exactly 80
+  expect_equal(bin_support(70, "ufboot", NULL), 2L)   # < 80, >= 50 moderate
   expect_equal(bin_support(50, "ufboot", NULL), 2L)   # boundary: exactly 50
   expect_equal(bin_support(49, "ufboot", NULL), 1L)   # < 50 low
   expect_equal(bin_support(0,  "ufboot", NULL), 1L)   # zero
 })
 
-
-# ---- bin_support: SH-aLRT thresholds (very_high=98, high=80, moderate=50) ---
+# ---- bin_support: SH-aLRT thresholds (very_high=80, high=70, moderate=50) ---
 test_that("SH-aLRT binning follows the default thresholds", {
-  expect_equal(bin_support(99, "sh_alrt", NULL), 4L)   # >= 98
-  expect_equal(bin_support(85, "sh_alrt", NULL), 3L)   # >= 80
+  expect_equal(bin_support(99, "sh_alrt", NULL), 4L)   # >= 80
+  expect_equal(bin_support(85, "sh_alrt", NULL), 4L)   # >= 80
   expect_equal(bin_support(60, "sh_alrt", NULL), 2L)   # >= 50
   expect_equal(bin_support(30, "sh_alrt", NULL), 1L)   # < 50
 })
 
 
-# ---- bin_support: ASTRAL LPP thresholds (very_high=0.99, high=0.95, mod=0.5)
+# ---- bin_support: ASTRAL LPP thresholds (very_high=0.95, high=0.90, mod=0.5)
 test_that("ASTRAL LPP binning follows the default thresholds", {
   expect_equal(bin_support(0.99, "lpp", NULL), 4L)
-  expect_equal(bin_support(0.96, "lpp", NULL), 3L)
+  expect_equal(bin_support(0.96, "lpp", NULL), 4L)
   expect_equal(bin_support(0.70, "lpp", NULL), 2L)
   expect_equal(bin_support(0.30, "lpp", NULL), 1L)
 })
@@ -142,10 +140,9 @@ test_that("posterior binning follows the default thresholds", {
 
 # ---- bin_support: cross-type comparison -------------------------------------
 test_that("same numeric value bins differently by support type", {
-  expect_equal(bin_support(85, "sh_alrt", NULL), 3L)   # 85 >= 80 → high
-  expect_equal(bin_support(85, "ufboot",  NULL), 2L)   # 85 < 95 → moderate
+  expect_equal(bin_support(75, "sh_alrt", NULL), 3L)   # 75 >= 70 -> high
+  expect_equal(bin_support(75, "ufboot",  NULL), 2L)   # 75 >= 50 -> moderate
 })
-
 
 # ---- bin_support: custom thresholds -----------------------------------------
 test_that("user thresholds override the defaults", {
@@ -158,10 +155,8 @@ test_that("user thresholds override the defaults", {
 
 test_that("custom thresholds for one type do not affect others", {
   custom <- list(ufboot = c(very_high = 99, high = 90, moderate = 70))
-  # sh_alrt should still use defaults since custom doesn't include it
-  expect_equal(bin_support(85, "sh_alrt", custom), 3L)
+  expect_equal(bin_support(85, "sh_alrt", custom), 4L)
 })
-
 
 # ---- bin_support: unknown type fallback -------------------------------------
 test_that("unknown support type falls back to a percentage scale", {
@@ -174,12 +169,10 @@ test_that("unknown support type falls back to a percentage scale", {
 
 # ---- bin_support: boundary values -------------------------------------------
 test_that("bin_support handles exact boundary values correctly", {
-  # Exactly at each threshold for ufboot
-  expect_equal(bin_support(98, "ufboot", NULL), 4L)    # >= 98 → very high
-  expect_equal(bin_support(95, "ufboot", NULL), 3L)    # >= 95, < 98 → high
-  expect_equal(bin_support(50, "ufboot", NULL), 2L)    # >= 50, < 95 → moderate
+  expect_equal(bin_support(95, "ufboot", NULL), 4L)    # >= 95 -> very high
+  expect_equal(bin_support(80, "ufboot", NULL), 3L)    # >= 80, < 95 -> high
+  expect_equal(bin_support(50, "ufboot", NULL), 2L)    # >= 50, < 80 -> moderate
 })
-
 test_that("bin_support handles zero and negative values", {
   expect_equal(bin_support(0, "ufboot", NULL), 1L)
 })

@@ -534,8 +534,8 @@ plot_phylorug <- function(backbone, npm,
     # --- Threshold legend (topright, support mode only) ---
     if (mode == "support") {
       longest_label <- paste0(
-        ">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) ",
-        "or >=0.95-0.98 (ASTRAL)"
+        "80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
+        "or 0.90-0.94 (LPP)"
       )
       th_width_in <- graphics::strwidth(
         longest_label, units = "inches", cex = th_text_cex
@@ -714,27 +714,27 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #'
 #' Draws the top-right legend of [plot_phylorug()] in support mode: the colour
 #' key explaining what each cell fill means. Black is very high support, greys
-#' are high and moderate, yellow is low, white means the clade was not recovered
-#' (monophyly not supported), and red means the clade was recovered but carries
-#' no support value (not computed). Called only when `mode = "support"`.
+#' are high and moderate, yellow is low, white means the clade was not
+#' recovered, and red means the clade was recovered but carries no support
+#' value (not computed). Called only when `mode = "support"`.
 #'
 #' @details
 #' The colour scheme here must stay in sync with `resolve_cell()` in
 #' `plot_node_rug.R`. If a fill colour changes in one place it must change in
 #' the other, or the legend will misdescribe the cells. The current scheme is
 #' `#000000` very high, `#5F5E5A` high, `#B4B2A9` moderate, `#E8C547` low, white
-#' not recovered, and `#D64545` not computed.
+#'  not recovered, and `#D64545` not computed.
 #'
 #' Rows stack downward from `y0`: row `i` sits `(i - 1) * (sq_h + gap)` below
 #' the top, where `gap` is 40 percent of a square's height. Each row is a filled
 #' square on the left plus its label, vertically centred, `text_gap` (30 percent
 #' of a square's width) to its right. All coordinates are in user units; the
-#' caller converts inches to user units before passing `x0`, `y0`, `sq_h`, and
-#' `sq_w`.
+#' caller converts inches to user units before passing `x0`, `y0`, `sq_h`,
+#' and `sq_w`.
 #'
-#' @param x0,y0 Numeric. Top-left anchor of the legend, in user coordinates. The
-#'   caller computes `x0` so the squares plus the longest label fit against the
-#'   right edge of the plot.
+#' @param x0,y0 Numeric. Top-left anchor of the legend, in user coordinates.
+#'   The caller computes `x0` so the squares plus the longest label fit against
+#'   the right edge of the plot.
 #' @param sq_h,sq_w Numeric. Height and width of one colour square, in user
 #'   coordinates.
 #' @param text_cex Numeric. Font size for the labels.
@@ -745,39 +745,56 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #'   `draw_position_legend()` for the companion numbered analysis key.
 #'
 #' @noRd
-draw_threshold_legend <- function(x0, y0, sq_h, sq_w, text_cex = 0.5) {
+draw_threshold_legend <- function(x0, y0,
+                                  sq_h, sq_w,
+                                  text_cex = 0.5) {
   gap      <- sq_h * 0.4
   text_gap <- sq_w * 0.3
 
   rows <- list(
-    list(fill = "#000000",
-         label = ">=98 (SH-aLRT/UFBoot2) or >=0.99 (ASTRAL)"),
-    list(fill = "#5F5E5A",
-         label = paste0(">=80-97.9 (SH-aLRT) or >=95-97 (UFBoot2) ",
-                        "or >=0.95-0.98 (ASTRAL)")),
-    list(fill = "#B4B2A9",
-         label = paste0(">=50-79.9 (SH-aLRT) or >=50-94 (UFBoot2) ",
-                        "or >=0.5-0.95 (ASTRAL)")),
-    list(fill = "#E8C547",
-         label = "<50 (SH-aLRT/UFBoot2) or <0.5 (ASTRAL)"),
-    list(fill = "white",
-         label = "monophyly not supported"),
-    list(fill = "#D64545",
-         label = "not computed")
+    list(
+      fill  = "#000000",
+      label = paste0(">=95 (UFBoot2) or >=80 (SH-aLRT) ","or >=0.95 (LPP)")),
+    list(
+      fill  = "#5F5E5A",
+      label = paste0("80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
+                     "or 0.90-0.94 (LPP)")
+      ),
+    list(
+      fill  = "#B4B2A9",
+      label = paste0("50-79 (UFBoot2) or 50-69 (SH-aLRT) ",
+                     "or 0.50-0.89 (LPP)")
+      ),
+    list(
+      fill  = "#E8C547",
+      label = paste0("<50 (UFBoot2/SH-aLRT) ","or <0.50 (LPP)")),
+    list(
+      fill  = "white",
+      label = "clade not recovered"),
+    list(
+      fill  = "#D64545",
+      label = "not computed")
   )
-  # Draw each row: a filled square on the left, its label to the right.
-  # Rows stack downward from (x0, y0), one square plus a gap per row.
   for (i in seq_along(rows)) {
     r       <- rows[[i]]
     ytop    <- y0 - (i - 1) * (sq_h + gap)
     ybottom <- ytop - sq_h
     xright  <- x0 + sq_w
 
-    graphics::rect(x0, ybottom, xright, ytop,
-                   col = r$fill, border = "black", lwd = 0.5)
-    graphics::text(xright + text_gap, (ytop + ybottom) / 2,
-                   labels = r$label, adj = c(0, 0.5),
-                   cex = text_cex, family = "sans")
+    graphics::rect(
+      x0, ybottom, xright, ytop,
+      col    = r$fill,
+      border = "black",
+      lwd    = 0.5
+    )
+    graphics::text(
+      xright + text_gap,
+      (ytop + ybottom) / 2,
+      labels = r$label,
+      adj    = c(0, 0.5),
+      cex    = text_cex,
+      family = "sans"
+    )
   }
 
   invisible(y0 - length(rows) * (sq_h + gap))

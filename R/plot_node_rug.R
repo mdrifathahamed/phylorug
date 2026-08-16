@@ -235,24 +235,22 @@ bin_support <- function(value, support_type, thresholds = NULL) {
   1L
 }
 
-
 #' Built-in bin thresholds per support measure
 #'
-#' Internal. Lower bound of each tier, following the binning used by Fu et al.
-#' (2025) for the Culicomorpha analysis: UFBoot2 and SH-aLRT on a 0-100 scale,
-#' ASTRAL local posterior probability on 0-1. See Minh et al. (2013) for
-#' UFBoot2, Guindon et al. (2010) for SH-aLRT, and Sayyari and Mirarab (2016)
-#' for ASTRAL LPP.
+#' Internal. Lower bound of each tier. UFBoot2 uses 95 as the
+#' significance threshold (Minh et al. 2013); SH-aLRT uses 80
+#' (Guindon et al. 2010); ASTRAL LPP uses 0.95 (Sayyari and
+#' Mirarab 2016). All values are on each metric's native scale:
+#' UFBoot2 and SH-aLRT on 0-100, LPP and posterior on 0-1.
 #'
 #' @noRd
 default_thresholds <- function(support_type) {
   switch(
     support_type %||% "ufboot",
-    ufboot    = c(very_high = 98,   high = 95,   moderate = 50),
-    sh_alrt   = c(very_high = 98,   high = 80,   moderate = 50),
-    lpp       = c(very_high = 0.99, high = 0.95, moderate = 0.5),
+    ufboot    = c(very_high = 95,   high = 80,  moderate = 50),
+    sh_alrt   = c(very_high = 80,   high = 70,  moderate = 50),
+    lpp       = c(very_high = 0.95, high = 0.9, moderate = 0.5),
     posterior = c(very_high = 0.99, high = 0.95, moderate = 0.5),
-    # Unknown type: fall back to a 0-100 percentage scale.
     c(very_high = 95, high = 80, moderate = 50)
   )
 }
