@@ -15,8 +15,8 @@ immune to all sources of error.
 
 Incomplete lineage sorting, long-branch attraction, model
 misspecification, and compositional heterogeneity each affect different
-methods differently (Fleming et al. 2023). Accouringly, exploring
-multiple strategeies , on different data types and different infrence
+methods differently (Fleming et al. 2023). Accordingly, exploring
+multiple strategies , on different data types and different infrence
 pipelines is the way researchers detect nodes that may be artifacts of a
 particular analytical choice versus nodes that hold up regardless of
 method.
@@ -32,7 +32,7 @@ grid a **rug** at every internal node of a reference tree(backbone).
 Each cell represents one tree, its colour shows whether that tree
 recovered the clade and how strongly it supported it.
 
-### Nodal support versus nodal stability
+## Nodal support versus nodal stability
 
 Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. **Nodal support** measures how confident a single analysis is
@@ -129,7 +129,7 @@ check_taxa(backbone, others)
 #> 4        70p_partition_entropy identical     15
 ```
 
-All trees share the same 15 taxa, so we can proceed. IF a missmatch is
+All trees share the same 15 taxa, so we can proceed. IF a mismatch is
 reported the helper function
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
 can be used to get identical taxa set.
@@ -254,12 +254,12 @@ fields and journals apply different cutoffs, so we recommend defining
 your own via the `thresholds` argument (see the Customisation section
 below):
 
-- **Black**: very high support (UFBoot2 \>= 98, SH-aLRT \>= 98, LPP \>=
-  0.99). Nodes that most researchers would treat as resolved.
-- **Dark grey**: high support (UFBoot2 95-97, SH-aLRT 80-97, LPP
-  0.95-0.98). Well supported but not at the strongest threshold.
-- **Light grey**: moderate support (UFBoot2 50-94, SH-aLRT 50-79, LPP
-  0.50-0.94). The clade is recovered but confidence is limited.
+- **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP \>=
+  0.95).
+- **Dark grey**: high support (UFBoot2 80-94, SH-aLRT 70-79, LPP
+  0.90-0.94).
+- **Light grey**: moderate support (UFBoot2 50-79, SH-aLRT 50-69, LPP
+  0.50-0.89).
 - **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for
   LPP). Present but weakly endorsed.
 - **White**: clade not recovered by that analysis.
