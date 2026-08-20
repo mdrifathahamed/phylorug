@@ -210,48 +210,68 @@ draw_cell <- function(xleft, ybottom, xright, ytop, cell) {
   invisible(NULL)
 }
 
-#' Map a support value to an integer bin, by support type
+#' Map a support value to an integer bin
 #'
 #' Internal. Returns an integer bin: 4 = very high, 3 = high, 2 = moderate,
-#' 1 = low. NA passes through. Thresholds are per measure, following each
-#' measure's own literature; no normalization across measures.
+#' 1 = low. NA passes through. When `support_type` is a recognized string,
+#' metric-specific thresholds are applied. When `support_type` is NULL,
+#' values >1 are divided by 100 and binned against universal 0-1 thresholds.
+#' Custom thresholds override both, keyed by metric name or `"universal"`.
 #'
 #' @noRd
-bin_support <- function(value, support_type, thresholds = NULL) {
+bin_support <- function(value, support_type = NULL, thresholds = NULL) {
   if (is.na(value)) {
     return(NA_integer_)
   }
 
-  th <- if (!is.null(thresholds) && !is.null(thresholds[[support_type]])) {
+  th <- if (!is.null(thresholds) && !is.null(support_type) &&
+            !is.null(thresholds[[support_type]])) {
+    # User custom thresholds for a named metric
     thresholds[[support_type]]
+  } else if (!is.null(thresholds) && is.null(support_type) &&
+             !is.null(thresholds[["universal"]])) {
+    # User custom universal thresholds
+    thresholds[["universal"]]
   } else {
+    # Named metric defaults or universal defaults
     default_thresholds(support_type)
   }
 
-  # th is c(very_high, high, moderate): the lower bound of each tier.
+  # Auto-normalize when thresholds are on 0-1 scale but value is > 1
+  if (value > 1 && all(th <= 1)) {
+    value <- value / 100
+  }
+
   if (value >= th[["very_high"]]) return(4L)
   if (value >= th[["high"]])      return(3L)
   if (value >= th[["moderate"]])  return(2L)
   1L
 }
-
 #' Built-in bin thresholds per support measure
 #'
-#' Internal. Lower bound of each tier. UFBoot2 uses 95 as the
-#' significance threshold (Minh et al. 2013); SH-aLRT uses 80
-#' (Guindon et al. 2010); ASTRAL LPP uses 0.95 (Sayyari and
-#' Mirarab 2016). All values are on each metric's native scale:
-#' UFBoot2 and SH-aLRT on 0-100, LPP and posterior on 0-1.
+#' Internal. Lower bound of each tier. When `support_type` is NULL,
+#' returns universal 0-1 thresholds for use with auto-normalized values.
+#' When a recognized string is passed, returns metric-specific thresholds
+#' on each metric's native scale. Unrecognized strings fall through to
+#' universal 0-1 thresholds.
 #'
 #' @noRd
 default_thresholds <- function(support_type) {
+  if (is.null(support_type)) {
+    return(c(very_high = 0.95, high = 0.80, moderate = 0.50))
+  }
   switch(
-    support_type %||% "ufboot",
-    ufboot    = c(very_high = 95,   high = 80,  moderate = 50),
-    sh_alrt   = c(very_high = 80,   high = 70,  moderate = 50),
-    lpp       = c(very_high = 0.95, high = 0.9, moderate = 0.5),
-    posterior = c(very_high = 0.99, high = 0.95, moderate = 0.5),
-    c(very_high = 95, high = 80, moderate = 50)
+    support_type,
+    ufboot         = c(very_high = 95,   high = 80,   moderate = 50),
+    sh_alrt        = c(very_high = 80,   high = 70,   moderate = 50),
+    lpp            = c(very_high = 0.95, high = 0.90, moderate = 0.50),
+    posterior      = c(very_high = 0.99, high = 0.95, moderate = 0.50),
+    jackknife      = c(very_high = 95,   high = 80,   moderate = 50),
+    bootstrap      = c(very_high = 95,   high = 80,   moderate = 50),
+    bremer_ratio   = c(very_high = 0.95, high = 0.80, moderate = 0.50),
+    transfer_boot  = c(very_high = 95,   high = 80,   moderate = 50),
+    # Unrecognized string: universal 0-1 thresholds
+    c(very_high = 0.95, high = 0.80, moderate = 0.50)
   )
 }
 

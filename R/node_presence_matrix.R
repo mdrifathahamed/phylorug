@@ -38,6 +38,12 @@
 #'   efficiently extracts both simultaneously into `support_1` and `support_2`
 #'   matrices, allowing you to easily switch between them during plotting
 #'   without recalculating. Default is `1` .
+#' @param support_type Optional named character vector mapping comparison trees
+#'   to their support metrics (e.g. `"ufboot"`, `"sh_alrt"`, `"lpp"`,
+#'   `"jackknife"`). Stored as an attribute of the returned list and used
+#'   automatically by [plot_phylorug()] when `mode = "support"`. If omitted,
+#'   [plot_phylorug()] will auto-normalize support values and apply universal
+#'   thresholds.
 #'
 #' @return A named list with one row per internal backbone node and one column
 #'   per comparison tree:
@@ -74,7 +80,8 @@
 #' rugmt$support_2       # second metric
 node_presence_matrix <- function(backbone,
                                  trees,
-                                 support_col = 1) {
+                                 support_col  = 1,
+                                 support_type = NULL) {
 
   if (!inherits(backbone, "phylo")) {
     stop(
@@ -201,12 +208,10 @@ node_presence_matrix <- function(backbone,
     support_matrices,
     paste0("support_", seq_along(support_col))
   )
-
   result <- c(list(presence = presence_matrix), support_named)
-
-  attr(result, "node_id")    <- bb_nodes
-  attr(result, "pool_sizes") <- pool_sizes
-
+  attr(result, "node_id")      <- bb_nodes
+  attr(result, "pool_sizes")   <- pool_sizes
+  attr(result, "support_type") <- support_type
   result
 }
 #' Refuse to proceed unless every trees carries the backbone's taxa

@@ -157,16 +157,11 @@ test_that("custom thresholds for one type do not affect others", {
   custom <- list(ufboot = c(very_high = 99, high = 90, moderate = 70))
   expect_equal(bin_support(85, "sh_alrt", custom), 4L)
 })
-
-# ---- bin_support: unknown type fallback -------------------------------------
-test_that("unknown support type falls back to a percentage scale", {
-  expect_equal(bin_support(96, "mystery", NULL), 4L)   # >= 95
-  expect_equal(bin_support(85, "mystery", NULL), 3L)   # >= 80
-  expect_equal(bin_support(60, "mystery", NULL), 2L)   # >= 50
-  expect_equal(bin_support(30, "mystery", NULL), 1L)   # < 50
+test_that("unknown support type falls back to universal 0-1 scale", {
+  expect_equal(bin_support(85, "mystery", NULL), 3L)
+  expect_equal(bin_support(60, "mystery", NULL), 2L)
+  expect_equal(bin_support(30, "mystery", NULL), 1L)
 })
-
-
 # ---- bin_support: boundary values -------------------------------------------
 test_that("bin_support handles exact boundary values correctly", {
   expect_equal(bin_support(95, "ufboot", NULL), 4L)    # >= 95 -> very high
@@ -234,10 +229,9 @@ test_that("default_thresholds falls back for unknown type", {
   expect_named(th, c("very_high", "high", "moderate"))
 })
 
-test_that("default_thresholds handles NULL support_type via %||%", {
+test_that("default_thresholds returns universal 0-1 for NULL", {
   th <- default_thresholds(NULL)
-  # Falls back to ufboot via %||%
-  expect_equal(th, default_thresholds("ufboot"))
+  expect_equal(th, c(very_high = 0.95, high = 0.80, moderate = 0.50))
 })
 
 

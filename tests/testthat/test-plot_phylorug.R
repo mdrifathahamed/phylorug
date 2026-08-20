@@ -27,6 +27,7 @@ make_npm <- function() {
   out <- list(presence = presence, support_1 = support_1, support_2 = support_2)
   attr(out, "node_id")    <- 6:9
   attr(out, "pool_sizes") <- c(iqtree = 1L, astral = 1L)
+  attr(out, "support_type") <- c(iqtree = "sh_alrt", astral = "lpp")
   out
 }
 
@@ -107,13 +108,15 @@ test_that("stops when rug_position is invalid", {
   )
 })
 
-test_that("stops when support mode requested but support_type is NULL", {
-  expect_error(
+test_that("support mode with NULL support_type issues message, not error", {
+  npm <- make_npm()
+  attr(npm, "support_type") <- NULL
+  expect_message(
     on_null_device(
-      plot_phylorug(make_backbone(), make_npm(),
-                    mode = "support", support_idx = 1)
+      plot_phylorug(make_backbone(), npm,
+                    mode = "support")
     ),
-    "requires `support_type`"
+    "No.*support_type"
   )
 })
 
@@ -121,8 +124,7 @@ test_that("stops when support_idx references a missing matrix", {
   expect_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    mode = "support", support_idx = 3,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    mode = "support", support_idx = 3)
     ),
     "not found in `npm`"
   )
@@ -132,8 +134,7 @@ test_that("stops when all support values are NA", {
   expect_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm_all_na_support(),
-                    mode = "support", support_idx = 1,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    mode = "support", support_idx = 1)
     ),
     "no support values"
   )
@@ -143,8 +144,7 @@ test_that("warns when some comparison trees have all-NA support", {
   expect_warning(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm_partial_na_support(),
-                    mode = "support", support_idx = 1,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    mode = "support", support_idx = 1)
     ),
     "no support values"
   )
@@ -165,12 +165,11 @@ test_that("presence mode returns invisible NULL on device", {
   expect_null(result)
 })
 
-test_that("presence mode ignores support_type silently", {
+test_that("presence mode works with support_type in npm", {
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    mode = "presence",
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    mode = "presence")
     )
   )
 })
@@ -181,8 +180,7 @@ test_that("support mode runs with support_idx = 1", {
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    mode = "support", support_idx = 1,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    mode = "support", support_idx = 1)
     )
   )
 })
@@ -192,8 +190,7 @@ test_that("support mode runs with support_idx = 2", {
     on_null_device(
       suppressWarnings(
         plot_phylorug(make_backbone(), make_npm(),
-                      mode = "support", support_idx = 2,
-                      support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                      mode = "support", support_idx = 2)
       )
     )
   )
@@ -208,7 +205,6 @@ test_that("support mode accepts custom thresholds", {
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
                     mode = "support",
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"),
                     thresholds = custom)
     )
   )
@@ -224,14 +220,15 @@ test_that("include_backbone = TRUE adds a backbone column in presence mode", {
   )
 })
 test_that("include_backbone = TRUE works in support mode", {
+  npm <- make_npm()
+  attr(npm, "support_type") <- c(backbone = "ufboot",
+                                 iqtree = "sh_alrt", astral = "lpp")
   expect_no_error(
-    on_null_device(
-      plot_phylorug(make_backbone_with_labels(), make_npm(),
+    suppressMessages(on_null_device(
+      plot_phylorug(make_backbone_with_labels(), npm,
                     mode = "support", support_idx = 1,
-                    include_backbone = TRUE,
-                    support_type = c(backbone = "ufboot",
-                                     iqtree = "sh_alrt", astral = "lpp"))
-    )
+                    include_backbone = TRUE)
+    ))
   )
 })
 
@@ -256,14 +253,15 @@ test_that("show_support = FALSE hides node labels", {
 })
 
 test_that("show_support auto-resolves to FALSE when support + include_backbone", { # nolint: line_length_linter.
+  npm <- make_npm()
+  attr(npm, "support_type") <- c(backbone = "ufboot",
+                                 iqtree = "sh_alrt", astral = "lpp")
   expect_no_error(
-    on_null_device(
-      plot_phylorug(make_backbone_with_labels(), make_npm(),
+    suppressMessages(on_null_device(
+      plot_phylorug(make_backbone_with_labels(), npm,
                     mode = "support", support_idx = 1,
-                    include_backbone = TRUE,
-                    support_type = c(backbone = "ufboot",
-                                     iqtree = "sh_alrt", astral = "lpp"))
-    )
+                    include_backbone = TRUE)
+    ))
   )
 })
 test_that("include_backbone + support mode errors without backbone in support_type", { # nolint: line_length_linter.
@@ -271,8 +269,7 @@ test_that("include_backbone + support mode errors without backbone in support_ty
     on_null_device(
       plot_phylorug(make_backbone_with_labels(), make_npm(),
                     mode = "support", support_idx = 1,
-                    include_backbone = TRUE,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"))
+                    include_backbone = TRUE)
     ),
     "backbone.*entry in `support_type`"
   )
@@ -307,7 +304,6 @@ test_that("support mode legend includes threshold key", {
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
                     mode = "support", support_idx = 1,
-                    support_type = c(iqtree = "sh_alrt", astral = "lpp"),
                     legend = TRUE)
     )
   )

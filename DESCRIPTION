@@ -15,7 +15,7 @@ Description: Generates rug plot visualizations directly on tree nodes to
     illustrate clade recovery and support from multiple phylogenetic and
     phylogenomic analyses. As modern studies routinely employ diverse
     datasets and inference techniques producing potentially conflicting
-    trees,phylorug simplifies the comparison among these trees by
+    trees, phylorug simplifies the comparison among these trees by
     consolidating clade recovery and support on a reference tree.
 License: MIT + file LICENSE
 URL: https://github.com/mdrifathahamed/phylorug, https://mdrifathahamed.github.io/phylorug/

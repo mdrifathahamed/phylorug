@@ -35,10 +35,6 @@
 #'  physically shade the grid cells using the second metric (stored in your
 #'  list as `support_2`).
 #'
-#' @param support_type Named character vector mapping comparison trees to their
-#'   support metrics (e.g., `"ufboot"`, `"sh_alrt"`, `"lpp"`). Required only
-#'   when `mode = "support"`. Names must match your comparison tree names.
-#'
 #' @param thresholds Optional list overriding built-in bin thresholds. While
 #'  default thresholds are provided based on common literature, it is highly
 #'  recommended to define your own custom thresholds to suit your specific
@@ -149,7 +145,6 @@ plot_phylorug <- function(backbone, npm,
                           height           = NULL,
                           mode             = c("presence", "support"),
                           support_idx      = 1,
-                          support_type     = NULL,
                           thresholds       = NULL,
                           n_rows           = NULL,
                           n_cols           = NULL,
@@ -168,7 +163,6 @@ plot_phylorug <- function(backbone, npm,
                           rug_on_identical = FALSE,
                           hide_unsupported = FALSE,
                           ...) {
-
   # --- 1. Validate -----------------------------------------------------------
   if (!inherits(backbone, "phylo"))
     stop("`backbone` must be a phylo object.", call. = FALSE)
@@ -201,17 +195,6 @@ plot_phylorug <- function(backbone, npm,
       stop(msg, call. = FALSE)
     }
   }
-
-  if (mode == "support" && is.null(support_type)) {
-    stop(
-      "`mode = \"support\"` requires `support_type` to interpret support ",
-      "values. Without it, a value like 95 cannot be told apart between ",
-      "UFBoot2, SH-aLRT, or a posterior probability. Supply a named vector ",
-      "mapping each tree to its measure, e.g. c(iqtree = \"ufboot\").",
-      call. = FALSE
-    )
-  }
-  # ---------------------------------------------
   presence <- npm$presence
   if (ncol(presence) < 1L)
     stop("`npm` has no comparison trees to plot.", call. = FALSE)
@@ -221,19 +204,34 @@ plot_phylorug <- function(backbone, npm,
   ntip <- ape::Ntip(backbone)
 
   # --- 2. Build matrices -----------------------------------------------------
-  support <- NULL
+  support      <- NULL
+  support_type <- NULL
+
   if (mode == "support") {
+    support_type <- attr(npm, "support_type")
+
+    if (is.null(support_type)) {
+      message(
+        "No `support_type` declared: values >1 are divided by 100 and ",
+        "binned against universal thresholds (0.95/0.80/0.50). To use ",
+        "metric-specific thresholds, pass `support_type` to ",
+        "`node_presence_matrix()`. To customise the universal thresholds, ",
+        "use the `thresholds` argument, e.g. ",
+        "`thresholds = list(universal = c(very_high = 0.95, ",
+        "high = 0.80, moderate = 0.50))`."
+      )
+    }
+
     support <- npm[[paste0("support_", support_idx)]]
 
-    # ---- NEW: guard against empty support ----
     if (all(is.na(support))) {
       stop(
         "`mode = \"support\"` was requested, but the selected support matrix ",
         "(`support_", support_idx, "`) contains no support values (all NA). ",
         "This happens when the trees carry no node support, for example a ",
         "topology-only tree, or a BEAST/TreeAnnotator tree whose bracket ",
-        "annotations ape could not import. Use `mode = \"presence\"` for",
-        " these trees, or supply trees whose node labels hold support values.",
+        "annotations ape could not import. Use `mode = \"presence\"` for ",
+        "these trees, or supply trees whose node labels hold support values.",
         call. = FALSE
       )
     }
@@ -242,11 +240,8 @@ plot_phylorug <- function(backbone, npm,
     if (any(empty_cols)) {
       warning(
         "These comparison tree(s) have no support values in `support_",
-        support_idx, "` (their cells will show as not-recovered or ",
-        "not-computed): ",
+        support_idx, "`: ",
         paste(colnames(support)[empty_cols], collapse = ", "),
-        ". Check that `support_type` maps them correctly, or that the trees ",
-        "carry node support.",
         call. = FALSE
       )
     }
@@ -257,11 +252,12 @@ plot_phylorug <- function(backbone, npm,
                    dimnames = list(rownames(presence), bb_name))
     presence <- cbind(bb_p, presence)
     if (mode == "support") {
-      if (!(bb_name %in% names(support_type))) {
+      if (!is.null(support_type) && !(bb_name %in% names(support_type))) {
         stop(
           "`include_backbone = TRUE` with `mode = \"support\"` requires a ",
-          "\"backbone\" entry in `support_type`, e.g. ",
-          "support_type = c(backbone = \"ufboot\", iqtree = \"sh_alrt\", ...)",
+          "\"backbone\" entry in `support_type`. Add it in ",
+          "`node_presence_matrix()`, e.g. ",
+          "support_type = c(backbone = \"ufboot\", ...)",
           call. = FALSE
         )
       }
