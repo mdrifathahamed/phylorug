@@ -18,6 +18,7 @@ plot_phylorug(
   include_backbone = FALSE,
   legend = TRUE,
   show_support = FALSE,
+  show_support_idx = 1,
   cell_scale = 0.45,
   x_offset = 0,
   y_offset = 0,
@@ -80,6 +81,10 @@ edited in a vector editor and every analysis must appear in the grid.}
 
 \item{show_support}{Logical. If \code{TRUE}, backbone node support labels are
 drawn beside each node. Default \code{FALSE}.}
+
+\item{show_support_idx}{Integer or NULL. Which value from compound node
+labels (e.g. "80/95") to display when \code{show_support = TRUE}. Default \code{1}
+(first value). Set to \code{NULL} to display the full compound label as-is.}
 
 \item{cell_scale}{Numeric multiplier on cell height. Default 0.45.}
 

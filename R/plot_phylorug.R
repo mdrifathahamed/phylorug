@@ -54,6 +54,10 @@
 #' @param show_support Logical. If `TRUE`, backbone node support labels are
 #'   drawn beside each node. Default `FALSE`.
 #'
+#' @param show_support_idx Integer or NULL. Which value from compound node
+#'   labels (e.g. "80/95") to display when `show_support = TRUE`. Default `1`
+#'   (first value). Set to `NULL` to display the full compound label as-is.
+#'
 #' @param cell_scale Numeric multiplier on cell height. Default 0.45.
 #'
 #' @param x_offset,y_offset Numeric grid shift. Default 0.
@@ -145,6 +149,7 @@ plot_phylorug <- function(backbone, npm,
                           include_backbone = FALSE,
                           legend           = TRUE,
                           show_support     = FALSE,
+                          show_support_idx = 1,
                           cell_scale       = 0.45,
                           x_offset         = 0,
                           y_offset         = 0,
@@ -401,6 +406,14 @@ plot_phylorug <- function(backbone, npm,
   # --- 7. Node support labels ------------------------------------------------
   if (show_support && !is.null(backbone$node.label)) {
     labs <- backbone$node.label
+    if (!is.null(show_support_idx)) {
+      labs <- vapply(labs, function(lbl) {
+        if (is.na(lbl) || !nzchar(lbl)) return(lbl)
+        parts <- strsplit(lbl, "/", fixed = TRUE)[[1L]]
+        if (length(parts) >= show_support_idx) parts[show_support_idx]
+        else lbl
+      }, character(1), USE.NAMES = FALSE)
+    }
     show <- which(!is.na(labs) & nzchar(labs))
     if (length(show) > 0) {
       node_ids <- show + ntip
@@ -523,10 +536,12 @@ plot_phylorug <- function(backbone, npm,
 
     # --- Threshold legend (topright, support mode only) ---
     if (mode == "support") {
-      longest_label <- paste0(
-        "80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
-        "or 0.90-0.94 (LPP)"
-      )
+      longest_label <- if (is.null(support_type)) {
+        "0.50-0.79 (moderate)"
+      } else {
+        paste0("80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
+               "or 0.90-0.94 (LPP)")
+      }
       th_width_in <- graphics::strwidth(
         longest_label, units = "inches", cex = th_text_cex
       ) + th_sq_in + 0.2
@@ -534,11 +549,12 @@ plot_phylorug <- function(backbone, npm,
       x0_right <- usr[2] - margin_x - graphics::xinch(th_width_in)
 
       draw_threshold_legend(
-        x0       = x0_right,
-        y0       = y0_top,
-        sq_h     = th_sq_h,
-        sq_w     = th_sq_w,
-        text_cex = th_text_cex
+        x0        = x0_right,
+        y0        = y0_top,
+        sq_h      = th_sq_h,
+        sq_w      = th_sq_w,
+        text_cex  = th_text_cex,
+        universal = is.null(support_type)
       )
     }
   }
@@ -737,34 +753,43 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #' @noRd
 draw_threshold_legend <- function(x0, y0,
                                   sq_h, sq_w,
-                                  text_cex = 0.5) {
+                                  text_cex = 0.5,
+                                  universal = FALSE) {
   gap      <- sq_h * 0.4
   text_gap <- sq_w * 0.3
-
-  rows <- list(
+  rows <- if (universal) {
     list(
-      fill  = "#000000",
-      label = paste0(">=95 (UFBoot2) or >=80 (SH-aLRT) ","or >=0.95 (LPP)")),
+      list(fill = "#000000", label = ">=0.95 (very high)"),
+      list(fill = "#5F5E5A", label = "0.80-0.94 (high)"),
+      list(fill = "#B4B2A9", label = "0.50-0.79 (moderate)"),
+      list(fill = "#E8C547", label = "<0.50 (low)"),
+      list(fill = "white",   label = "clade not recovered"),
+      list(fill = "#D64545", label = "not computed")
+    )
+  } else {
     list(
-      fill  = "#5F5E5A",
-      label = paste0("80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
-                     "or 0.90-0.94 (LPP)")
-      ),
-    list(
-      fill  = "#B4B2A9",
-      label = paste0("50-79 (UFBoot2) or 50-69 (SH-aLRT) ",
-                     "or 0.50-0.89 (LPP)")
-      ),
-    list(
-      fill  = "#E8C547",
-      label = paste0("<50 (UFBoot2/SH-aLRT) ","or <0.50 (LPP)")),
-    list(
-      fill  = "white",
-      label = "clade not recovered"),
-    list(
-      fill  = "#D64545",
-      label = "not computed")
-  )
+      list(
+        fill  = "#000000",
+        label = paste0(">=95 (UFBoot2) or >=80 (SH-aLRT) ", "or >=0.95 (LPP)")),
+      list(
+        fill  = "#5F5E5A",
+        label = paste0("80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
+                       "or 0.90-0.94 (LPP)")),
+      list(
+        fill  = "#B4B2A9",
+        label = paste0("50-79 (UFBoot2) or 50-69 (SH-aLRT) ",
+                       "or 0.50-0.89 (LPP)")),
+      list(
+        fill  = "#E8C547",
+        label = paste0("<50 (UFBoot2/SH-aLRT) ", "or <0.50 (LPP)")),
+      list(
+        fill  = "white",
+        label = "clade not recovered"),
+      list(
+        fill  = "#D64545",
+        label = "not computed")
+    )
+  }
   for (i in seq_along(rows)) {
     r       <- rows[[i]]
     ytop    <- y0 - (i - 1) * (sq_h + gap)
