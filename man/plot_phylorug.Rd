@@ -12,7 +12,6 @@ plot_phylorug(
   height = NULL,
   mode = c("presence", "support"),
   support_idx = 1,
-  support_type = NULL,
   thresholds = NULL,
   n_rows = NULL,
   n_cols = NULL,
@@ -62,10 +61,6 @@ single support matrix from the \code{npm} list to visualize when
 \code{support_col = c(1, 2)}, passing \code{2} here tells the plotting engine to
 physically shade the grid cells using the second metric (stored in your
 list as \code{support_2}).}
-
-\item{support_type}{Named character vector mapping comparison trees to their
-support metrics (e.g., \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}). Required only
-when \code{mode = "support"}. Names must match your comparison tree names.}
 
 \item{thresholds}{Optional list overriding built-in bin thresholds. While
 default thresholds are provided based on common literature, it is highly

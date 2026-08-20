@@ -4,7 +4,7 @@
 \alias{node_presence_matrix}
 \title{Tabulate clade recovery and support across trees}
 \usage{
-node_presence_matrix(backbone, trees, support_col = 1)
+node_presence_matrix(backbone, trees, support_col = 1, support_type = NULL)
 }
 \arguments{
 \item{backbone}{The reference tree, as a \code{"phylo"} object. The rug is
@@ -23,6 +23,13 @@ only the first metric into a \code{support_1} matrix. Passing \code{c(1, 2)}
 efficiently extracts both simultaneously into \code{support_1} and \code{support_2}
 matrices, allowing you to easily switch between them during plotting
 without recalculating. Default is \code{1} .}
+
+\item{support_type}{Optional named character vector mapping comparison trees
+to their support metrics (e.g. \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
+\code{"jackknife"}). Stored as an attribute of the returned list and used
+automatically by \code{\link[=plot_phylorug]{plot_phylorug()}} when \code{mode = "support"}. If omitted,
+\code{\link[=plot_phylorug]{plot_phylorug()}} will auto-normalize support values and apply universal
+thresholds.}
 }
 \value{
 A named list with one row per internal backbone node and one column
