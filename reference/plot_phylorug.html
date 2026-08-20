@@ -64,6 +64,7 @@ handles canvas sizing, legend placement, and font scaling automatically.</p>
 <span>  include_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_support <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  show_support_idx <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  cell_scale <span class="op">=</span> <span class="fl">0.45</span>,</span>
 <span>  x_offset <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  y_offset <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -151,6 +152,12 @@ edited in a vector editor and every analysis must appear in the grid.</p></dd>
 <dt id="arg-show-support">show_support<a class="anchor" aria-label="anchor" href="#arg-show-support"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, backbone node support labels are
 drawn beside each node. Default <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-show-support-idx">show_support_idx<a class="anchor" aria-label="anchor" href="#arg-show-support-idx"></a></dt>
+<dd><p>Integer or NULL. Which value from compound node
+labels (e.g. "80/95") to display when <code>show_support = TRUE</code>. Default <code>1</code>
+(first value). Set to <code>NULL</code> to display the full compound label as-is.</p></dd>
 
 
 <dt id="arg-cell-scale">cell_scale<a class="anchor" aria-label="anchor" href="#arg-cell-scale"></a></dt>

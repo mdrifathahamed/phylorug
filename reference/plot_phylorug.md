@@ -23,6 +23,7 @@ plot_phylorug(
   include_backbone = FALSE,
   legend = TRUE,
   show_support = FALSE,
+  show_support_idx = 1,
   cell_scale = 0.45,
   x_offset = 0,
   y_offset = 0,
@@ -112,6 +113,12 @@ plot_phylorug(
 
   Logical. If `TRUE`, backbone node support labels are drawn beside each
   node. Default `FALSE`.
+
+- show_support_idx:
+
+  Integer or NULL. Which value from compound node labels (e.g. "80/95")
+  to display when `show_support = TRUE`. Default `1` (first value). Set
+  to `NULL` to display the full compound label as-is.
 
 - cell_scale:
 
