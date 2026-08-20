@@ -47,7 +47,7 @@ records either its presence or its support value.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_presence_matrix</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">trees</span>, support_col <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_presence_matrix</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">trees</span>, support_col <span class="op">=</span> <span class="fl">1</span>, support_type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +75,15 @@ only the first metric into a <code>support_1</code> matrix. Passing <code>c(1, 2
 efficiently extracts both simultaneously into <code>support_1</code> and <code>support_2</code>
 matrices, allowing you to easily switch between them during plotting
 without recalculating. Default is <code>1</code> .</p></dd>
+
+
+<dt id="arg-support-type">support_type<a class="anchor" aria-label="anchor" href="#arg-support-type"></a></dt>
+<dd><p>Optional named character vector mapping comparison trees
+to their support metrics (e.g. <code>"ufboot"</code>, <code>"sh_alrt"</code>, <code>"lpp"</code>,
+<code>"jackknife"</code>). Stored as an attribute of the returned list and used
+automatically by <code><a href="plot_phylorug.html">plot_phylorug()</a></code> when <code>mode = "support"</code>. If omitted,
+<code><a href="plot_phylorug.html">plot_phylorug()</a></code> will auto-normalize support values and apply universal
+thresholds.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -193,6 +193,8 @@ beyond parameter sensitivity to modern phylogenomic workflows.
 
 ## All functions
 
+- [`add_tree()`](https://mdrifathahamed.github.io/phylorug/reference/add_tree.md)
+  : Add a comparison tree to an existing node presence matrix
 - [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
   : Diagnose taxon consistency between backbone and comparison trees
 - [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)

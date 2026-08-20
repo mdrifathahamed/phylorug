@@ -8,7 +8,7 @@ records either its presence or its support value.
 ## Usage
 
 ``` r
-node_presence_matrix(backbone, trees, support_col = 1)
+node_presence_matrix(backbone, trees, support_col = 1, support_type = NULL)
 ```
 
 ## Arguments
@@ -37,6 +37,17 @@ node_presence_matrix(backbone, trees, support_col = 1)
   extracts both simultaneously into `support_1` and `support_2`
   matrices, allowing you to easily switch between them during plotting
   without recalculating. Default is `1` .
+
+- support_type:
+
+  Optional named character vector mapping comparison trees to their
+  support metrics (e.g. `"ufboot"`, `"sh_alrt"`, `"lpp"`,
+  `"jackknife"`). Stored as an attribute of the returned list and used
+  automatically by
+  [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+  when `mode = "support"`. If omitted,
+  [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+  will auto-normalize support values and apply universal thresholds.
 
 ## Value
 

@@ -17,7 +17,6 @@ plot_phylorug(
   height = NULL,
   mode = c("presence", "support"),
   support_idx = 1,
-  support_type = NULL,
   thresholds = NULL,
   n_rows = NULL,
   n_cols = NULL,
@@ -84,12 +83,6 @@ plot_phylorug(
   passing `2` here tells the plotting engine to physically shade the
   grid cells using the second metric (stored in your list as
   `support_2`).
-
-- support_type:
-
-  Named character vector mapping comparison trees to their support
-  metrics (e.g., `"ufboot"`, `"sh_alrt"`, `"lpp"`). Required only when
-  `mode = "support"`. Names must match your comparison tree names.
 
 - thresholds:
 
