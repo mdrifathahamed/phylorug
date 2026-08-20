@@ -189,43 +189,33 @@ which handles the cell-level drawing(not used by the user).
 # Build the plotting input from real trees:
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
-npm <- node_presence_matrix(backbone, others, support_col = 1)
-
-# --- Presence mode --------------------------------------------------------
-# Each cell shows whether an analysis recovered the backbone clade.
-# Writing to a file uses the internal scaling engine for a clean figure.
-tmp <- tempfile(fileext = ".pdf")
-plot_phylorug(backbone, npm, file = tmp)
-unlink(tmp)
-
-# --- Support mode ---------------------------------------------------------
-# Cells are shaded by support strength. `support_type` tells plot_phylorug
-# how to read each tree's values: ASTRAL trees carry local posterior
-# probability ("lpp"), IQ-TREE trees carry UFBoot2 ("ufboot").
 support_type <- c(
   "70p_ASTRAL_partition_entropy" = "lpp",
   "70p_ASTRAL_uce"               = "lpp",
   "70p_ghost"                    = "ufboot",
   "70p_partition_entropy"        = "ufboot"
 )
+npm_st <- node_presence_matrix(backbone, others,
+                               support_col = 1,
+                               support_type = support_type)
+
+# --- Presence mode --------------------------------------------------------
+# Each cell shows whether an analysis recovered the backbone clade.
+tmp <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm_st, file = tmp)
+unlink(tmp)
+
+# --- Support mode ---------------------------------------------------------
 tmp2 <- tempfile(fileext = ".pdf")
-plot_phylorug(backbone, npm,
+plot_phylorug(backbone, npm_st,
               file         = tmp2,
               mode         = "support",
-              support_idx  = 1,
-              support_type = support_type)
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning: "support_type" is not a graphical parameter
-#> Warning: "support_type" is not a graphical parameter
-#> Warning: "support_type" is not a graphical parameter
+              support_idx  = 1)
 unlink(tmp2)
 
 # --- Some optional controls -----------------------------------------------
-# include_backbone = TRUE adds the backbone as its own cell in every rug;
-# rug_position = "outside" places grids toward the tips instead of the crook;
-# hide_unsupported = TRUE leaves clades no analysis recovered bare.
 tmp3 <- tempfile(fileext = ".pdf")
-plot_phylorug(backbone, npm,
+plot_phylorug(backbone, npm_st,
               file             = tmp3,
               include_backbone = TRUE,
               rug_position     = "outside")

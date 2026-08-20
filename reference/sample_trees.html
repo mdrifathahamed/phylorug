@@ -99,11 +99,11 @@ partitioned gene trees.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Select backbone and comparison trees</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Core pipeline:</span></span></span>
 <span class="r-in"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Validate taxa</span></span></span>
+<span class="r-in"><span><span class="co"># Optional: diagnose taxon overlap</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> All 4 comparison trees share the same 15 taxa as the backbone.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
@@ -114,12 +114,10 @@ partitioned gene trees.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3                    70p_ghost identical     15              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        70p_partition_entropy identical     15              </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Build the node presence matrix</span></span></span>
 <span class="r-in"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Plot in presence mode</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="sample_trees-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".pdf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

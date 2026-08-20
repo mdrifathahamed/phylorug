@@ -67,11 +67,17 @@ comparison tree:
 
 ## Details
 
-Every tree must include the complete set of backbone taxa. Because an
-tree lacking a backbone taxon cannot assess the presence of a clade
-containing that taxon,scoring such a clade as 'absent' would introduce a
-false negative.The function therefore enforces strict taxon matching.
-Use
+This is the core function of the phylorug pipeline. It can be called
+directly after
+[`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
+—
+[`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
+is a useful diagnostic but not a prerequisite, as this function enforces
+taxon matching internally. Every tree must include the complete set of
+backbone taxa. Because an tree lacking a backbone taxon cannot assess
+the presence of a clade containing that taxon,scoring such a clade as
+'absent' would introduce a false negative.The function therefore
+enforces strict taxon matching. Use
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
 to diagnose the discrepancies and
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
@@ -103,7 +109,8 @@ tree has no node to carry a support value.
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# It is good practice to check the taxa line up before building the matrix:
+# Optional: diagnose taxon overlap before building the matrix.
+# This is not required — node_presence_matrix() enforces matching internally.
 check_taxa(backbone, others)
 #> All 4 comparison trees share the same 15 taxa as the backbone.
 #> [1] TRUE
@@ -114,10 +121,10 @@ check_taxa(backbone, others)
 #> 3                    70p_ghost identical     15              
 #> 4        70p_partition_entropy identical     15              
 
-# For a presence/absence matrix, just pass the backbone and comparison trees
-# (support_col defaults to 1):
+# --- Presence/absence matrix -----------------------------------------------
+# Just pass the backbone and comparison trees (support_col defaults to 1):
 npmatrix <- node_presence_matrix(backbone, others)
-npmatrix$presence     # clade presence/absence
+npmatrix$presence     # clade presence/absence (1/0 or pool proportion)
 #>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy
 #> 16                            1              1         1                     1
 #> 17                            1              1         0                     1
@@ -150,10 +157,11 @@ npmatrix$support_1    # support values (from column 1 of the node labels)
 #> 28                         1.00           1.00       100                   100
 #> 29                         0.91           1.00       100                   100
 
-# To extract several support metrics at once (e.g. SH-aLRT and UFBoot2 stored
-# as "80/95"), pass their column positions to support_col:
+# --- Multiple support metrics at once --------------------------------------
+# IQ-TREE stores SH-aLRT and UFBoot2 as "80/95". Pass their column positions
+# to support_col to extract both in a single pass:
 rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-rugmt$support_1       # first metric
+rugmt$support_1       # first metric (SH-aLRT)
 #>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy
 #> 16                         0.00           0.01       100                   100
 #> 17                         1.00           1.00        NA                   100
@@ -169,7 +177,7 @@ rugmt$support_1       # first metric
 #> 27                         1.00           1.00       100                   100
 #> 28                         1.00           1.00       100                   100
 #> 29                         0.91           1.00       100                   100
-rugmt$support_2       # second metric
+rugmt$support_2       # second metric (UFBoot2)
 #>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy
 #> 16                           NA             NA       100                   100
 #> 17                           NA             NA        NA                   100
@@ -185,4 +193,21 @@ rugmt$support_2       # second metric
 #> 27                           NA             NA       100                   100
 #> 28                           NA             NA       100                   100
 #> 29                           NA             NA       100                   100
+
+# --- With support_type (stored in npm, used by plot_phylorug) --------------
+# Declaring support_type lets plot_phylorug() apply metric-specific
+# thresholds automatically. If omitted, universal 0-1 thresholds are used.
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
+npm_typed <- node_presence_matrix(backbone, others,
+                                  support_type = support_type)
+attr(npm_typed, "support_type")   # stored as an attribute
+#> 70p_ASTRAL_partition_entropy               70p_ASTRAL_uce 
+#>                        "lpp"                        "lpp" 
+#>                    70p_ghost        70p_partition_entropy 
+#>                     "ufboot"                     "ufboot" 
 ```

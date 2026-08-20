@@ -103,7 +103,11 @@ Named in the order requested, so <code>support_col = c(1, 2)</code> produces
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Every tree must include the complete set of backbone taxa. Because an
+    <p>This is the core function of the phylorug pipeline. It can be called
+directly after <code><a href="read_trees.html">read_trees()</a></code> — <code><a href="check_taxa.html">check_taxa()</a></code> is a useful diagnostic
+but not a prerequisite, as this function enforces taxon matching
+internally.
+Every tree must include the complete set of backbone taxa. Because an
 tree lacking a backbone taxon cannot assess the presence of a clade
 containing that taxon,scoring such a clade as 'absent' would introduce a
 false negative.The function therefore enforces strict taxon matching. Use
@@ -132,7 +136,8 @@ carry a support value.</p>
 <span class="r-in"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># It is good practice to check the taxa line up before building the matrix:</span></span></span>
+<span class="r-in"><span><span class="co"># Optional: diagnose taxon overlap before building the matrix.</span></span></span>
+<span class="r-in"><span><span class="co"># This is not required — node_presence_matrix() enforces matching internally.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> All 4 comparison trees share the same 15 taxa as the backbone.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
@@ -143,10 +148,10 @@ carry a support value.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3                    70p_ghost identical     15              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        70p_partition_entropy identical     15              </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># For a presence/absence matrix, just pass the backbone and comparison trees</span></span></span>
-<span class="r-in"><span><span class="co"># (support_col defaults to 1):</span></span></span>
+<span class="r-in"><span><span class="co"># --- Presence/absence matrix -----------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co"># Just pass the backbone and comparison trees (support_col defaults to 1):</span></span></span>
 <span class="r-in"><span><span class="va">npmatrix</span> <span class="op">&lt;-</span> <span class="fu">node_presence_matrix</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">npmatrix</span><span class="op">$</span><span class="va">presence</span>     <span class="co"># clade presence/absence</span></span></span>
+<span class="r-in"><span><span class="va">npmatrix</span><span class="op">$</span><span class="va">presence</span>     <span class="co"># clade presence/absence (1/0 or pool proportion)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16                            1              1         1                     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17                            1              1         0                     1</span>
@@ -179,10 +184,11 @@ carry a support value.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 28                         1.00           1.00       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 29                         0.91           1.00       100                   100</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># To extract several support metrics at once (e.g. SH-aLRT and UFBoot2 stored</span></span></span>
-<span class="r-in"><span><span class="co"># as "80/95"), pass their column positions to support_col:</span></span></span>
+<span class="r-in"><span><span class="co"># --- Multiple support metrics at once --------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co"># IQ-TREE stores SH-aLRT and UFBoot2 as "80/95". Pass their column positions</span></span></span>
+<span class="r-in"><span><span class="co"># to support_col to extract both in a single pass:</span></span></span>
 <span class="r-in"><span><span class="va">rugmt</span> <span class="op">&lt;-</span> <span class="fu">node_presence_matrix</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">rugmt</span><span class="op">$</span><span class="va">support_1</span>       <span class="co"># first metric</span></span></span>
+<span class="r-in"><span><span class="va">rugmt</span><span class="op">$</span><span class="va">support_1</span>       <span class="co"># first metric (SH-aLRT)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16                         0.00           0.01       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17                         1.00           1.00        NA                   100</span>
@@ -198,7 +204,7 @@ carry a support value.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 27                         1.00           1.00       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 28                         1.00           1.00       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 29                         0.91           1.00       100                   100</span>
-<span class="r-in"><span><span class="va">rugmt</span><span class="op">$</span><span class="va">support_2</span>       <span class="co"># second metric</span></span></span>
+<span class="r-in"><span><span class="va">rugmt</span><span class="op">$</span><span class="va">support_2</span>       <span class="co"># second metric (UFBoot2)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16                           NA             NA       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17                           NA             NA        NA                   100</span>
@@ -214,6 +220,23 @@ carry a support value.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 27                           NA             NA       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 28                           NA             NA       100                   100</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 29                           NA             NA       100                   100</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># --- With support_type (stored in npm, used by plot_phylorug) --------------</span></span></span>
+<span class="r-in"><span><span class="co"># Declaring support_type lets plot_phylorug() apply metric-specific</span></span></span>
+<span class="r-in"><span><span class="co"># thresholds automatically. If omitted, universal 0-1 thresholds are used.</span></span></span>
+<span class="r-in"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">npm_typed</span> <span class="op">&lt;-</span> <span class="fu">node_presence_matrix</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>,</span></span>
+<span class="r-in"><span>                                  support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">npm_typed</span>, <span class="st">"support_type"</span><span class="op">)</span>   <span class="co"># stored as an attribute</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70p_ASTRAL_partition_entropy               70p_ASTRAL_uce </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        "lpp"                        "lpp" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    70p_ghost        70p_partition_entropy </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     "ufboot"                     "ufboot" </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

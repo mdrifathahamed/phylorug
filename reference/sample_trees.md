@@ -61,11 +61,11 @@ set of taxa using different inference methods and data types:
 ## Examples
 
 ``` r
-# Select backbone and comparison trees
+# Core pipeline:
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# Validate taxa
+# Optional: diagnose taxon overlap
 check_taxa(backbone, others)
 #> All 4 comparison trees share the same 15 taxa as the backbone.
 #> [1] TRUE
@@ -76,9 +76,8 @@ check_taxa(backbone, others)
 #> 3                    70p_ghost identical     15              
 #> 4        70p_partition_entropy identical     15              
 
-# Build the node presence matrix
 npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-
-# Plot in presence mode
-plot_phylorug(backbone, npm)
+tmp <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm, file = tmp)
+unlink(tmp)
 ```

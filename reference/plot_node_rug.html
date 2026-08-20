@@ -119,8 +119,9 @@ proportion (pool recovery).</p></dd>
 
 <dt id="arg-support-type">support_type<a class="anchor" aria-label="anchor" href="#arg-support-type"></a></dt>
 <dd><p>Named character vector mapping each comparison tree to
-its support measure (<code>"ufboot"</code>, <code>"sh_alrt"</code>, <code>"lpp"</code>, <code>"posterior"</code>), or
-<code>NULL</code>. Required for binned shading.</p></dd>
+its support measure (e.g. <code>"ufboot"</code>, <code>"sh_alrt"</code>, <code>"lpp"</code>,
+<code>"jackknife"</code>, <code>"bremer_ratio"</code>), or <code>NULL</code>. When <code>NULL</code>, values &gt;1
+are auto-normalized to 0-1 and binned against universal thresholds.</p></dd>
 
 
 <dt id="arg-thresholds">thresholds<a class="anchor" aria-label="anchor" href="#arg-thresholds"></a></dt>
@@ -150,10 +151,13 @@ a fraction of the tree's width and height.</p></dd>
 <dd><p>Plot coordinates from <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code> giving the x/y
 position of every node and tip, used to place each rug grid at its node.
 <code><a href="plot_phylorug.html">plot_phylorug()</a></code> always supplies this. If called directly with <code>NULL</code>,
-the coordinates are fetched from the most recently drawn tree.</p>
-<p>#' @return Returns nothing; it draws the rug cells directly onto the tree.</p></dd>
+the coordinates are fetched from the most recently drawn tree.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>Returns nothing; it draws the rug cells directly onto the tree.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

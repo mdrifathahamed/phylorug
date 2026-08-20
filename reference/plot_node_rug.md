@@ -59,8 +59,9 @@ plot_node_rug(
 - support_type:
 
   Named character vector mapping each comparison tree to its support
-  measure (`"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or `NULL`.
-  Required for binned shading.
+  measure (e.g. `"ufboot"`, `"sh_alrt"`, `"lpp"`, `"jackknife"`,
+  `"bremer_ratio"`), or `NULL`. When `NULL`, values \>1 are
+  auto-normalized to 0-1 and binned against universal thresholds.
 
 - thresholds:
 
@@ -95,5 +96,6 @@ plot_node_rug(
   always supplies this. If called directly with `NULL`, the coordinates
   are fetched from the most recently drawn tree.
 
-  \#' @return Returns nothing; it draws the rug cells directly onto the
-  tree.
+## Value
+
+Returns nothing; it draws the rug cells directly onto the tree.

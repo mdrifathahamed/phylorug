@@ -227,43 +227,33 @@ drawing(not used by the user).</p></div>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Build the plotting input from real trees:</span></span></span>
 <span class="r-in"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># --- Presence mode --------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Each cell shows whether an analysis recovered the backbone clade.</span></span></span>
-<span class="r-in"><span><span class="co"># Writing to a file uses the internal scaling engine for a clean figure.</span></span></span>
-<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".pdf"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># --- Support mode ---------------------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># Cells are shaded by support strength. `support_type` tells plot_phylorug</span></span></span>
-<span class="r-in"><span><span class="co"># how to read each tree's values: ASTRAL trees carry local posterior</span></span></span>
-<span class="r-in"><span><span class="co"># probability ("lpp"), IQ-TREE trees carry UFBoot2 ("ufboot").</span></span></span>
 <span class="r-in"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span></span>
 <span class="r-in"><span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span></span>
 <span class="r-in"><span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span></span>
 <span class="r-in"><span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">npm_st</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>,</span></span>
+<span class="r-in"><span>                               support_col <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                               support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># --- Presence mode --------------------------------------------------------</span></span></span>
+<span class="r-in"><span><span class="co"># Each cell shows whether an analysis recovered the backbone clade.</span></span></span>
+<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".pdf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm_st</span>, file <span class="op">=</span> <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># --- Support mode ---------------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="va">tmp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".pdf"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span></span>
+<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm_st</span>,</span></span>
 <span class="r-in"><span>              file         <span class="op">=</span> <span class="va">tmp2</span>,</span></span>
 <span class="r-in"><span>              mode         <span class="op">=</span> <span class="st">"support"</span>,</span></span>
-<span class="r-in"><span>              support_idx  <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>              support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>"support_type" is not a graphical parameter</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>"support_type" is not a graphical parameter</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>"support_type" is not a graphical parameter</span>
+<span class="r-in"><span>              support_idx  <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># --- Some optional controls -----------------------------------------------</span></span></span>
-<span class="r-in"><span><span class="co"># include_backbone = TRUE adds the backbone as its own cell in every rug;</span></span></span>
-<span class="r-in"><span><span class="co"># rug_position = "outside" places grids toward the tips instead of the crook;</span></span></span>
-<span class="r-in"><span><span class="co"># hide_unsupported = TRUE leaves clades no analysis recovered bare.</span></span></span>
 <span class="r-in"><span><span class="va">tmp3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".pdf"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span></span>
+<span class="r-in"><span><span class="fu">plot_phylorug</span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm_st</span>,</span></span>
 <span class="r-in"><span>              file             <span class="op">=</span> <span class="va">tmp3</span>,</span></span>
 <span class="r-in"><span>              include_backbone <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>              rug_position     <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span></span></span>
