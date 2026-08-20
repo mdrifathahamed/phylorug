@@ -221,6 +221,10 @@ plot_phylorug(
   mode         = "support",
   support_type = support_type
 )
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning in plot.window(...): "support_type" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
+#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/support-default-1.png)
@@ -303,6 +307,10 @@ plot_phylorug(
   support_label_col = "red",
   support_label_cex = 0.4
 )
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning in plot.window(...): "support_type" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
+#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/support-refined-1.png)
@@ -444,6 +452,10 @@ plot_phylorug(backbone, npm,
               rug_position       = "inside",
               rug_on_identical   = FALSE,
               hide_unsupported   = TRUE)
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning in plot.window(...): "support_type" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
+#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/plot-culico-support-1.png)
@@ -658,6 +670,10 @@ plot_phylorug(
   hide_unsupported   = TRUE,
   cex                = 0.8
 )
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning in plot.window(...): "support_type" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
+#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
@@ -792,6 +808,10 @@ plot_phylorug(
   support_type = support_type,
   thresholds = my_thresholds
 )
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning in plot.window(...): "support_type" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
+#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/custom-thresh-1.png)

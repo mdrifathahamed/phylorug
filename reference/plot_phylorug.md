@@ -221,6 +221,10 @@ plot_phylorug(backbone, npm,
               mode         = "support",
               support_idx  = 1,
               support_type = support_type)
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+#> Warning: "support_type" is not a graphical parameter
+#> Warning: "support_type" is not a graphical parameter
+#> Warning: "support_type" is not a graphical parameter
 unlink(tmp2)
 
 # --- Some optional controls -----------------------------------------------

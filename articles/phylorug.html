@@ -257,7 +257,11 @@ across plot calls:</p>
 <span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>  mode         <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  support_type <span class="op">=</span> <span class="va">support_type</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
+<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/support-default-1.png" class="r-plt" alt="" width="1950"></p>
 </div>
 </div>
@@ -351,7 +355,11 @@ figure.</p>
 <span>  show_support      <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  support_label_col <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  support_label_cex <span class="op">=</span> <span class="fl">0.4</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
+<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/support-refined-1.png" class="r-plt" alt="" width="1950"></p>
 </div>
 <div class="section level2">
@@ -474,7 +482,11 @@ visible.</p>
 <span>              cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>              rug_position       <span class="op">=</span> <span class="st">"inside"</span>,</span>
 <span>              rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>              hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>              hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
+<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
@@ -671,7 +683,11 @@ shading. For a tree this size, always write to a file (file =
 <span>  rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
+<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level3">
@@ -784,7 +800,11 @@ vector.</p>
 <span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  support_type <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>  thresholds <span class="op">=</span> <span class="va">my_thresholds</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
+<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
+<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100"></p>
 </div>
 </div>
