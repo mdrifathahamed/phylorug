@@ -1,9 +1,14 @@
 #' Diagnose taxon consistency between backbone and comparison trees
 #'
-#' For each comparison tree, checks whether its tip labels(taxon) match the
-#' backbone's exactly, contain extra labels, or are missing some. A tree missing
-#' a tip label of backbone tree cannot be scored for any clade containing that
-#' tip, so run this diagnosis before building a phylorug.
+#' For each comparison tree, checks whether its tip labels (taxon) match the
+#' backbone's exactly, contain extra labels, or are missing some. A tree
+#' missing a tip label of the backbone cannot be scored for any clade
+#' containing that tip. We recommend running this diagnostic before building
+#' the matrix, especially when combining trees from different studies or
+#' pipelines. However, it is not a mandatory step [node_presence_matrix()]
+#' enforces taxon matching internally and will error with a clear message if any
+#' comparison tree is missing backbone taxa. If you are certain all trees share
+#' the same taxon set, you can proceed directly to [node_presence_matrix()].
 #'
 #' @details
 #' This function reports; it does not modify the trees. If the backbone is
