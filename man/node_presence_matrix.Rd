@@ -50,6 +50,10 @@ whether the same clade (the same set of tips) appears in each tree, and
 records either its presence or its support value.
 }
 \details{
+This is the core function of the phylorug pipeline. It can be called
+directly after \code{\link[=read_trees]{read_trees()}} --- \code{\link[=check_taxa]{check_taxa()}} is a useful diagnostic
+but not a prerequisite, as this function enforces taxon matching
+internally.
 Every tree must include the complete set of backbone taxa. Because an
 tree lacking a backbone taxon cannot assess the presence of a clade
 containing that taxon,scoring such a clade as 'absent' would introduce a
@@ -80,18 +84,33 @@ carry a support value.
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# It is good practice to check the taxa line up before building the matrix:
+# Optional: diagnose taxon overlap before building the matrix.
+# This is not required — node_presence_matrix() enforces matching internally.
 check_taxa(backbone, others)
 
-# For a presence/absence matrix, just pass the backbone and comparison trees
-# (support_col defaults to 1):
+# --- Presence/absence matrix -----------------------------------------------
+# Just pass the backbone and comparison trees (support_col defaults to 1):
 npmatrix <- node_presence_matrix(backbone, others)
-npmatrix$presence     # clade presence/absence
+npmatrix$presence     # clade presence/absence (1/0 or pool proportion)
 npmatrix$support_1    # support values (from column 1 of the node labels)
 
-# To extract several support metrics at once (e.g. SH-aLRT and UFBoot2 stored
-# as "80/95"), pass their column positions to support_col:
+# --- Multiple support metrics at once --------------------------------------
+# IQ-TREE stores SH-aLRT and UFBoot2 as "80/95". Pass their column positions
+# to support_col to extract both in a single pass:
 rugmt <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-rugmt$support_1       # first metric
-rugmt$support_2       # second metric
+rugmt$support_1       # first metric (SH-aLRT)
+rugmt$support_2       # second metric (UFBoot2)
+
+# --- With support_type (stored in npm, used by plot_phylorug) --------------
+# Declaring support_type lets plot_phylorug() apply metric-specific
+# thresholds automatically. If omitted, universal 0-1 thresholds are used.
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
+npm_typed <- node_presence_matrix(backbone, others,
+                                  support_type = support_type)
+attr(npm_typed, "support_type")   # stored as an attribute
 }

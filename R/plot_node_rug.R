@@ -31,8 +31,9 @@
 #'   `NULL`, the rug is drawn in presence mode.
 #'
 #' @param support_type Named character vector mapping each comparison tree to
-#'   its support measure (`"ufboot"`, `"sh_alrt"`, `"lpp"`, `"posterior"`), or
-#'   `NULL`. Required for binned shading.
+#'   its support measure (e.g. `"ufboot"`, `"sh_alrt"`, `"lpp"`,
+#'   `"jackknife"`, `"bremer_ratio"`), or `NULL`. When `NULL`, values >1
+#'   are auto-normalized to 0-1 and binned against universal thresholds.
 #'
 #' @param thresholds Optional list overriding the built-in bin thresholds, keyed
 #'   by support type.`NULL` uses the literature defaults.
@@ -52,7 +53,7 @@
 #'   [plot_phylorug()] always supplies this. If called directly with `NULL`,
 #'   the coordinates are fetched from the most recently drawn tree.
 #'
-#'#' @return Returns nothing; it draws the rug cells directly onto the tree.
+#' @return Returns nothing; it draws the rug cells directly onto the tree.
 #'
 #' @keywords internal
 plot_node_rug <- function(npm,

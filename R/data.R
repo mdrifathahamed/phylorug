@@ -32,16 +32,15 @@
 #'   \doi{10.1371/journal.pone.0309596}
 #'
 #' @examples
-#' # Select backbone and comparison trees
+#' # Core pipeline:
 #' backbone <- sample_trees[["70p_uce"]]
 #' others   <- sample_trees[names(sample_trees) != "70p_uce"]
 #'
-#' # Validate taxa
+#' # Optional: diagnose taxon overlap
 #' check_taxa(backbone, others)
 #'
-#' # Build the node presence matrix
 #' npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-#'
-#' # Plot in presence mode
-#' plot_phylorug(backbone, npm)
+#' tmp <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm, file = tmp)
+#' unlink(tmp)
 "sample_trees"

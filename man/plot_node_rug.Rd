@@ -28,8 +28,9 @@ proportion (pool recovery).}
 \code{NULL}, the rug is drawn in presence mode.}
 
 \item{support_type}{Named character vector mapping each comparison tree to
-its support measure (\code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"}, \code{"posterior"}), or
-\code{NULL}. Required for binned shading.}
+its support measure (e.g. \code{"ufboot"}, \code{"sh_alrt"}, \code{"lpp"},
+\code{"jackknife"}, \code{"bremer_ratio"}), or \code{NULL}. When \code{NULL}, values >1
+are auto-normalized to 0-1 and binned against universal thresholds.}
 
 \item{thresholds}{Optional list overriding the built-in bin thresholds, keyed
 by support type.\code{NULL} uses the literature defaults.}
@@ -47,9 +48,10 @@ a fraction of the tree's width and height.}
 \item{last_pp}{Plot coordinates from \code{\link[ape:plot.phylo]{ape::plot.phylo()}} giving the x/y
 position of every node and tip, used to place each rug grid at its node.
 \code{\link[=plot_phylorug]{plot_phylorug()}} always supplies this. If called directly with \code{NULL},
-the coordinates are fetched from the most recently drawn tree.
-
-#' @return Returns nothing; it draws the rug cells directly onto the tree.}
+the coordinates are fetched from the most recently drawn tree.}
+}
+\value{
+Returns nothing; it draws the rug cells directly onto the tree.
 }
 \description{
 For each internal node of the backbone tree, paints a small grid of
