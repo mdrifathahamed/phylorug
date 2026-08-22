@@ -2,18 +2,20 @@
 #'
 #' Compares a set of phylogenetic trees against a reference topology, the
 #' `"backbone"`. For each internal node of the backbone, the function asks
-#' whether the same clade (the same set of tips) appears in each tree, and
-#' records either its presence or its support value.
+#' whether the same clade appears in each tree, and records either its presence
+#' or its support value.
 #'
 #' @details
 #' This is the core function of the phylorug pipeline. It can be called
-#' directly after [read_trees()] --- [check_taxa()] is a useful diagnostic
-#' but not a prerequisite, as this function enforces taxon matching
-#' internally.
-#' Every tree must include the complete set of backbone taxa. Because an
-#' tree lacking a backbone taxon cannot assess the presence of a clade
-#' containing that taxon,scoring such a clade as 'absent' would introduce a
-#' false negative.The function therefore enforces strict taxon matching. Use
+#' directly after [read_trees()], [check_taxa()] is a useful diagnosis but not
+#' a prerequisite, as [node_presence_matrix()] requires perfectly matched taxon
+#' sets and the pipline can not proceed if any mismatches in taxa set are
+#' detected between the backbone and comparison trees.
+#'
+#' Every tree must include the complete set of backbone taxa. Because a tree
+#' lacking a backbone taxon cannot assess the presence of a clade containing
+#' that taxon, scoring such a clade as 'absent' would introduce a false
+#' negative. The function therefore enforces strict taxon matching. Use
 #' [check_taxa()] to diagnose the discrepancies and [prune_to_shared()] to
 #' harmonize the backbone and comparing tree taxa.
 #'
@@ -21,17 +23,21 @@
 #' in a single pass. The plotting function [plot_phylorug()] decide which to
 #' use based on the visualisation context.
 #'
-#' In presence matrix (`use_support = FALSE`),For multiple equally most
-#' parsimonious trees (MPTs) the cell records the clade frequency among MPTs
-#' and, for a single-tree this is 1 for presence  or 0 for absence.
+#' The `presence` matrix records clade recovery: `1` where the bipartition
+#' is found, `0` where absent. For multiple equally most parsimonious trees
+#' (MPTs), the behaviour depends on `pool_threshold`: the default (`1.0`,
+#' strict consensus) requires the clade to appear in every pool tree;
+#' `0.5` applies majority rule; `0` records the raw proportion.
 #'
-#' In support matrix `use_support = TRUE`, the cell records the support value
-#' from the tree that recovered the clade, such as bootstrap or posterior
-#' probability. For MPTs, support values are averaged across the trees that
-#' recovered the clade; trees that did not recover it contribute nothing. For a
-#' single tree this is the support value where the clade is present, or `NA`
-#' where it is absent, since a clade that is not in the tree has no node to
-#' carry a support value.
+#' Each `support_*` matrix records the raw support value from the node label
+#' of the tree that recovered the clade, such as bootstrap percentage or
+#' posterior probability. Support extraction is only meaningful for single
+#' trees (`phylo`), not for pools of equally optimal trees (`multiPhylo`).
+#' Averaging node labels across MPTs is not scientifically valid: support
+#' values come from resampling analyses (bootstrap, jackknife), which
+#' produce a separate consensus tree that should be passed to phylorug as
+#' a single `phylo` comparison tree. If a pool is supplied, only presence
+#' mode is meaningful; support cells for that column will be `NA`.
 #'
 #' @inheritParams check_taxa
 #'
@@ -42,6 +48,7 @@
 #'   efficiently extracts both simultaneously into `support_1` and `support_2`
 #'   matrices, allowing you to easily switch between them during plotting
 #'   without recalculating. Default is `1` .
+#'
 #' @param support_type Optional named character vector mapping comparison trees
 #'   to their support metrics (e.g. `"ufboot"`, `"sh_alrt"`, `"lpp"`,
 #'   `"jackknife"`). Stored as an attribute of the returned list and used
@@ -49,11 +56,23 @@
 #'   [plot_phylorug()] will auto-normalize support values and apply universal
 #'   thresholds.
 #'
+#' @param pool_threshold Numeric between 0 and 1. Controls how pools of equally
+#'   optimal trees (e.g. from TNT or PAUP*) are scored. Default `1.0`
+#'   (strict consensus): a clade must appear in every pool tree to be scored as
+#'   present. Set to `0.5` for majority rule (>50% of pool trees). Set to `0` to
+#'   record the raw proportion (gradient cells in the rug). See Simmons &
+#'   Freudenstein (2011) for why strict consensus is the recommended default for
+#'   parsimony analyses. This parameter is only applicable when evaluating
+#'   parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
+#'   generated via TNT or similar software).
+#'
 #' @return A named list with one row per internal backbone node and one column
 #'   per comparison tree:
 #'   \describe{
-#'     \item{presence}{Clade presence: `1` where recovered, `0` where absent, or
-#'      the proportion of pool trees recovering the clade.}
+#'     \item{presence}{Clade presence: `1` where recovered, `0` where absent.
+#'      For pools, the value depends on `pool_threshold`: strict consensus
+#'      (default) gives `1` or `0`; `pool_threshold = 0` gives the raw
+#'      proportion.}
 #'     \item{support_1, support_2, ...}{One matrix per value in `support_col`.
 #'      Raw support values where the clade was recovered,`NA` where absent.
 #'      Named in the order requested, so `support_col = c(1, 2)` produces
@@ -73,9 +92,10 @@
 #' check_taxa(backbone, others)
 #'
 #' # --- Presence/absence matrix -----------------------------------------------
-#' # Just pass the backbone and comparison trees (support_col defaults to 1):
+#' # Just pass the backbone and comparison trees (support_col defaults to 1).
+#' # For pools of MPTs, pool_threshold defaults to 1.0 (strict consensus):
 #' npmatrix <- node_presence_matrix(backbone, others)
-#' npmatrix$presence     # clade presence/absence (1/0 or pool proportion)
+#' npmatrix$presence     # clade presence/absence (1/0)
 #' npmatrix$support_1    # support values (from column 1 of the node labels)
 #'
 #' # --- Multiple support metrics at once --------------------------------------
@@ -99,8 +119,9 @@
 #' attr(npm_typed, "support_type")   # stored as an attribute
 node_presence_matrix <- function(backbone,
                                  trees,
-                                 support_col  = 1,
-                                 support_type = NULL) {
+                                 support_col    = 1,
+                                 support_type   = NULL,
+                                 pool_threshold = 1.0) {
 
   if (!inherits(backbone, "phylo")) {
     stop(
@@ -123,12 +144,17 @@ node_presence_matrix <- function(backbone,
                 "with values 1, 2, or 3."), call. = FALSE)
   }
   support_col <- as.integer(support_col)
+  if (!is.numeric(pool_threshold) || length(pool_threshold) != 1L ||
+      pool_threshold < 0 || pool_threshold > 1) {
+    stop(
+      "`pool_threshold` must be a single number between 0 and 1.",
+      call. = FALSE
+    )
+  }
   nm <- names(trees)
   if (is.null(nm)) {
     nm <- paste0("tree_", seq_along(trees))
   }
-
-  # Backbone check if its rooted or not
   if (!ape::is.rooted(backbone)) {
     stop(
       "`backbone` is unrooted. Clade comparison requires a rooted tree: the ",
@@ -137,13 +163,10 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
-
-  # Comparison trees check if its rooted or not
   unrooted <- vapply(seq_along(trees), function(j) {
     pool <- as_pool(trees[[j]])
     !all(vapply(pool, ape::is.rooted, logical(1)))
   }, logical(1))
-
   if (any(unrooted)) {
     stop(
       length(which(unrooted)), " comparison tree(s) contain unrooted trees: ",
@@ -153,15 +176,14 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
-  # every trees must carry the same  set of taxa
+
   bb_taxa <- sort(backbone$tip.label)
   assert_shared_taxa(bb_taxa, trees, nm)
-  #setup the empty matrix
+
   ntip     <- ape::Ntip(backbone)
   bb_nodes <- (ntip + 1L):(ntip + backbone$Nnode)
   bb_keys  <- clade_keys(backbone)
 
-  # Presence matrix: 1 = clade recovered, 0 = absent, proportion for pools
   presence_matrix <- matrix(
     NA_real_,
     nrow     = length(bb_nodes),
@@ -169,7 +191,6 @@ node_presence_matrix <- function(backbone,
     dimnames = list(as.character(bb_nodes), nm)
   )
 
-  # One support matrix per requested column
   support_matrices <- lapply(seq_along(support_col), function(s) {
     matrix(
       NA_real_,
@@ -179,10 +200,6 @@ node_presence_matrix <- function(backbone,
     )
   })
 
-  #Double loop begins -to fill each cell of the matrix
-  #outer loop: j iterates over trees(columns)
-  #inner loop: i iterates over backbone nodes(rows)
-  # Double loop begins - to fill each cell of the matrix
   for (j in seq_along(trees)) {
     pool      <- as_pool(trees[[j]])
     pool_keys <- lapply(pool, clade_keys)
@@ -191,11 +208,14 @@ node_presence_matrix <- function(backbone,
       key  <- bb_keys[i]
       hits <- vapply(pool_keys, function(k) key %in% k, logical(1))
 
-      # 1. Fill presence
-      presence_matrix[i, j] <- mean(hits)
+      freq <- mean(hits)
+      presence_matrix[i, j] <- if (pool_threshold == 0) {
+        freq
+      } else {
+        if (freq >= pool_threshold) 1 else 0
+      }
 
-      # 2. Fill support (This must be INSIDE the i loop)
-      if (any(hits)) {
+      if (any(hits) && length(pool) == 1L) {
         for (s in seq_along(support_col)) {
           col <- support_col[s]
           vals <- vapply(which(hits), function(w) {
@@ -212,17 +232,15 @@ node_presence_matrix <- function(backbone,
             else mean(vals, na.rm = TRUE)
         }
       } else {
-        # If no hits, explicitly set support to NA
+
         for (s in seq_along(support_col)) {
           support_matrices[[s]][i, j] <- NA_real_
         }
       }
     }
   }
-  #Attach metadata and return
   pool_sizes <- vapply(trees, pool_size, integer(1))
 
-  # Build named list: presence + support_1, support_2, ...
   support_named <- stats::setNames(
     support_matrices,
     paste0("support_", seq_along(support_col))
@@ -230,9 +248,11 @@ node_presence_matrix <- function(backbone,
   result <- c(list(presence = presence_matrix), support_named)
   attr(result, "node_id")      <- bb_nodes
   attr(result, "pool_sizes")   <- pool_sizes
-  attr(result, "support_type") <- support_type
+  attr(result, "support_type")   <- support_type
+  attr(result, "pool_threshold") <- pool_threshold
   result
 }
+
 #' Refuse to proceed unless every trees carries the backbone's taxa
 #'
 #' @noRd

@@ -261,10 +261,10 @@ test_that("pool presence: identical trees give 1.0", {
   expect_true(all(result$presence[, "pool"] == 1))
 })
 
-test_that("pool presence: mixed recovery gives a fraction", {
-  result <- node_presence_matrix(make_backbone(), list(pool = make_pool()))
-  vals      <- result$presence[, "pool"]
-  fractions <- vals[vals > 0 & vals < 1]
+test_that("pool presence: mixed recovery gives a fraction with pool_threshold = 0", { # nolint: line_length_linter.
+  result <- node_presence_matrix(make_backbone(), list(pool = make_pool()),
+                                 pool_threshold = 0)
+  fractions <- result$presence[result$presence > 0 & result$presence < 1]
   expect_true(length(fractions) > 0)
 })
 
@@ -349,16 +349,14 @@ test_that("support_col = 3 gives NA when the tree has fewer values", {
   expect_true(all(is.na(result$support_1)))
 })
 
-test_that("support values are averaged across pool trees that recover the clade", { # nolint: line_length_linter.
+test_that("support is NA for pools (averaging MPT labels is invalid)", {
   t1 <- ape::read.tree(text = "(((A,B)80,C),(D,E));")
   t2 <- ape::read.tree(text = "(((A,B)100,C),(D,E));")
   pool <- structure(list(t1, t2), class = "multiPhylo")
   result <- node_presence_matrix(
     make_backbone(), list(pool = pool)
   )
-  ab_support <- result$support_1[, "pool"]
-  ab_val <- ab_support[!is.na(ab_support)]
-  expect_true(90 %in% ab_val)
+  expect_true(all(is.na(result$support_1[, "pool"])))
 })
 
 # ---- multi-column behaviour -------------------------------------------------

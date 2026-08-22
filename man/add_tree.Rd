@@ -4,7 +4,15 @@
 \alias{add_tree}
 \title{Add a comparison tree to an existing node presence matrix}
 \usage{
-add_tree(npm, backbone, new_tree, name, support_col = 1, support_type = NULL)
+add_tree(
+  npm,
+  backbone,
+  new_tree,
+  name,
+  support_col = 1,
+  support_type = NULL,
+  pool_threshold = 1
+)
 }
 \arguments{
 \item{npm}{A node presence matrix list, as returned by
@@ -36,6 +44,13 @@ divided by 100) and binned against universal thresholds at plot time. For
 this reason, raw Bremer support (an unbounded integer) is not supported;
 use the Bremer ratio \code{"bremer_ratio"} instead, which is bounded between
 0 and 1.}
+
+\item{pool_threshold}{Numeric between 0 and 1. Controls how pools are
+scored. Default \code{1.0} (strict consensus). Should match the value used
+when the original npm was built. See \code{\link[=node_presence_matrix]{node_presence_matrix()}} for
+details.This parameter is only applicable when evaluating
+parsimony-based \code{multiPhylo} objects (e.g., Most Parsimonious Trees
+generated via TNT or similar software).}
 }
 \value{
 The updated npm list with the new tree appended as an additional
@@ -74,9 +89,15 @@ sampling is a legitimate use case, not a data error.}
 }
 
 The new tree must be rooted. If it is a \code{multiPhylo} object (a pool
-of equally optimal trees from one search), clade presence is recorded as
-the proportion of pool trees recovering each clade, and support values
-are averaged across trees that recovered the clade.
+of equally optimal trees from one search), clade presence is determined
+by \code{pool_threshold}: the default (\code{1.0}, strict consensus) requires the
+clade in every pool tree; \code{0.5} applies majority rule; \code{0} records the
+raw proportion. Support extraction is skipped for pools because
+averaging node labels across equally optimal trees is not scientifically
+valid; support cells for that column will be \code{NA}. To include support
+values from a parsimony analysis, compute the consensus tree with
+bootstrap or jackknife support upstream (e.g. in TNT) and pass that
+consensus as a single \code{phylo} object.
 
 If \code{support_type} is supplied, it is appended to the
 \code{"support_type"} attribute stored in the npm object, keyed by the

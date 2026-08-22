@@ -31,9 +31,15 @@
 #' }
 #'
 #' The new tree must be rooted. If it is a `multiPhylo` object (a pool
-#' of equally optimal trees from one search), clade presence is recorded as
-#' the proportion of pool trees recovering each clade, and support values
-#' are averaged across trees that recovered the clade.
+#' of equally optimal trees from one search), clade presence is determined
+#' by `pool_threshold`: the default (`1.0`, strict consensus) requires the
+#' clade in every pool tree; `0.5` applies majority rule; `0` records the
+#' raw proportion. Support extraction is skipped for pools because
+#' averaging node labels across equally optimal trees is not scientifically
+#' valid; support cells for that column will be `NA`. To include support
+#' values from a parsimony analysis, compute the consensus tree with
+#' bootstrap or jackknife support upstream (e.g. in TNT) and pass that
+#' consensus as a single `phylo` object.
 #'
 #' If `support_type` is supplied, it is appended to the
 #' `"support_type"` attribute stored in the npm object, keyed by the
@@ -69,6 +75,13 @@
 #'   this reason, raw Bremer support (an unbounded integer) is not supported;
 #'   use the Bremer ratio `"bremer_ratio"` instead, which is bounded between
 #'   0 and 1.
+#'
+#' @param pool_threshold Numeric between 0 and 1. Controls how pools are
+#'   scored. Default `1.0` (strict consensus). Should match the value used
+#'   when the original npm was built. See [node_presence_matrix()] for
+#'   details.This parameter is only applicable when evaluating
+#'   parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
+#'   generated via TNT or similar software).
 #'
 #' @return The updated npm list with the new tree appended as an additional
 #'   column in the `presence` matrix and each `support_*` matrix. Attributes
@@ -111,8 +124,9 @@
 #' #                   support_type = "ufboot")
 add_tree <- function(npm, backbone, new_tree,
                      name,
-                     support_col  = 1,
-                     support_type = NULL) {
+                     support_col    = 1,
+                     support_type   = NULL,
+                     pool_threshold = 1.0) {
   # --- 1. Validate inputs ----------------------------------------------------
   if (!is.list(npm) || !("presence" %in% names(npm))) {
     stop("`npm` must be a valid node presence matrix list.", call. = FALSE)
@@ -225,7 +239,7 @@ add_tree <- function(npm, backbone, new_tree,
     hits <- vapply(pool_keys, function(k) key %in% k, logical(1))
     new_presence[i] <- mean(hits)
 
-    if (any(hits)) {
+    if (any(hits) && length(pool) == 1L) {
       for (s in seq_along(support_col)) {
         col <- support_col[s]
         vals <- vapply(which(hits), function(w) {

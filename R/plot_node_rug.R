@@ -229,7 +229,8 @@ bin_support <- function(value, support_type = NULL, thresholds = NULL) {
             !is.null(thresholds[[support_type]])) {
     # User custom thresholds for a named metric
     thresholds[[support_type]]
-  } else if (!is.null(thresholds) && is.null(support_type) &&
+  } else if (!is.null(thresholds) &&
+             (is.null(support_type) || is.na(support_type)) &&
              !is.null(thresholds[["universal"]])) {
     # User custom universal thresholds
     thresholds[["universal"]]
@@ -258,7 +259,7 @@ bin_support <- function(value, support_type = NULL, thresholds = NULL) {
 #'
 #' @noRd
 default_thresholds <- function(support_type) {
-  if (is.null(support_type)) {
+  if (is.null(support_type) || is.na(support_type)) {
     return(c(very_high = 0.95, high = 0.80, moderate = 0.50))
   }
   switch(
