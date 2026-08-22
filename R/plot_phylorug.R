@@ -9,7 +9,7 @@
 #' @param backbone A `phylo` object representing the backbone tree.
 #'
 #' @param npm A named list containing the `presence` and `support` matrices,
-#'  exactly as returned by [node_presence_matrix()].
+#'  returned by [node_presence_matrix()].
 #'
 #' @param file Optional character string specifying the output file name or full
 #'  directory path. If left as `NULL` (the default), the plot renders in the
@@ -28,17 +28,18 @@
 #' @param mode One of `"presence"` (default) or `"support"`.
 #'
 #' @param support_idx Integer (1, 2, or 3). Default is `1`. Specifies which
-#'  single support matrix from the `npm` list to visualize when
-#'  `mode = "support"`. This corresponds directly to your extraction order in
-#'  [node_presence_matrix()]. For example, if you generated the data using
-#'  `support_col = c(1, 2)`, passing `2` here tells the plotting engine to
-#'  physically shade the grid cells using the second metric (stored in your
-#'  list as `support_2`).
+#'  single support matrix from the `npm` list to visualize. For example, if you
+#'  generated the data using `support_col = c(1, 2)`, passing `2` here tells the
+#'  plotting engine to physically shade the grid cells using the second metric
+#'  (stored in your list as `support_2`).
 #'
-#' @param thresholds Optional list overriding built-in bin thresholds. While
-#'  default thresholds are provided based on common literature, it is highly
-#'  recommended to define your own custom thresholds to suit your specific
-#'  analytical framework.
+#' @param thresholds Optional list overriding built-in bin thresholds. Keyed
+#'   by metric name for named metrics, or `"universal"` when `support_type`
+#'   is not declared. For example:
+#'   `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
+#'   or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,`
+#'   `moderate = 0.50))`. If `NULL` (default), literature-based thresholds
+#'   are applied.
 #'
 #' @param n_rows,n_cols Integer. Grid shape for the rug at each node. If
 #'   `NULL` (the default), a roughly square grid is chosen automatically.
@@ -83,8 +84,8 @@
 #'
 #' @param support_label_col Colour of the backbone support labels. Default
 #'   `"red"`.
-#' @param rug_on_identical Logical. Default `FALSE`. When  it and
-#'   `dot_identical`both are  `TRUE`, unanimous nodes receive both the dot and
+#' @param rug_on_identical Logical. Default `FALSE`. When this and
+#'   `dot_identical` are both `TRUE`, unanimous nodes receive both the dot and
 #'   a support rug, making per-tree support strength visible even at universally
 #'   recovered clades.
 #' @param hide_unsupported Logical. Default `FALSE`. When `TRUE`, nodes where

@@ -2,9 +2,9 @@
 #'
 #' @description
 #' Adds a new comparison tree to an existing node presence matrix without
-#' rerunning [node_presence_matrix()] from scratch. The function computes
-#' clade presence and support for the new tree only and attaches the results as
-#' a new column in every matrix of the npm. All existing columns remain
+#' rerunning whole pipeline from scratch. The function computes clade
+#' recovery(presence) and support for the new tree only and attaches the results
+#' as a new column in every matrix of the npm. All existing columns remain
 #' unchanged.
 #'
 #' @details
@@ -41,10 +41,10 @@
 #' bootstrap or jackknife support upstream (e.g. in TNT) and pass that
 #' consensus as a single `phylo` object.
 #'
-#' If `support_type` is supplied, it is appended to the
-#' `"support_type"` attribute stored in the npm object, keyed by the
-#' new tree's name. This allows [plot_phylorug()] to apply the correct
-#' metric-specific thresholds without the user re-declaring the full vector.
+#' If `support_type` is supplied, it is appended to the `"support_type"`
+#' attribute stored in the npm object, keyed by the new tree's name. This allows
+#' [plot_phylorug()] to apply the correct metric-specific thresholds without the
+#' user re-declaring the full vector.
 #'
 #' @param npm A node presence matrix list, as returned by
 #'   [node_presence_matrix()] or a previous call to `add_tree()`.
@@ -73,13 +73,12 @@
 #'   `NULL`, the new tree's support values will be auto-normalized (values >1
 #'   divided by 100) and binned against universal thresholds at plot time. For
 #'   this reason, raw Bremer support (an unbounded integer) is not supported;
-#'   use the Bremer ratio `"bremer_ratio"` instead, which is bounded between
-#'   0 and 1.
+#'   use the`"bremer_ratio"` instead, which is bounded between 0 and 1.
 #'
 #' @param pool_threshold Numeric between 0 and 1. Controls how pools are
 #'   scored. Default `1.0` (strict consensus). Should match the value used
 #'   when the original npm was built. See [node_presence_matrix()] for
-#'   details.This parameter is only applicable when evaluating
+#'   details. This parameter is only applicable when evaluating
 #'   parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
 #'   generated via TNT or similar software).
 #'

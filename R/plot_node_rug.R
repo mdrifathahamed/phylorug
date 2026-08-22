@@ -10,8 +10,10 @@
 #' rather than named directly. ([plot_phylorug()] selects the tier for the user
 #' through its `mode` argument.)
 #' \itemize{
-#'   \item Tier 1, presence: `support` is `NULL`. Cells are black for present,
-#'     white for absent, and grey for partial recovery in a pool.
+#'   \item Tier 1, presence: `support` is `NULL`. Cells are black for present
+#'     and white for absent. Grey cells appear only when `pool_threshold = 0`
+#'     was used in [node_presence_matrix()], indicating partial recovery
+#'     across a pool of equally optimal trees.
 #'   \item Tier 2, support: both `support` and `support_type` are supplied.
 #'     Recovered cells are shaded by binned support strength, from black (very
 #'     high) through greys to yellow (low). A cell is white when the tree does
@@ -24,8 +26,8 @@
 #'
 #' @param npm The presence matrix from [node_presence_matrix()]. One row per
 #'   internal backbone node (node numbers as rownames), one column per
-#'   comparison tree. Cells are `1` (recovered), `0` (not recovered), or a
-#'   proportion (pool recovery).
+#'   comparison tree. Cells are `1` (recovered), `0` (not recovered), or
+#'   a proportion between 0 and 1 when `pool_threshold = 0` was used.
 #'
 #' @param support Support matrix of the same shape as `npm`, or `NULL`. When
 #'   `NULL`, the rug is drawn in presence mode.
