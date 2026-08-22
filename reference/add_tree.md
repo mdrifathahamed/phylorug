@@ -10,7 +10,15 @@ of the npm. All existing columns remain unchanged.
 ## Usage
 
 ``` r
-add_tree(npm, backbone, new_tree, name, support_col = 1, support_type = NULL)
+add_tree(
+  npm,
+  backbone,
+  new_tree,
+  name,
+  support_col = 1,
+  support_type = NULL,
+  pool_threshold = 1
+)
 ```
 
 ## Arguments
@@ -59,6 +67,16 @@ add_tree(npm, backbone, new_tree, name, support_col = 1, support_type = NULL)
   use the Bremer ratio `"bremer_ratio"` instead, which is bounded
   between 0 and 1.
 
+- pool_threshold:
+
+  Numeric between 0 and 1. Controls how pools are scored. Default `1.0`
+  (strict consensus). Should match the value used when the original npm
+  was built. See
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+  for details.This parameter is only applicable when evaluating
+  parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
+  generated via TNT or similar software).
+
 ## Value
 
 The updated npm list with the new tree appended as an additional column
@@ -98,9 +116,15 @@ Three taxon scenarios are handled automatically:
   sampling is a legitimate use case, not a data error.
 
 The new tree must be rooted. If it is a `multiPhylo` object (a pool of
-equally optimal trees from one search), clade presence is recorded as
-the proportion of pool trees recovering each clade, and support values
-are averaged across trees that recovered the clade.
+equally optimal trees from one search), clade presence is determined by
+`pool_threshold`: the default (`1.0`, strict consensus) requires the
+clade in every pool tree; `0.5` applies majority rule; `0` records the
+raw proportion. Support extraction is skipped for pools because
+averaging node labels across equally optimal trees is not scientifically
+valid; support cells for that column will be `NA`. To include support
+values from a parsimony analysis, compute the consensus tree with
+bootstrap or jackknife support upstream (e.g. in TNT) and pass that
+consensus as a single `phylo` object.
 
 If `support_type` is supplied, it is appended to the `"support_type"`
 attribute stored in the npm object, keyed by the new tree's name. This

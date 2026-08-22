@@ -50,7 +50,15 @@ unchanged.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_tree</span><span class="op">(</span><span class="va">npm</span>, <span class="va">backbone</span>, <span class="va">new_tree</span>, <span class="va">name</span>, support_col <span class="op">=</span> <span class="fl">1</span>, support_type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_tree</span><span class="op">(</span></span>
+<span>  <span class="va">npm</span>,</span>
+<span>  <span class="va">backbone</span>,</span>
+<span>  <span class="va">new_tree</span>,</span>
+<span>  <span class="va">name</span>,</span>
+<span>  support_col <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  support_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pool_threshold <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -98,6 +106,15 @@ this reason, raw Bremer support (an unbounded integer) is not supported;
 use the Bremer ratio <code>"bremer_ratio"</code> instead, which is bounded between
 0 and 1.</p></dd>
 
+
+<dt id="arg-pool-threshold">pool_threshold<a class="anchor" aria-label="anchor" href="#arg-pool-threshold"></a></dt>
+<dd><p>Numeric between 0 and 1. Controls how pools are
+scored. Default <code>1.0</code> (strict consensus). Should match the value used
+when the original npm was built. See <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code> for
+details.This parameter is only applicable when evaluating
+parsimony-based <code>multiPhylo</code> objects (e.g., Most Parsimonious Trees
+generated via TNT or similar software).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -134,9 +151,15 @@ sampling is a legitimate use case, not a data error.</p></dd>
 
 
 </dl><p>The new tree must be rooted. If it is a <code>multiPhylo</code> object (a pool
-of equally optimal trees from one search), clade presence is recorded as
-the proportion of pool trees recovering each clade, and support values
-are averaged across trees that recovered the clade.</p>
+of equally optimal trees from one search), clade presence is determined
+by <code>pool_threshold</code>: the default (<code>1.0</code>, strict consensus) requires the
+clade in every pool tree; <code>0.5</code> applies majority rule; <code>0</code> records the
+raw proportion. Support extraction is skipped for pools because
+averaging node labels across equally optimal trees is not scientifically
+valid; support cells for that column will be <code>NA</code>. To include support
+values from a parsimony analysis, compute the consensus tree with
+bootstrap or jackknife support upstream (e.g. in TNT) and pass that
+consensus as a single <code>phylo</code> object.</p>
 <p>If <code>support_type</code> is supplied, it is appended to the
 <code>"support_type"</code> attribute stored in the npm object, keyed by the
 new tree's name. This allows <code><a href="plot_phylorug.html">plot_phylorug()</a></code> to apply the correct

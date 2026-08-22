@@ -2,13 +2,19 @@
 
 Compares a set of phylogenetic trees against a reference topology, the
 `"backbone"`. For each internal node of the backbone, the function asks
-whether the same clade (the same set of tips) appears in each tree, and
-records either its presence or its support value.
+whether the same clade appears in each tree, and records either its
+presence or its support value.
 
 ## Usage
 
 ``` r
-node_presence_matrix(backbone, trees, support_col = 1, support_type = NULL)
+node_presence_matrix(
+  backbone,
+  trees,
+  support_col = 1,
+  support_type = NULL,
+  pool_threshold = 1
+)
 ```
 
 ## Arguments
@@ -49,6 +55,18 @@ node_presence_matrix(backbone, trees, support_col = 1, support_type = NULL)
   [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
   will auto-normalize support values and apply universal thresholds.
 
+- pool_threshold:
+
+  Numeric between 0 and 1. Controls how pools of equally optimal trees
+  (e.g. from TNT or PAUP\*) are scored. Default `1.0` (strict
+  consensus): a clade must appear in every pool tree to be scored as
+  present. Set to `0.5` for majority rule (\>50% of pool trees). Set to
+  `0` to record the raw proportion (gradient cells in the rug). See
+  Simmons & Freudenstein (2011) for why strict consensus is the
+  recommended default for parsimony analyses. This parameter is only
+  applicable when evaluating parsimony-based `multiPhylo` objects (e.g.,
+  Most Parsimonious Trees generated via TNT or similar software).
+
 ## Value
 
 A named list with one row per internal backbone node and one column per
@@ -56,8 +74,9 @@ comparison tree:
 
 - presence:
 
-  Clade presence: `1` where recovered, `0` where absent, or the
-  proportion of pool trees recovering the clade.
+  Clade presence: `1` where recovered, `0` where absent. For pools, the
+  value depends on `pool_threshold`: strict consensus (default) gives
+  `1` or `0`; `pool_threshold = 0` gives the raw proportion.
 
 - support_1, support_2, ...:
 
@@ -69,15 +88,18 @@ comparison tree:
 
 This is the core function of the phylorug pipeline. It can be called
 directly after
-[`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
-—
+[`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md),
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
-is a useful diagnostic but not a prerequisite, as this function enforces
-taxon matching internally. Every tree must include the complete set of
-backbone taxa. Because an tree lacking a backbone taxon cannot assess
-the presence of a clade containing that taxon,scoring such a clade as
-'absent' would introduce a false negative.The function therefore
-enforces strict taxon matching. Use
+is a useful diagnosis but not a prerequisite, as
+`node_presence_matrix()` requires perfectly matched taxon sets and the
+pipline can not proceed if any mismatches in taxa set are detected
+between the backbone and comparison trees.
+
+Every tree must include the complete set of backbone taxa. Because a
+tree lacking a backbone taxon cannot assess the presence of a clade
+containing that taxon, scoring such a clade as 'absent' would introduce
+a false negative. The function therefore enforces strict taxon matching.
+Use
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
 to diagnose the discrepancies and
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
@@ -88,17 +110,22 @@ in a single pass. The plotting function
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
 decide which to use based on the visualisation context.
 
-In presence matrix (`use_support = FALSE`),For multiple equally most
-parsimonious trees (MPTs) the cell records the clade frequency among
-MPTs and, for a single-tree this is 1 for presence or 0 for absence.
+The `presence` matrix records clade recovery: `1` where the bipartition
+is found, `0` where absent. For multiple equally most parsimonious trees
+(MPTs), the behaviour depends on `pool_threshold`: the default (`1.0`,
+strict consensus) requires the clade to appear in every pool tree; `0.5`
+applies majority rule; `0` records the raw proportion.
 
-In support matrix `use_support = TRUE`, the cell records the support
-value from the tree that recovered the clade, such as bootstrap or
-posterior probability. For MPTs, support values are averaged across the
-trees that recovered the clade; trees that did not recover it contribute
-nothing. For a single tree this is the support value where the clade is
-present, or `NA` where it is absent, since a clade that is not in the
-tree has no node to carry a support value.
+Each `support_*` matrix records the raw support value from the node
+label of the tree that recovered the clade, such as bootstrap percentage
+or posterior probability. Support extraction is only meaningful for
+single trees (`phylo`), not for pools of equally optimal trees
+(`multiPhylo`). Averaging node labels across MPTs is not scientifically
+valid: support values come from resampling analyses (bootstrap,
+jackknife), which produce a separate consensus tree that should be
+passed to phylorug as a single `phylo` comparison tree. If a pool is
+supplied, only presence mode is meaningful; support cells for that
+column will be `NA`.
 
 ## Examples
 
@@ -122,9 +149,10 @@ check_taxa(backbone, others)
 #> 4        70p_partition_entropy identical     15              
 
 # --- Presence/absence matrix -----------------------------------------------
-# Just pass the backbone and comparison trees (support_col defaults to 1):
+# Just pass the backbone and comparison trees (support_col defaults to 1).
+# For pools of MPTs, pool_threshold defaults to 1.0 (strict consensus):
 npmatrix <- node_presence_matrix(backbone, others)
-npmatrix$presence     # clade presence/absence (1/0 or pool proportion)
+npmatrix$presence     # clade presence/absence (1/0)
 #>    70p_ASTRAL_partition_entropy 70p_ASTRAL_uce 70p_ghost 70p_partition_entropy
 #> 16                            1              1         1                     1
 #> 17                            1              1         0                     1
