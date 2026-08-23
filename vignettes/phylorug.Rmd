@@ -707,9 +707,7 @@ analysis. A single-tree file returns a `phylo`; a file with multiple
 equally optimal trees (as POY, TNT, or PAUP\* write them) returns a
 `multiPhylo` scored as a pool.
 
-**Pool scoring in presence mode.** The presence value is the proportion
-of pool trees recovering the clade. If 2 out of 3 tied optima contain a
-clade, the cell records 0.67. A single-tree analysis records 1 or 0.
+**Pool scoring in presence mode.** By default (`pool_threshold = 1.0`), a clade counts as present only if every tree in the pool recovers it — equivalent to a strict consensus. Set `pool_threshold = 0.5` for majority rule, or `pool_threshold = 0` to record the raw proportion (e.g., 2 out of 3 gives 0.67). A single-tree analysis always records 1 or 0.
 
 **Support mode is not available for pools.** Node labels on tied optima
 are not independent support values. Meaningful support (bootstrap,
