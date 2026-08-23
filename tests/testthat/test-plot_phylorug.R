@@ -264,14 +264,24 @@ test_that("show_support auto-resolves to FALSE when support + include_backbone",
     ))
   )
 })
-test_that("include_backbone + support mode errors without backbone in support_type", { # nolint: line_length_linter.
-  expect_error(
+test_that("include_backbone = TRUE without metric gives message, not error", {
+  expect_message(
     on_null_device(
       plot_phylorug(make_backbone_with_labels(), make_npm(),
                     mode = "support", support_idx = 1,
                     include_backbone = TRUE)
     ),
-    "backbone.*entry in `support_type`"
+    "Backbone support type not declared"
+  )
+})
+
+test_that("include_backbone = 'sh_alrt' adds backbone with metric thresholds", {
+  expect_no_error(
+    on_null_device(
+      plot_phylorug(make_backbone_with_labels(), make_npm(),
+                    mode = "support", support_idx = 1,
+                    include_backbone = "sh_alrt")
+    )
   )
 })
 test_that("show_support with support_label_cex and support_label_col", {

@@ -44,11 +44,12 @@
 #' @param n_rows,n_cols Integer. Grid shape for the rug at each node. If
 #'   `NULL` (the default), a roughly square grid is chosen automatically.
 #'
-#' @param include_backbone Logical. If `TRUE`, the backbone tree occupies
-#'   cell 1 of every rug, showing its own presence (always `1`) or its own
-#'   support value. Default `FALSE`, since the backbone defines the topology
-#'   and trivially recovers every clade. Useful when the figure will be
-#'   edited in a vector editor and every analysis must appear in the grid.
+#' @param include_backbone Logical or character. If `FALSE` (default), the
+#'   backbone does not occupy a rug cell. If `TRUE`, the backbone is added as
+#'   cell 1 using universal thresholds in support mode (with a message). If a
+#'   character string naming a support metric (`include_backbone = "ufboot"`),
+#'   the backbone is added as cell 1 and binned against that metric's
+#'   thresholds.
 #'
 #' @param legend Logical. Draw the legend. Default TRUE.
 #'
@@ -84,14 +85,18 @@
 #'
 #' @param support_label_col Colour of the backbone support labels. Default
 #'   `"red"`.
+#'
 #' @param rug_on_identical Logical. Default `FALSE`. When this and
 #'   `dot_identical` are both `TRUE`, unanimous nodes receive both the dot and
 #'   a support rug, making per-tree support strength visible even at universally
 #'   recovered clades.
-#' @param hide_unsupported Logical. Default `FALSE`. When `TRUE`, nodes where
-#'   no comparison tree recovers the clade are left bare, no rug is drawn.
-#'   The absence of both a dot and a rug signals that the clade is unique to
-#'   the backbone topology.
+#'
+#' @param hide_unsupported Logical. Default `TRUE`. Nodes where no comparison
+#'   tree recovers the clade are left bare, the absence of both a dot and a
+#'   rug signals that the clade is unique to the backbone topology. Set to
+#'   `FALSE` to draw all-white rugs at these nodes, which can be useful when
+#'   you want every internal node to carry a visible grid for annotation or
+#'   figure editing.
 #'
 #' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
 #'   directly to the active graphics device (not recommended).
@@ -161,7 +166,7 @@ plot_phylorug <- function(backbone, npm,
                           support_label_cex = NULL,
                           support_label_col = "red",
                           rug_on_identical = FALSE,
-                          hide_unsupported = FALSE,
+                          hide_unsupported = TRUE,
                           ...) {
   # --- 1. Validate -----------------------------------------------------------
   if (!inherits(backbone, "phylo"))
@@ -171,6 +176,12 @@ plot_phylorug <- function(backbone, npm,
 
   mode         <- match.arg(mode)
   rug_position <- match.arg(rug_position)
+  # --- Resolve include_backbone ---
+  bb_support_metric <- NULL
+  if (is.character(include_backbone)) {
+    bb_support_metric <- include_backbone
+    include_backbone  <- TRUE
+  }
 
   # --- Support matrix validation ---
   if (mode == "support") {
@@ -252,14 +263,15 @@ plot_phylorug <- function(backbone, npm,
                    dimnames = list(rownames(presence), bb_name))
     presence <- cbind(bb_p, presence)
     if (mode == "support") {
-      if (!is.null(support_type) && !(bb_name %in% names(support_type))) {
-        stop(
-          "`include_backbone = TRUE` with `mode = \"support\"` requires a ",
-          "\"backbone\" entry in `support_type`. Add it in ",
-          "`node_presence_matrix()`, e.g. ",
-          "support_type = c(backbone = \"ufboot\", ...)",
-          call. = FALSE
+      if (!is.null(bb_support_metric)) {
+        support_type <- c(stats::setNames(bb_support_metric, bb_name), support_type)# nolint: line_length_linter.
+      } else if (!is.null(support_type) && !(bb_name %in% names(support_type))) {
+        message(
+          "Backbone support type not declared. The backbone column will ",
+          "use universal thresholds. To use metric-specific thresholds, ",
+          "pass the metric name directly, e.g. `include_backbone = \"ufboot\"`."
         )
+        support_type <- c(stats::setNames(NA_character_, bb_name), support_type)
       }
       bb_s <- node_support(backbone)[[paste0("support_", support_idx)]]
       bb_col <- matrix(bb_s[as.integer(rownames(presence)) - ntip],

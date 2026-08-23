@@ -29,7 +29,7 @@ plot_phylorug(
   support_label_cex = NULL,
   support_label_col = "red",
   rug_on_identical = FALSE,
-  hide_unsupported = FALSE,
+  hide_unsupported = TRUE,
   ...
 )
 }
@@ -72,11 +72,12 @@ are applied.}
 \item{n_rows, n_cols}{Integer. Grid shape for the rug at each node. If
 \code{NULL} (the default), a roughly square grid is chosen automatically.}
 
-\item{include_backbone}{Logical. If \code{TRUE}, the backbone tree occupies
-cell 1 of every rug, showing its own presence (always \code{1}) or its own
-support value. Default \code{FALSE}, since the backbone defines the topology
-and trivially recovers every clade. Useful when the figure will be
-edited in a vector editor and every analysis must appear in the grid.}
+\item{include_backbone}{Logical or character. If \code{FALSE} (default), the
+backbone does not occupy a rug cell. If \code{TRUE}, the backbone is added as
+cell 1 using universal thresholds in support mode (with a message). If a
+character string naming a support metric (\code{include_backbone = "ufboot"}),
+the backbone is added as cell 1 and binned against that metric's
+thresholds.}
 
 \item{legend}{Logical. Draw the legend. Default TRUE.}
 
@@ -114,10 +115,12 @@ labels. Default \code{NULL} auto-scales with tree size.}
 a support rug, making per-tree support strength visible even at universally
 recovered clades.}
 
-\item{hide_unsupported}{Logical. Default \code{FALSE}. When \code{TRUE}, nodes where
-no comparison tree recovers the clade are left bare, no rug is drawn.
-The absence of both a dot and a rug signals that the clade is unique to
-the backbone topology.}
+\item{hide_unsupported}{Logical. Default \code{TRUE}. Nodes where no comparison
+tree recovers the clade are left bare, the absence of both a dot and a
+rug signals that the clade is unique to the backbone topology. Set to
+\code{FALSE} to draw all-white rugs at these nodes, which can be useful when
+you want every internal node to carry a visible grid for annotation or
+figure editing.}
 
 \item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}, such as
 \code{cex}, \code{edge.width}, \code{font}, or \code{label.offset}. These override the

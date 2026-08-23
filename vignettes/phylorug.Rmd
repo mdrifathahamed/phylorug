@@ -23,7 +23,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 # What problem does phylorug solve?
 
 Phylogenetic trees represent best-supported, statistically convincing
@@ -89,15 +88,15 @@ plots "Navajo rugs" and showed that nodal support and nodal stability
 can tell different stories.
 
 Sanders (2010) automated clade detection with Cladescan (Perl), and
-Machado (2015) extended the approach with YBYRÁ (Python). Both tools produce 
-individual SVG plots per node that must be manually placed onto the tree in a 
-vector editor. Cladescan is no longer available online, and YBYRÁ has been 
-archived by its developer and is no longer maintained. More importantly, 
-both were designed around sensitivity analysis within a single analytical
-framework, varying parameters and cost schemes, rather than comparing
-trees from fundamentally different inference pipelines that report
-support in incompatible formats (e.g., UFBoot2, SH-aLRT, posterior
-probability, ASTRAL LPP).
+Machado (2015) extended the approach with YBYRÁ (Python). Both tools
+produce individual SVG plots per node that must be manually placed onto
+the tree in a vector editor. Cladescan is no longer available online,
+and YBYRÁ has been archived by its developer and is no longer
+maintained. More importantly, both were designed around sensitivity
+analysis within a single analytical framework, varying parameters and
+cost schemes, rather than comparing trees from fundamentally different
+inference pipelines that report support in incompatible formats (e.g.,
+UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP).
 
 phylorug extends this lineage into R. It reads trees from any pipeline,
 bins support values against metric-specific thresholds rather than
@@ -106,19 +105,20 @@ tree — no manual placement, no external software.
 
 # Quick start
 
-The fastest way to see phylorug in action is with the built-in `sample_trees` 
-dataset, a 15-taxon subset of the  beetle  data (Lopes et al., 2024), already 
-rooted, pruned, and with tip labels translated to species names. Lets start with
-attaching the package : 
+The fastest way to see phylorug in action is with the built-in
+`sample_trees` dataset, a 15-taxon subset of the beetle data (Lopes et
+al., 2024), already rooted, pruned, and with tip labels translated to
+species names. Lets start with attaching the package :
+
 ```{r setup}
 library(phylorug)
 ```
 
 ## Load the data
 
-`sample_trees` is a named list of five `phylo` objects, all sharing the same 15 
-taxa. Pick one as the backbone and use the rest as comparisons. In the original
-study `70p_uce` is used as a backbone tree.
+`sample_trees` is a named list of five `phylo` objects, all sharing the
+same 15 taxa. Pick one as the backbone and use the rest as comparisons.
+In the original study `70p_uce` is used as a backbone tree.
 
 ```{r load-sample}
 names(sample_trees)
@@ -129,75 +129,56 @@ others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
 ## Check taxon consistency
 
-Before building a rug, verify that every comparison tree carries the same taxa 
-as the backbone. `check_taxa()` reports the outcome and flags any mismatches:
+`check_taxa()` compares the tip labels of the backbone against every
+comparison tree and reports any mismatches , missing taxa, extra taxa,
+or spelling differences. Running it before `node_presence_matrix()` is
+good practice, especially the first time you work with a new dataset.
+That said, `node_presence_matrix()` will stop with a clear error if a
+comparison tree is missing a backbone taxon, so if you already know your
+trees share the same taxa you can skip straight to building the matrix :
 
 ```{r check-taxa}
 check_taxa(backbone, others)
 ```
 
-All trees share the same 15 taxa, so we can proceed. IF a mismatch is reported 
-the helper function `prune_to_shared()` can be used to get identical taxa set.
+All trees share the same 15 taxa, so we can proceed. IF a mismatch is
+reported the helper function `prune_to_shared()` can be used to get
+identical taxa set.
 
 ## Build the node presence matrix
- 
-Once the trees share the same taxa, the next question is: which clades from the 
-backbone appear in which comparison trees, and how strongly are they supported?
-`node_presence_matrix()` answers this by walking every internal node of the 
-backbone and checking each comparison tree for the same clade. 
-It returns two matrices:
-a **presence matrix** (1 = clade recovered, 0 = absent) and a **support matrix**
-containing the support values extracted from the node labels of each tree. 
-By default, the first support value in each node label is used. If your trees 
-carry compound labels like `100/98` (e.g., SH-aLRT/UFBoot2 from IQ-TREE), 
-`support_col` lets you select which value to extract, `support_col = 1` takes 
-the first, `support_col = 2` takes the second.
 
-```{r build-npm}
-npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-```
-The result is a named list. `npm$presence``is a matrix of 1s and 0s. 
-`npm$support_1` and `npm$support_2` hold the raw support values, with NA where 
-the clade was not recovered. These matrices are what `plot_phylorug()` uses to 
-draw the **rug**, presence determines whether a cell is filled or empty, support
-determines its shade
+Once the trees share the same taxa, the next question is: which clades
+from the backbone appear in which comparison trees, and how strongly are
+they supported? `node_presence_matrix()` answers this by walking every
+internal node of the backbone and checking each comparison tree for the
+same clade.
 
-## Plot the rug
- 
-With the node presence matrix ready, `plot_phylorug()` draws the rug on the 
-backbone. In its simplest form, all arguments are defaults: `mode = "presence"`,
-`dot_identical = TRUE` (unanimous nodes get a black dot), `legend = TRUE`, and 
-`rug_position = "inside"`. The internal scaling engine sizes the canvas, fonts, 
-and cell dimensions automatically based on tree size.
- 
-```{r quick-presence,  fig.height=5.8, fig.width= 6.5, fig.dpi=300}
-plot_phylorug(backbone, npm)
-```
+It returns a named list of matrices: a **presence matrix** (1 = clade
+recovered, 0 = absent) and one or more **support matrices** containing
+the support values extracted from the node labels of each tree. By
+default, the first support value in each node label is used. If your
+trees carry compound labels like `100/98` (e.g., SH-aLRT/UFBoot2 from
+IQ-TREE), `support_col` lets you select which value to extract,
+`support_col = 1` takes the first, `support_col = 2` takes the second.
 
-For publication-quality output, setting `file`, `width`, and `height` is 
-strongly recommended. All other arguments are worth exploring to fine-tune your 
-figure, but these three matter most.
+Two other arguments belong here rather than at plot time. `support_type`
+is an optional named character vector that declares which support metric
+each comparison tree uses (e.g., `"ufboot"`, `"lpp"`, `"sh_alrt"`,
+`"posterior"`). It is stored as an attribute of the result and read
+automatically by `plot_phylorug()` when drawing in support mode, so you
+only declare it once.
 
-```{r presence-file, eval = FALSE}
-plot_phylorug(backbone, npm, file = "presence.pdf", width = 12, height = 8)
-```
-## Support mode
- 
-Lets switch to support mode to see how strongly each tree supports each clade. 
-Cells are shaded by binned support strength, darker means stronger. Support 
-values are binned against thresholds specific to their own metric: a tree with 
-LPP 0.95 and a tree with LPP 0.65 are compared to LPP thresholds, while a tree 
-carrying UFBoot2 values is binned against UFBoot2 thresholds independently. 
-`phylorug` never cross-compares values from different support metrics, because 
-LPP 0.95 and UFBoot2 95 do not measure the same thing despite looking 
-numerically quite similar and it can be tempting to convert them by dividing.
+When a comparison tree file contains multiple equally optimal trees (a
+pool), `pool_threshold` decides how many of them must recover a clade
+for it to count as present. At `1.0` (the default), all of them must be
+a strict consensus. At `0.5`, a majority is enough. At `0`, the cell
+simply shows the fraction that recovered it, with no cutoff applied. The
+`sample_trees` dataset contains single `phylo` objects, not pools, so
+`pool_threshold` does not apply here. We declare support_type so that
+`plot_phylorug()` can bin each tree's support values against the correct
+metric-specific thresholds:
 
-The `support_type` argument tells `phylorug` which support metric each tree 
-uses, so the correct thresholds are applied. IQ-TREE UFBoot2 values are on a 
-0–100 scale; ASTRAL local posterior probabilities are on a 0–1 scale. 
-Define it once and reuse across plot calls:
-
-```{r support-type}
+```{r Support_type_vector}
 support_type <- c(
   "70p_ASTRAL_partition_entropy" = "lpp",
   "70p_ASTRAL_uce"               = "lpp",
@@ -206,63 +187,104 @@ support_type <- c(
 )
 ```
 
+```{r build-npm}
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2), support_type = support_type)
+```
+
+The result is a named list. `npm$presence` is a matrix of 1s and 0s.
+`npm$support_1` and `npm$support_2` hold the raw support values, with
+`NA` where the clade was not recovered. These matrices are what
+`plot_phylorug()` uses to draw the rug, presence determines whether a
+cell is filled or empty, support determines its shade.
+
+## Plot the rug
+
+With the node presence matrix ready, `plot_phylorug()` draws the rug on
+the backbone. In its simplest form, all arguments are defaults:
+`mode = "presence"`, `dot_identical = TRUE` (unanimous nodes get a black
+dot), `legend = TRUE`, and `rug_position = "inside"`. The internal
+scaling engine sizes the canvas, fonts, and cell dimensions
+automatically based on tree size.
+
+```{r quick-presence,  fig.height=5.8, fig.width= 6.5, fig.dpi=300}
+plot_phylorug(backbone, npm)
+```
+
+For publication-quality output, setting `file`, `width`, and `height` is
+strongly recommended. All other arguments are worth exploring to
+fine-tune your figure, but these three matter most.
+
+```{r presence-file, eval = FALSE}
+plot_phylorug(backbone, npm, file = "presence.pdf", width = 12, height = 8)
+```
+
+## Support mode
+
+Now switch to support mode to see how strongly each tree supports each
+clade. Cells are shaded by binned support strength, darker means
+stronger. Support values are binned against thresholds specific to their
+own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
+to LPP thresholds, while a tree carrying UFBoot2 values is binned
+against UFBoot2 thresholds independently. phylorug never cross-compares
+values from different support metrics, because LPP 0.95 and UFBoot2 95
+do not measure the same thing despite looking numerically similar.
+
+Since we already declared `support_type` when building the node presence
+matrix, `plot_phylorug()` reads it automatically from the stored
+attribute and applies the correct metric-specific thresholds.
+
+If `support_type` is not declared, `plot_phylorug()` falls back to a
+universal threshold scale: values greater than 1 are divided by 100 to
+bring them onto a 0–1 scale, and all trees are binned against the same
+set of thresholds regardless of metric. This is a reasonable starting
+point for quick exploration, but declaring `support_type` is always
+preferred because it ensures each value is evaluated against the
+thresholds published for its own method.
+
 ```{r support-default, fig.height=5.8, fig.width= 6.5, fig.dpi=300}
 plot_phylorug(
   backbone, npm,
-  mode         = "support",
-  support_type = support_type
-)
+  mode         = "support")
 ```
 
-# Reading the plot
+# Reading the rug plot
 
-The plot carries two legends. The **position legend** (top-left) maps each 
-numbered cell to a tree. For example, cell 1 is the first tree, cell 2 the 
-second, and so on. The **threshold legend** (top-right, support mode only) shows
-what each shade means.
- 
+The rug plot carries two legends. The **position legend** (top-left)
+maps each numbered cell to a tree. For example, cell 1 is the first
+tree, cell 2 the second, and so on. The **threshold legend** (top-right,
+support mode only) shows what each shade means.
+
 At each node you will see one of these patterns:
 
-- **Black dot**: all analyses recover this clade unanimously 
-(`dot_identical = TRUE`, the default). No rug is drawn to reduce clutter.
-- **Mixed grid**: some cells filled with solid black, some white. These are the 
-interesting nodes, the position legend tells you which analysis agrees and which
-disagrees.
-- **All-white grid**: No comparison tree recovers this backbone clade. It exists 
-only in the backbone topology. Setting `hide_unsupported = TRUE` removes these 
-all-white rugs for a cleaner figure. A node with neither a dot nor a rug then 
-signals a clade found only in the backbone.
- 
-In support mode, filled cells are shaded by how strongly each analysis supports
-the clade. The colour scheme uses a greyscale gradient for recovered clades plus
-two special colours for absent and unparseable cases. The thresholds shown below
-are the package defaults. Different fields and journals apply different cutoffs,
-so we recommend defining your own via the `thresholds` argument (see the 
-Customisation section below):
+- **Black dot**: all analyses recover this clade unanimously
+  (`dot_identical = TRUE`, the default). No rug is drawn to reduce clutter.
+- **Mixed grid**: some cells filled with solid black, some white. These
+  are the interesting nodes, the position legend tells you which analysis agrees  and which disagrees.
+- **Bare node** (no dot, no rug): no comparison tree recovers this backbone 
+  clade, it exists only in the backbone topology. This is the default behaviour    (`hide_unsupported = TRUE`). Set `hide_unsupported = FALSE` to draw all-white    grids at these nodes instead.
 
-- **Black**: very high support (UFBoot2 >= 95, SH-aLRT >= 80, LPP >= 0.95).
+In support mode, filled cells are shaded by how strongly each analysis supports the clade. The colour scheme uses a greyscale gradient for recovered clades plus two special colours for absent and unparseable cases. The thresholds shown below are the package defaults. Different fields and journals apply different cutoffs, so we recommend defining your own via the `thresholds` argument (see the Customisation section below):
+
+- **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP \>=0.95).
 - **Dark grey**: high support (UFBoot2 80-94, SH-aLRT 70-79, LPP 0.90-0.94).
-- **Light grey**: moderate support (UFBoot2 50-79, SH-aLRT 50-69,
-  LPP 0.50-0.89).
-- **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for LPP).
-  Present but weakly endorsed.
+- **Light grey**: moderate support (UFBoot2 50-79, SH-aLRT 50-69, LPP 0.50-0.89).
+- **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for LPP). Present but weakly endorsed.
 - **White**: clade not recovered by that analysis.
-- **Red**: clade recovered but no support value could be read. This typically
-  means the tree file had no node labels, or the label was not a parseable
-  number.
- 
+- **Red**: clade recovered but no support value could be read. This typically means the tree file had no node labels, or the label was not a parseable number.
+
 # Fine-tuning the figure
- 
-The following example shows how optional arguments refine the plot. 
-`rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing per-tree
-support strength even at stable clades. `hide_unsupported = TRUE` removes 
-all-white rugs for a cleaner figure. `cell_scale` adjusts the size of 
-each rug cell, `rug_position` controls whether rugs sit toward the root 
-(`"inside"`) or toward the tips (`"outside"`). `dot_cex` scales the 
-unanimous-node dot, and `show_support = TRUE` with `support_label_cex` and 
-`support_label_col` overlays the backbone's own support labels on the tree. 
-`cex` and `font` are passed directly to the tree plotter. For publication 
-output, add `file = "output.pdf"` along with `width` and `height` to produce a 
+
+The following example shows how optional arguments refine the plot.
+`rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing
+per-tree support strength even at stable clades.
+`hide_unsupported = FALSE` would draw all-white rugs at nodes unique to the backbone; the default (`TRUE`) leaves them bare.
+`cell_scale` adjusts the size of each rug cell, `rug_position` controls
+whether rugs sit toward the root (`"inside"`) or toward the tips
+(`"outside"`). `dot_cex` scales the unanimous-node dot, and
+`show_support = TRUE` with `support_label_cex` and `support_label_col`
+overlays the backbone's own support labels on the tree. `cex` and `font`
+are passed directly to the tree plotter. For publication output, add
+`file = "output.pdf"` along with `width` and `height` to produce a
 properly scaled figure.
 
 ```{r support-refined, fig.height=5.8, fig.width= 6.5, fig.dpi=300}
@@ -273,11 +295,9 @@ plot_phylorug(
   width             = 6.5,
   height            = 5.8,
   mode              = "support",
-  support_type      = support_type,
   rug_position      = "inside",
   cell_scale        = 0.38,
   rug_on_identical  = TRUE,
-  hide_unsupported  = TRUE,
   cex               = 0.90,
   font              = 3,
   dot_cex           = 1.3,
@@ -289,13 +309,14 @@ plot_phylorug(
 
 # Working with real data: Culicomorpha
 
-The built-in Culicomorpha dataset contains 10 phylogenomic analyses of 46 taxa 
-from eight Diptera families (Fu et al., 2025), covering IQ-TREE partitioned, 
-PMSF, LG+C20+F+R, and ASTRAL strategies.
+The built-in Culicomorpha dataset contains 10 phylogenomic analyses of
+46 taxa from eight Diptera families (Fu et al., 2025), covering IQ-TREE
+partitioned, PMSF, LG+C20+F+R, and ASTRAL strategies.
 
 ## Read the trees
 
-`read_trees()` scans a directory for tree files and returns a named list:
+`read_trees()` scans a directory for tree files and returns a named
+list:
 
 ```{r read-culico}
 tree_dir <- system.file("extdata", "culicomorpha", package = "phylorug")
@@ -306,10 +327,11 @@ names(trees)
 ## Root and remove the outgroups
 
 The *Culicomorpha* trees include three outgroup taxa from outside the
-infraorder: *Phlebotomus chinensis* and *Clogmia albipunctata (Psychodidae)*
-and *Coboldia fuscipes (Scatopsidae)*. Root on all three, then drop them.
-The order matters — you must root while the outgroup tips are still
-present, because `ape::root()` needs to find them in the tree:
+infraorder: *Phlebotomus chinensis* and *Clogmia albipunctata
+(Psychodidae)* and *Coboldia fuscipes (Scatopsidae)*. Root on all three,
+then drop them. The order matters — you must root while the outgroup
+tips are still present, because `ape::root()` needs to find them in the
+tree:
 
 ```{r root-culico}
 trees <- lapply(trees, function(tr) {
@@ -323,11 +345,11 @@ trees <- lapply(trees, function(tr) {
 })
 ```
 
-The Culicomorpha trees already carry species names as tip labels, so no 
-translation is needed here. For trees with specimen codes, see 
+The Culicomorpha trees already carry species names as tip labels, so no
+translation is needed here. For trees with specimen codes, see
 `translate_tips()` in the beetles example below.
 
-## Choose a backbone 
+## Choose a backbone
 
 Pick one analysis as the backbone. The remaining trees are comparisons:
 
@@ -336,28 +358,15 @@ backbone <- trees[["Matrix1-kpi_PMSF(H1.guide)"]]
 others   <- trees[names(trees) != "Matrix1-kpi_PMSF(H1.guide)"]
 
 ```
+
 ## Check taxon consistency
+
 ```{r check-taxon-consistency-culico}
 check_taxa(backbone, others)
 ```
 
 ## Build the matrix and plot
-
-```{r npm-culico}
-npm <- node_presence_matrix(backbone, others)
-```
-## plot the phylorug-presence
-
-```{r plot-culico, fig.width = 8, fig.height = 10}
-plot_phylorug(backbone, npm)
-```
-
-With 9 comparison trees, phylorug automatically arranges the rug grid (3
-columns by 3 rows in this case). The position legend maps each cell position to 
-an analysis name.
-
 ```{r support-type-culico}
-# --- Map each comparison tree to its support metric ---
 support_type <- c(
   "Matrix1-kpi_ASTRAL"            = "lpp",
   "Matrix1-smart_ASTRAL"          = "lpp",
@@ -371,77 +380,94 @@ support_type <- c(
 )
 ```
 
-## support-mode 
-Here we use show_support = TRUE to overlay the backbone's own node labels in red
-for cross-referencing, `cell_scale = 0.35` to shrink the rug cells slightly for 
-a denser tree, and hide_unsupported = TRUE to remove all-white rugs so only 
-contested and stable nodes remain visible.
+```{r npm-culico}
+npm <- node_presence_matrix(backbone, others, support_type = support_type)
+```
+
+## plot the phylorug-presence
+
+```{r plot-culico, fig.width = 8, fig.height = 10}
+plot_phylorug(backbone, npm)
+```
+
+With 9 comparison trees, phylorug automatically arranges the rug grid (3
+columns by 3 rows in this case). The position legend maps each cell
+position to an analysis name.
+
+## support-mode
+
+Here we use show_support = TRUE to overlay the backbone's own node labels in red for cross-referencing and `cell_scale = 0.35` to shrink the rug cells slightly for a denser tree. All-white rugs are hidden by default, so only contested and stable nodes remain visible.
 
 ```{r plot-culico-support,fig.width = 8, fig.height = 10}
 plot_phylorug(backbone, npm,
               mode               = "support",
-              support_type       = support_type,
               show_support       = TRUE,
               support_label_cex  = 0.25,
               support_label_col  = "red",
               cell_scale         = 0.35,
               rug_position       = "inside",
-              rug_on_identical   = FALSE,
-              hide_unsupported   = TRUE)
+              rug_on_identical   = FALSE)
 ```
 
 ## What the rug reveals?
 
-The **rugs** immediately separates stable from contested regions of the 
-*Culicomorpha* tree. Most family-level clades carry black dots, meaning those 
-clades are recovered by unanimously  all 9 analyses. *Culicidae* (mosquitoes), 
-*Chironomidae* (non-biting midges), *Ceratopogonidae* (biting midges), and the 
-*Simuliidae* + *Thaumaleidae* clade all show complete agreement across every 
-inference method and dataset. Fu et al. (2025) reported the same, full support 
-for these clades regardless of model or matrix.
+The **rugs** immediately separates stable from contested regions of the
+*Culicomorpha* tree. Most family-level clades carry black dots, meaning
+those clades are recovered by unanimously all 9 analyses. *Culicidae*
+(mosquitoes), *Chironomidae* (non-biting midges), *Ceratopogonidae*
+(biting midges), and the *Simuliidae* + *Thaumaleidae* clade all show
+complete agreement across every inference method and dataset. Fu et al.
+(2025) reported the same, full support for these clades regardless of
+model or matrix.
 
-The interesting nodes are the contested ones. The central question in 
-*Culicomorpha* phylogenetics is where *Ceratopogonidae* and *Chironomidae* sit 
-relative to the rest of the infraorder. Fu et al. (2025) tested multiple 
-hypotheses. Their preferred topology (H1) places *Chironomidae* + 
-*Ceratopogonidae* together as sister to all remaining families. The alternative 
-(H2) breaks this pairing and places *Ceratopogonidae* elsewhere, nested closer 
-to the other families. On the rug, the node defining the *Chironomidae* + 
-*Ceratopogonidae* clade shows a mixed grid. The two ASTRAL cells (cells 1 and 4 
-in the position legend) are white at this node, meaning the coalescent-based 
-analyses did not recover this grouping. The IQ-TREE concatenation cells are 
-mostly black, meaning the concatenation analyses did recover it. This is a 
-textbook example of gene-tree/species-tree conflict made visible on a single 
-figure: concatenation says these two families group together, coalescent methods
-say they do not.
+The interesting nodes are the contested ones. The central question in
+*Culicomorpha* phylogenetics is where *Ceratopogonidae* and
+*Chironomidae* sit relative to the rest of the infraorder. Fu et al.
+(2025) tested multiple hypotheses. Their preferred topology (H1) places
+*Chironomidae* + *Ceratopogonidae* together as sister to all remaining
+families. The alternative (H2) breaks this pairing and places
+*Ceratopogonidae* elsewhere, nested closer to the other families. On the
+rug, the node defining the *Chironomidae* + *Ceratopogonidae* clade
+shows a mixed grid. The two ASTRAL cells (cells 1 and 4 in the position
+legend) are white at this node, meaning the coalescent-based analyses
+did not recover this grouping. The IQ-TREE concatenation cells are
+mostly black, meaning the concatenation analyses did recover it. This is
+a textbook example of gene-tree/species-tree conflict made visible on a
+single figure: concatenation says these two families group together,
+coalescent methods say they do not.
 
-Within *Chironomidae*, the subfamily-level relationships are largely stable, 
-with black dots on most internal nodes. A few nodes near *Potthastia* and 
-*Paraheptagyia* show mixed grids with red cells. Red means the analysis 
-recovered the clade but carried no computable support value. These nodes sit on 
-short internal branches where rapid diversification left little phylogenetic 
-signal, making resolution sensitive to model choice. Fu et al. (2025) noted 
-similar instability around the placement of *Telmatogetoninae* within 
-*Diamesinae* depending on the analytical model used.
+Within *Chironomidae*, the subfamily-level relationships are largely
+stable, with black dots on most internal nodes. A few nodes near
+*Potthastia* and *Paraheptagyia* show mixed grids with red cells. Red
+means the analysis recovered the clade but carried no computable support
+value. These nodes sit on short internal branches where rapid
+diversification left little phylogenetic signal, making resolution
+sensitive to model choice. Fu et al. (2025) noted similar instability
+around the placement of *Telmatogetoninae* within *Diamesinae* depending
+on the analytical model used.
 
-This is the core value of `phylorug`: patterns that required opening 10 separate
-tree files side by side in the original study are condensed onto a single 
-figure. A reader can immediately see which nodes are robust to analytical choice
-and which deserve further investigation.
+This is the core value of `phylorug`: patterns that required opening 10
+separate tree files side by side in the original study are condensed
+onto a single figure. A reader can immediately see which nodes are
+robust to analytical choice and which deserve further investigation.
 
 # Full pipeline: beetles with tip translation
-The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains two 
-sets of trees from Lopes et al. (2024): `beetles_50p/` and `beetles_70p/`, each
-with 5 analyses of 314 ingroup dung beetle taxa (316 tips including 2 outgroups)
-built from UCE loci retained at different completeness thresholds (50% and 70%).
-The two datasets produce slightly different topologies, making them a good test 
-case for exploring how data filtering affects clade recovery. For this vignette 
-we use the 50p set, but users are encouraged to try both. Unlike the 
-*Culicomorpha* trees, these trees store specimen codes as tip labels (e.g., 
-`"OntauST002"` rather than a species name), so this example adds one extra step:
-translating tip labels using a lookup table before building the rug.
+
+The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains
+two sets of trees from Lopes et al. (2024): `beetles_50p/` and
+`beetles_70p/`, each with 5 analyses of 314 ingroup dung beetle taxa
+(316 tips including 2 outgroups) built from UCE loci retained at
+different completeness thresholds (50% and 70%). The two datasets
+produce slightly different topologies, making them a good test case for
+exploring how data filtering affects clade recovery. For this vignette
+we use the 50p set, but users are encouraged to try both. Unlike the
+*Culicomorpha* trees, these trees store specimen codes as tip labels
+(e.g., `"OntauST002"` rather than a species name), so this example adds
+one extra step: translating tip labels using a lookup table before
+building the rug.
 
 ## Read the trees
+
 ```{r read trees-beetles-50p}
 tree_dir <- system.file("extdata", "beetles_50p", package = "phylorug")
 trees    <- read_trees(tree_dir)
@@ -449,9 +475,10 @@ names(trees)
 ```
 
 ## Root and remove outgroups
-The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*. We ill 
-root on them first, then drop them. As before, rooting must happen while the 
-outgroup tips are still in the tree.
+
+The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*.
+We ill root on them first, then drop them. As before, rooting must
+happen while the outgroup tips are still in the tree.
 
 ```{r root and remove outgroup- bettle-50p}
 trees <- lapply(trees, function(tr) {
@@ -462,18 +489,23 @@ trees <- lapply(trees, function(tr) {
 ```
 
 ## Translate tip labels
-The trees still carry specimen codes at this point. A CSV file `biogeo.csv` 
-included with the package maps each code to its species name. Lets load it and 
-check the first few rows:
+
+The trees still carry specimen codes at this point. A CSV file
+`biogeo.csv` included with the package maps each code to its species
+name. Lets load it and check the first few rows:
+
 ```{r load the lookup table}
 biogeo_path <- system.file("extdata", "beetles_50p", "biogeo.csv",
                            package = "phylorug")
 biogeo <- read.csv(biogeo_path)
 head(biogeo)
 ```
-Now translate. The ordering rule from earlier applies here. Frist root and drop 
-outgroups before translating, because `translate_tips()` replaces the original 
-codes and `ape::root()` would no longer find "*NicorbUCE*" after translation.
+
+Now translate. The ordering rule from earlier applies here. Frist root
+and drop outgroups before translating, because `translate_tips()`
+replaces the original codes and `ape::root()` would no longer find
+"*NicorbUCE*" after translation.
+
 ```{r translate tree tips-beetle-50p}
 trees <- translate_tips(trees, biogeo,
                         from_col = "specimen_code",
@@ -481,6 +513,7 @@ trees <- translate_tips(trees, biogeo,
 ```
 
 ## Choose a backbone and check taxa
+
 ```{r Choose a backbone and check taxa}
 backbone <- trees[["50p_uce"]]
 others   <- trees[names(trees) != "50p_uce"]
@@ -488,25 +521,11 @@ check_taxa(backbone, others)
 ```
 
 ## Build the node presence matrix
-The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for 
-`IQ-TREE trees`). Extract both support values with `support_col = c(1, 2)`:
-```{r npm-bettle-50p}
-npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-```
 
-## Presence mode
-At ~316 taxa the tree is dense. For a clean figure, `hide_unsupported = TRUE` 
-removes all-white rugs that would clutter the backbone, and writing to a file 
-with explicit width and height avoids the distortion that GUI windows introduce 
-on large trees.
-```{r plot phylorug , fig.width = 25, fig.height = 65}
-plot_phylorug(backbone, npm, hide_unsupported = TRUE)
-```
-
-## Support mode
-Map each comparison tree to its support metric. The two ASTRAL trees carry local
-posterior probabilities, the two IQ-TREE trees carry UFBoot2:
-```{r define support_type beetles 50p}
+The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
+`IQ-TREE trees`). Extract both support values with
+`support_col = c(1, 2)`:
+```{r support_type_define}
 support_type <- c(
   "50p_partition_entropy"        = "ufboot",
   "50p_ghost"                    = "ufboot",
@@ -515,12 +534,29 @@ support_type <- c(
 )
 ```
 
-With ~316 taxa, the canvas dimensions matter. `width = 25` and `height = 65` 
-give each tip enough vertical space to remain legible, and `cell_scale = 0.25` 
-shrinks the rug cells to avoid overlap in dense regions. `show_support = TRUE` 
-with `support_label_col = "red"` overlays the backbone's own support values 
-for cross-referencing against the **rug** shading. For a tree this size, always 
-write to a file (file = "beetles_support.pdf") rather than rendering in the GUI.
+```{r npm-bettle-50p}
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
+                            support_type = support_type)
+```
+
+## Presence mode
+
+At \~316 taxa the tree is dense. For a clean figure,
+all-white rugs are hidden by default, and writing to a file with explicit width and height avoid the distortion that GUI windows introduce on large trees.
+
+```{r plot phylorug , fig.width = 25, fig.height = 65}
+plot_phylorug(backbone, npm)
+```
+
+## Support mode
+
+With \~316 taxa, the canvas dimensions matter. `width = 25` and
+`height = 65` give each tip enough vertical space to remain legible, and
+`cell_scale = 0.25` shrinks the rug cells to avoid overlap in dense
+regions. `show_support = TRUE` with `support_label_col = "red"` overlays
+the backbone's own support values for cross-referencing against the
+**rug** shading. For a tree this size, always write to a file (file =
+"beetles_support.pdf") rather than rendering in the GUI.
 
 ```{r plot phylorug beetles 50 p, fig.width = 25, fig.height = 65}
 # For publication output, add:
@@ -531,85 +567,86 @@ plot_phylorug(
   width              = 25,
   height             = 65,
   mode               = "support",
-  support_type       = support_type,
   show_support       = TRUE,
   support_label_col  = "red",
   support_label_cex  = 0.34,
   cell_scale         = 0.35,
   rug_on_identical   = FALSE,
-  hide_unsupported   = TRUE,
   cex                = 0.8
 )
 ```
 
-## What the rug reveals ?    
+## What the rug reveals ?
 
-The **rug** on the 20-taxon beetle subset (Lopes et al. 2024) exposes a 
-recurring split between coalescent and concatenation methods. At several nodes 
-the two ASTRAL analyses (cells 1--2) and the two concatenation analyses 
-(cells 3--4, GHOST and partitioned IQ-TREE) tell opposite stories.
+The **rug** on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
+recurring split between coalescent and concatenation methods. At several
+nodes the two ASTRAL analyses (cells 1--2) and the two concatenation
+analyses (cells 3--4, GHOST and partitioned IQ-TREE) tell opposite
+stories.
 
-The node uniting *Coptorhina* and *Frankenbergerius* (backbone support 100/100) 
-is a clear example. Both IQ-TREE trees recover the clade with maximum support 
-(black), but both ASTRAL trees either fail to recover it altogether (white) or 
-place it with very low posterior probability (yellow). The inverse pattern 
-appears at a deeper backbone node (30/52): ASTRAL weakly recovers the grouping 
-(dark and light grey), while neither concatenation tree finds it at all (white).
-These two nodes sit on short internal branches, exactly where incomplete lineage
-sorting is expected to overwhelm the species-tree signal in individual gene 
-trees.
+The node uniting *Coptorhina* and *Frankenbergerius* (backbone support
+100/100) is a clear example. Both IQ-TREE trees recover the clade with
+maximum support (black), but both ASTRAL trees either fail to recover it
+altogether (white) or place it with very low posterior probability
+(yellow). The inverse pattern appears at a deeper backbone node (30/52):
+ASTRAL weakly recovers the grouping (dark and light grey), while neither
+concatenation tree finds it at all (white). These two nodes sit on short
+internal branches, exactly where incomplete lineage sorting is expected
+to overwhelm the species-tree signal in individual gene trees.
 
-The node grouping *Gyronotus*, *Circellium*, *Scarabaeus*, and *Kheper* 
-(98.9/98) is recovered by three of four analyses, but GHOST disagrees. Because 
-GHOST explicitly models among-site rate variation that standard partitioned 
-models may absorb, its failure to recover the clade raises the possibility that 
-the grouping in the other trees is partly driven by unmodelled heterotachy 
-rather than genuine phylogenetic signal.
+The node grouping *Gyronotus*, *Circellium*, *Scarabaeus*, and *Kheper*
+(98.9/98) is recovered by three of four analyses, but GHOST disagrees.
+Because GHOST explicitly models among-site rate variation that standard
+partitioned models may absorb, its failure to recover the clade raises
+the possibility that the grouping in the other trees is partly driven by
+unmodelled heterotachy rather than genuine phylogenetic signal.
 
-The *Onthophagus* clade (100/99, 100/100) is one of the few nodes where all four
-cells are black or near-black, a pattern consistent with the strong molecular 
-support for *Onthophagini* monophyly reported across beetle phylogenomic studies
-generally.
+The *Onthophagus* clade (100/99, 100/100) is one of the few nodes where
+all four cells are black or near-black, a pattern consistent with the
+strong molecular support for *Onthophagini* monophyly reported across
+beetle phylogenomic studies generally.
 
-Near the base of the outgroup (63.5/44), only a single cell is black; the 
-remaining three are white. This is the weakest node in the tree, and the rug 
-makes immediately visible what a single pair of support numbers can obscure: one
-method's confidence does not translate into consensus.
+Near the base of the outgroup (63.5/44), only a single cell is black;
+the remaining three are white. This is the weakest node in the tree, and
+the rug makes immediately visible what a single pair of support numbers
+can obscure: one method's confidence does not translate into consensus.
 
-The overall pattern, concatenation and coalescent methods systematically 
-disagreeing at short branches, agreeing at long ones, is precisely the kind of 
-method-space comparison `phylorug` was designed to display. A table of support 
-values would record the same numbers, but the rug places the conflict directly 
-on the tree, at the node where it matters, making it legible at a glance.
+The overall pattern, concatenation and coalescent methods systematically
+disagreeing at short branches, agreeing at long ones, is precisely the
+kind of method-space comparison `phylorug` was designed to display. A
+table of support values would record the same numbers, but the rug
+places the conflict directly on the tree, at the node where it matters,
+making it legible at a glance.
 
 # Customisation
 
-The remaining examples use the compact `sample_trees` dataset to 
-demonstrate optional arguments. Reload the backbone and rebuild the 
-node presence matrix:
+The remaining examples use the compact `sample_trees` dataset to
+demonstrate optional arguments. Reload the backbone and rebuild the node
+presence matrix:
 
 ```{r reload-sample}
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
-npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-
 support_type <- c(
   "70p_ASTRAL_partition_entropy" = "lpp",
   "70p_ASTRAL_uce"               = "lpp",
   "70p_ghost"                    = "ufboot",
   "70p_partition_entropy"        = "ufboot"
 )
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
+                            support_type = support_type)
 ```
 
 ## Grid dimensions
 
-By default, phylorug chooses a roughly square grid. Override with 
+By default, phylorug chooses a roughly square grid. Override with
 `n_rows` and `n_cols`:
 
 ```{r grid-demo}
 #rug with flatend grid
 plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 ```
+
 ```{r}
 #rug with squired grid
 plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
@@ -617,7 +654,7 @@ plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
 
 ## Tree appearance
 
-`plot_phylorug()` passes additional arguments through `...` to 
+`plot_phylorug()` passes additional arguments through `...` to
 `ape::plot.phylo()`. Common options:
 
 ```{r tree-appearance}
@@ -626,16 +663,20 @@ plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
 
 ## Including the backbone
 
-By default, the backbone does not occupy a cell in the rug (it trivially 
-recovers every clade, since it defines the topology). Set 
+By default, the backbone does not occupy a cell in the rug (it trivially
+recovers every clade, since it defines the topology). Set
 `include_backbone = TRUE` to add it as cell 1:
 
 ```{r include-bb}
 plot_phylorug(backbone, npm, include_backbone = TRUE)
 ```
 
-In support mode with `include_backbone = TRUE`, you must also include 
-`"backbone"` in the `support_type` vector.
+In support mode, pass the backbone's support metric directly to `include_backbone` so it gets binned against the correct thresholds:
+```{r}
+plot_phylorug(backbone, npm,
+              mode             = "support",
+              include_backbone = "ufboot")
+```
 
 ## Custom thresholds
 
@@ -649,12 +690,10 @@ my_thresholds <- list(
 
 plot_phylorug(
   backbone, npm,
-  mode = "support",
-  support_type = support_type,
+  mode       = "support",
   thresholds = my_thresholds
 )
 ```
-
 
 # Tips and best practices
 
@@ -663,22 +702,24 @@ specimen codes with species names. Once translated, you cannot match
 outgroup names for rooting. Always: (1) root, (2) drop outgroup, (3)
 translate.
 
-**One file = one analysis.** `read_trees()` treats each file as one analysis. 
-A single-tree file returns a `phylo`; a file with multiple equally optimal trees
-(as POY, TNT, or PAUP\* write them) returns a `multiPhylo` scored as a pool.
+**One file = one analysis.** `read_trees()` treats each file as one
+analysis. A single-tree file returns a `phylo`; a file with multiple
+equally optimal trees (as POY, TNT, or PAUP\* write them) returns a
+`multiPhylo` scored as a pool.
 
-**Pool scoring in presence mode.** The presence value is the proportion of pool 
-trees recovering the clade. If 2 out of 3 tied optima contain a clade, the cell 
-records 0.67. A single-tree analysis records 1 or 0.
+**Pool scoring in presence mode.** The presence value is the proportion
+of pool trees recovering the clade. If 2 out of 3 tied optima contain a
+clade, the cell records 0.67. A single-tree analysis records 1 or 0.
 
-**Support mode is not available for pools.** Node labels on tied optima are not 
-independent support values. Meaningful support (bootstrap, posterior, SH-aLRT) 
-comes only from explicit resampling or model-based procedures. To visualize 
-support for a parsimony analysis, compute it externally (e.g., map bootstrap 
-replicates onto the strict consensus, per Simmons and Freudenstein 2011), save 
-the summarized tree, and pass that single file to phylorug. Passing raw tied 
-optima into support mode would display arbitrary node labels as though they were
-support values, producing an artifactual rug.
+**Support mode is not available for pools.** Node labels on tied optima
+are not independent support values. Meaningful support (bootstrap,
+posterior, SH-aLRT) comes only from explicit resampling or model-based
+procedures. To visualize support for a parsimony analysis, compute it
+externally (e.g., map bootstrap replicates onto the strict consensus,
+per Simmons and Freudenstein 2011), save the summarized tree, and pass
+that single file to phylorug. Passing raw tied optima into support mode
+would display arbitrary node labels as though they were support values,
+producing an artifactual rug.
 
 **Wrap bare `multiPhylo` in a list.** If you construct comparison trees
 manually, each element of the list passed to `node_presence_matrix()`
@@ -703,15 +744,14 @@ to reduce all trees to their common taxa.
   phylogenomics clarifies the systematics of rare dung beetles
   (Coleoptera: Scarabaeinae) from museum collections. *PLOS ONE*,
   19(12), e0309596.
-- Machado, D. J. (2015). YBYRÁ fossile: a command line system for
-  total evidence dating and sensitivity analysis. *BMC
-  Bioinformatics*, 16, 40.
-- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
-  of consensus support in large data sets. *Cladistics*, 26(6),
-  598–613.
+- Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
+  evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
+  40. 
+- Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches of
+  consensus support in large data sets. *Cladistics*, 26(6), 598–613.
 - Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. & Rokas, A. (2023).
   Incongruence in the phylogenomics era. *Nature Reviews Genetics*,
   24(12), 834–850.
-- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity,
-  and the phylogenetic analysis of molecular data. *Systematic
-  Biology*, 44(3), 321–331.
+- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity, and
+  the phylogenetic analysis of molecular data. *Systematic Biology*,
+  44(3), 321–331.
