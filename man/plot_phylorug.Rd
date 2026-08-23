@@ -37,7 +37,7 @@ plot_phylorug(
 \item{backbone}{A \code{phylo} object representing the backbone tree.}
 
 \item{npm}{A named list containing the \code{presence} and \code{support} matrices,
-exactly as returned by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.}
+returned by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.}
 
 \item{file}{Optional character string specifying the output file name or full
 directory path. If left as \code{NULL} (the default), the plot renders in the
@@ -56,17 +56,18 @@ dimension requirements.}
 \item{mode}{One of \code{"presence"} (default) or \code{"support"}.}
 
 \item{support_idx}{Integer (1, 2, or 3). Default is \code{1}. Specifies which
-single support matrix from the \code{npm} list to visualize when
-\code{mode = "support"}. This corresponds directly to your extraction order in
-\code{\link[=node_presence_matrix]{node_presence_matrix()}}. For example, if you generated the data using
-\code{support_col = c(1, 2)}, passing \code{2} here tells the plotting engine to
-physically shade the grid cells using the second metric (stored in your
-list as \code{support_2}).}
+single support matrix from the \code{npm} list to visualize. For example, if you
+generated the data using \code{support_col = c(1, 2)}, passing \code{2} here tells the
+plotting engine to physically shade the grid cells using the second metric
+(stored in your list as \code{support_2}).}
 
-\item{thresholds}{Optional list overriding built-in bin thresholds. While
-default thresholds are provided based on common literature, it is highly
-recommended to define your own custom thresholds to suit your specific
-analytical framework.}
+\item{thresholds}{Optional list overriding built-in bin thresholds. Keyed
+by metric name for named metrics, or \code{"universal"} when \code{support_type}
+is not declared. For example:
+\code{thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))}
+or \verb{thresholds = list(universal = c(very_high = 0.90, high = 0.70,}
+\verb{moderate = 0.50))}. If \code{NULL} (default), literature-based thresholds
+are applied.}
 
 \item{n_rows, n_cols}{Integer. Grid shape for the rug at each node. If
 \code{NULL} (the default), a roughly square grid is chosen automatically.}
@@ -108,8 +109,8 @@ labels. Default \code{NULL} auto-scales with tree size.}
 \item{support_label_col}{Colour of the backbone support labels. Default
 \code{"red"}.}
 
-\item{rug_on_identical}{Logical. Default \code{FALSE}. When  it and
-\code{dot_identical}both are  \code{TRUE}, unanimous nodes receive both the dot and
+\item{rug_on_identical}{Logical. Default \code{FALSE}. When this and
+\code{dot_identical} are both \code{TRUE}, unanimous nodes receive both the dot and
 a support rug, making per-tree support strength visible even at universally
 recovered clades.}
 

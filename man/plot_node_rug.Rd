@@ -21,8 +21,8 @@ plot_node_rug(
 \arguments{
 \item{npm}{The presence matrix from \code{\link[=node_presence_matrix]{node_presence_matrix()}}. One row per
 internal backbone node (node numbers as rownames), one column per
-comparison tree. Cells are \code{1} (recovered), \code{0} (not recovered), or a
-proportion (pool recovery).}
+comparison tree. Cells are \code{1} (recovered), \code{0} (not recovered), or
+a proportion between 0 and 1 when \code{pool_threshold = 0} was used.}
 
 \item{support}{Support matrix of the same shape as \code{npm}, or \code{NULL}. When
 \code{NULL}, the rug is drawn in presence mode.}
@@ -63,8 +63,10 @@ The appearance is set by a tier, resolved from which arguments are supplied
 rather than named directly. (\code{\link[=plot_phylorug]{plot_phylorug()}} selects the tier for the user
 through its \code{mode} argument.)
 \itemize{
-\item Tier 1, presence: \code{support} is \code{NULL}. Cells are black for present,
-white for absent, and grey for partial recovery in a pool.
+\item Tier 1, presence: \code{support} is \code{NULL}. Cells are black for present
+and white for absent. Grey cells appear only when \code{pool_threshold = 0}
+was used in \code{\link[=node_presence_matrix]{node_presence_matrix()}}, indicating partial recovery
+across a pool of equally optimal trees.
 \item Tier 2, support: both \code{support} and \code{support_type} are supplied.
 Recovered cells are shaded by binned support strength, from black (very
 high) through greys to yellow (low). A cell is white when the tree does
