@@ -89,33 +89,30 @@
 <div class="section level3">
 <h3 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Load example trees from the package data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Select backbone and comparison trees</span></span>
-<span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Validate  all trees share same set of taxa</span></span>
-<span><span class="fu"><a href="reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Build the node presence matrix</span></span>
-<span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
-<span><span class="fu"><a href="reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Support mode: How strongly?</span></span>
-<span><span class="fu"><a href="reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>              support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>                <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>                <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
-<span>              <span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(phylorug)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Load example trees from the package data</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">data</span>(sample_trees)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Select backbone and comparison trees</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>backbone <span class="ot">&lt;-</span> sample_trees[[<span class="st">"70p_uce"</span>]]</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>others   <span class="ot">&lt;-</span> sample_trees[<span class="fu">names</span>(sample_trees) <span class="sc">!=</span> <span class="st">"70p_uce"</span>]</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Validate  all trees share same set of taxa (recommended but optional)</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">check_taxa</span>(backbone, others)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Build the node presence matrix</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>npm <span class="ot">&lt;-</span> <span class="fu">node_presence_matrix</span>(backbone, others, <span class="at">support_type =</span> <span class="fu">c</span>(</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                <span class="st">"70p_ghost"</span>                    <span class="ot">=</span> <span class="st">"ufboot"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>                <span class="st">"70p_partition_entropy"</span>        <span class="ot">=</span> <span class="st">"ufboot"</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm)</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co"># Support mode: How strongly?</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm, <span class="at">mode =</span> <span class="st">"support"</span>))</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="core-functions">Core functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>
@@ -125,19 +122,17 @@
 <li>
 <code><a href="reference/read_trees.html">read_trees()</a></code> reads all Newick and Nexus tree files from a directory. So you don’t need to load each file individually.</li>
 <li>
-<code><a href="reference/check_taxa.html">check_taxa()</a></code> validates that the backbone and comparison trees share the same taxa, reporting any missing or extra tips.</li>
-<li>
 <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code> builds the comparison matrix recording which clades are recovered by which analyses, along with their support values.</li>
 <li>
 <code><a href="reference/plot_phylorug.html">plot_phylorug()</a></code> draws the rug plot on a reference tree in presence or support mode, with automatic normalization of heterogeneous support formats.</li>
 </ul>
-<p>That is the basic pipeline: read -&gt; check -&gt; matrix -&gt; plot. Two additional helpers are available when your data needs them:</p>
+<p>That is the basic pipeline: read -&gt; matrix -&gt; plot. Four additional helpers are available when your data needs them:</p>
 <ul>
-<li>
-<code><a href="reference/translate_tips.html">translate_tips()</a></code> Rename tip labels between naming conventions using a lookup table (e.g. specimen codes to species names).</li>
-<li>
-<code><a href="reference/prune_to_shared.html">prune_to_shared()</a></code> drops taxa not present in all trees, keeping only the shared set.Useful when comparison trees lack some taxa found in the backbone.</li>
+<li><p><code><a href="reference/check_taxa.html">check_taxa()</a></code> validates that the backbone and comparison trees share the same taxa, reporting any missing or extra tips. This function is a diagnostic tool, if you are confident that all your trees are from same set of taxa you can move to <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code> after <code><a href="reference/read_trees.html">read_trees()</a></code></p></li>
+<li><p><code><a href="reference/translate_tips.html">translate_tips()</a></code> Rename tip labels between naming conventions using a lookup table (e.g. specimen codes to species names).</p></li>
+<li><p><code><a href="reference/prune_to_shared.html">prune_to_shared()</a></code> drops taxa not present in all trees, keeping only the shared set.Useful when comparison trees lack some taxa found in the backbone.</p></li>
 </ul>
+<p>-<code><a href="reference/add_tree.html">add_tree()</a></code> adds new trees to npm made by <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code> without rerunning the whole pipeline.</p>
 <p>You can learn more about each step in <code><a href="articles/phylorug.html">vignette("phylorug")</a></code>.</p>
 </div>
 <div class="section level3">

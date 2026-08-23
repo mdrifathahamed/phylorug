@@ -79,7 +79,6 @@ library(phylorug)
 ### Quick example
 
 ``` r
-
 library(phylorug)
 
 # Load example trees from the package data
@@ -89,23 +88,21 @@ data(sample_trees)
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# Validate  all trees share same set of taxa
+# Validate  all trees share same set of taxa (recommended but optional)
 check_taxa(backbone, others)
 
 # Build the node presence matrix
-npm <- node_presence_matrix(backbone, others)
+npm <- node_presence_matrix(backbone, others, support_type = c(
+                "70p_ASTRAL_partition_entropy" = "lpp",
+                "70p_ASTRAL_uce"               = "lpp",
+                "70p_ghost"                    = "ufboot",
+                "70p_partition_entropy"        = "ufboot")
 
 # Presence mode: Which analyses recover each clade?
 plot_phylorug(backbone, npm)
 
 # Support mode: How strongly?
-plot_phylorug(backbone, npm, mode = "support",
-              support_type = c(
-                "70p_ASTRAL_partition_entropy" = "lpp",
-                "70p_ASTRAL_uce"               = "lpp",
-                "70p_ghost"                    = "ufboot",
-                "70p_partition_entropy"        = "ufboot"
-              ))
+plot_phylorug(backbone, npm, mode = "support"))
 ```
 
 ### Core functions
@@ -116,9 +113,6 @@ raw tree files to publication-ready figures:
 - [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
   reads all Newick and Nexus tree files from a directory. So you don’t
   need to load each file individually.
-- [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
-  validates that the backbone and comparison trees share the same taxa,
-  reporting any missing or extra tips.
 - [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
   builds the comparison matrix recording which clades are recovered by
   which analyses, along with their support values.
@@ -126,15 +120,30 @@ raw tree files to publication-ready figures:
   draws the rug plot on a reference tree in presence or support mode,
   with automatic normalization of heterogeneous support formats.
 
-That is the basic pipeline: read -\> check -\> matrix -\> plot. Two
-additional helpers are available when your data needs them:
+That is the basic pipeline: read -\> matrix -\> plot. Four additional
+helpers are available when your data needs them:
+
+- [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
+  validates that the backbone and comparison trees share the same taxa,
+  reporting any missing or extra tips. This function is a diagnostic
+  tool, if you are confident that all your trees are from same set of
+  taxa you can move to
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+  after
+  [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
 
 - [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
   Rename tip labels between naming conventions using a lookup table
   (e.g. specimen codes to species names).
+
 - [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
   drops taxa not present in all trees, keeping only the shared
   set.Useful when comparison trees lack some taxa found in the backbone.
+
+\-[`add_tree()`](https://mdrifathahamed.github.io/phylorug/reference/add_tree.md)
+adds new trees to npm made by
+[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+without rerunning the whole pipeline.
 
 You can learn more about each step in
 [`vignette("phylorug")`](https://mdrifathahamed.github.io/phylorug/articles/phylorug.md).
