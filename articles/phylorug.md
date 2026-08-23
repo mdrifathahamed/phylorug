@@ -111,10 +111,17 @@ others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
 ### Check taxon consistency
 
-Before building a rug, verify that every comparison tree carries the
-same taxa as the backbone.
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
-reports the outcome and flags any mismatches:
+compares the tip labels of the backbone against every comparison tree
+and reports any mismatches , missing taxa, extra taxa, or spelling
+differences. Running it before
+[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+is good practice, especially the first time you work with a new dataset.
+That said,
+[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+will stop with a clear error if a comparison tree is missing a backbone
+taxon, so if you already know your trees share the same taxa you can
+skip straight to building the matrix :
 
 ``` r
 
@@ -141,25 +148,56 @@ from the backbone appear in which comparison trees, and how strongly are
 they supported?
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
 answers this by walking every internal node of the backbone and checking
-each comparison tree for the same clade. It returns two matrices: a
-**presence matrix** (1 = clade recovered, 0 = absent) and a **support
-matrix** containing the support values extracted from the node labels of
-each tree. By default, the first support value in each node label is
-used. If your trees carry compound labels like `100/98` (e.g.,
-SH-aLRT/UFBoot2 from IQ-TREE), `support_col` lets you select which value
-to extract, `support_col = 1` takes the first, `support_col = 2` takes
-the second.
+each comparison tree for the same clade.
+
+It returns a named list of matrices: a **presence matrix** (1 = clade
+recovered, 0 = absent) and one or more **support matrices** containing
+the support values extracted from the node labels of each tree. By
+default, the first support value in each node label is used. If your
+trees carry compound labels like `100/98` (e.g., SH-aLRT/UFBoot2 from
+IQ-TREE), `support_col` lets you select which value to extract,
+`support_col = 1` takes the first, `support_col = 2` takes the second.
+
+Two other arguments belong here rather than at plot time. `support_type`
+is an optional named character vector that declares which support metric
+each comparison tree uses (e.g., `"ufboot"`, `"lpp"`, `"sh_alrt"`,
+`"posterior"`). It is stored as an attribute of the result and read
+automatically by
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+when drawing in support mode, so you only declare it once.
+
+When a comparison tree file contains multiple equally optimal trees (a
+pool), `pool_threshold` decides how many of them must recover a clade
+for it to count as present. At `1.0` (the default), all of them must be
+a strict consensus. At `0.5`, a majority is enough. At `0`, the cell
+simply shows the fraction that recovered it, with no cutoff applied. The
+`sample_trees` dataset contains single `phylo` objects, not pools, so
+`pool_threshold` does not apply here. We declare support_type so that
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+can bin each tree’s support values against the correct metric-specific
+thresholds:
 
 ``` r
 
-npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+support_type <- c(
+  "70p_ASTRAL_partition_entropy" = "lpp",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ghost"                    = "ufboot",
+  "70p_partition_entropy"        = "ufboot"
+)
 ```
 
-The result is a named list.
-``` npm$presence``is a matrix of 1s and 0s. ```npm\$support_1\` and
-\`npm\$support_2`hold the raw support values, with NA where the clade was not recovered. These matrices are what`plot_phylorug()\`
-uses to draw the **rug**, presence determines whether a cell is filled
-or empty, support determines its shade
+``` r
+
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2), support_type = support_type)
+```
+
+The result is a named list. `npm$presence` is a matrix of 1s and 0s.
+`npm$support_1` and `npm$support_2` hold the raw support values, with
+`NA` where the clade was not recovered. These matrices are what
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+uses to draw the rug, presence determines whether a cell is filled or
+empty, support determines its shade.
 
 ### Plot the rug
 
@@ -189,51 +227,44 @@ plot_phylorug(backbone, npm, file = "presence.pdf", width = 12, height = 8)
 
 ### Support mode
 
-Lets switch to support mode to see how strongly each tree supports each
+Now switch to support mode to see how strongly each tree supports each
 clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
 own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
 to LPP thresholds, while a tree carrying UFBoot2 values is binned
-against UFBoot2 thresholds independently. `phylorug` never
-cross-compares values from different support metrics, because LPP 0.95
-and UFBoot2 95 do not measure the same thing despite looking numerically
-quite similar and it can be tempting to convert them by dividing.
+against UFBoot2 thresholds independently. phylorug never cross-compares
+values from different support metrics, because LPP 0.95 and UFBoot2 95
+do not measure the same thing despite looking numerically similar.
 
-The `support_type` argument tells `phylorug` which support metric each
-tree uses, so the correct thresholds are applied. IQ-TREE UFBoot2 values
-are on a 0–100 scale; ASTRAL local posterior probabilities are on a 0–1
-scale. Define it once and reuse across plot calls:
+Since we already declared `support_type` when building the node presence
+matrix,
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+reads it automatically from the stored attribute and applies the correct
+metric-specific thresholds.
 
-``` r
-
-support_type <- c(
-  "70p_ASTRAL_partition_entropy" = "lpp",
-  "70p_ASTRAL_uce"               = "lpp",
-  "70p_ghost"                    = "ufboot",
-  "70p_partition_entropy"        = "ufboot"
-)
-```
+If `support_type` is not declared,
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+falls back to a universal threshold scale: values greater than 1 are
+divided by 100 to bring them onto a 0–1 scale, and all trees are binned
+against the same set of thresholds regardless of metric. This is a
+reasonable starting point for quick exploration, but declaring
+`support_type` is always preferred because it ensures each value is
+evaluated against the thresholds published for its own method.
 
 ``` r
 
 plot_phylorug(
   backbone, npm,
-  mode         = "support",
-  support_type = support_type
-)
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning in plot.window(...): "support_type" is not a graphical parameter
-#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
-#> Warning in title(...): "support_type" is not a graphical parameter
+  mode         = "support")
 ```
 
 ![](phylorug_files/figure-html/support-default-1.png)
 
-## Reading the plot
+## Reading the rug plot
 
-The plot carries two legends. The **position legend** (top-left) maps
-each numbered cell to a tree. For example, cell 1 is the first tree,
-cell 2 the second, and so on. The **threshold legend** (top-right,
+The rug plot carries two legends. The **position legend** (top-left)
+maps each numbered cell to a tree. For example, cell 1 is the first
+tree, cell 2 the second, and so on. The **threshold legend** (top-right,
 support mode only) shows what each shade means.
 
 At each node you will see one of these patterns:
@@ -244,11 +275,11 @@ At each node you will see one of these patterns:
 - **Mixed grid**: some cells filled with solid black, some white. These
   are the interesting nodes, the position legend tells you which
   analysis agrees and which disagrees.
-- **All-white grid**: No comparison tree recovers this backbone clade.
-  It exists only in the backbone topology. Setting
-  `hide_unsupported = TRUE` removes these all-white rugs for a cleaner
-  figure. A node with neither a dot nor a rug then signals a clade found
-  only in the backbone.
+- **Bare node** (no dot, no rug): no comparison tree recovers this
+  backbone clade, it exists only in the backbone topology. This is the
+  default behaviour (`hide_unsupported = TRUE`). Set
+  `hide_unsupported = FALSE` to draw all-white grids at these nodes
+  instead.
 
 In support mode, filled cells are shaded by how strongly each analysis
 supports the clade. The colour scheme uses a greyscale gradient for
@@ -258,8 +289,8 @@ fields and journals apply different cutoffs, so we recommend defining
 your own via the `thresholds` argument (see the Customisation section
 below):
 
-- **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP \>=
-  0.95).
+- **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP
+  \>=0.95).
 - **Dark grey**: high support (UFBoot2 80-94, SH-aLRT 70-79, LPP
   0.90-0.94).
 - **Light grey**: moderate support (UFBoot2 50-79, SH-aLRT 50-69, LPP
@@ -276,15 +307,15 @@ below):
 The following example shows how optional arguments refine the plot.
 `rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing
 per-tree support strength even at stable clades.
-`hide_unsupported = TRUE` removes all-white rugs for a cleaner figure.
-`cell_scale` adjusts the size of each rug cell, `rug_position` controls
-whether rugs sit toward the root (`"inside"`) or toward the tips
-(`"outside"`). `dot_cex` scales the unanimous-node dot, and
-`show_support = TRUE` with `support_label_cex` and `support_label_col`
-overlays the backbone’s own support labels on the tree. `cex` and `font`
-are passed directly to the tree plotter. For publication output, add
-`file = "output.pdf"` along with `width` and `height` to produce a
-properly scaled figure.
+`hide_unsupported = FALSE` would draw all-white rugs at nodes unique to
+the backbone; the default (`TRUE`) leaves them bare. `cell_scale`
+adjusts the size of each rug cell, `rug_position` controls whether rugs
+sit toward the root (`"inside"`) or toward the tips (`"outside"`).
+`dot_cex` scales the unanimous-node dot, and `show_support = TRUE` with
+`support_label_cex` and `support_label_col` overlays the backbone’s own
+support labels on the tree. `cex` and `font` are passed directly to the
+tree plotter. For publication output, add `file = "output.pdf"` along
+with `width` and `height` to produce a properly scaled figure.
 
 ``` r
 
@@ -295,11 +326,9 @@ plot_phylorug(
   width             = 6.5,
   height            = 5.8,
   mode              = "support",
-  support_type      = support_type,
   rug_position      = "inside",
   cell_scale        = 0.38,
   rug_on_identical  = TRUE,
-  hide_unsupported  = TRUE,
   cex               = 0.90,
   font              = 3,
   dot_cex           = 1.3,
@@ -307,10 +336,6 @@ plot_phylorug(
   support_label_col = "red",
   support_label_cex = 0.4
 )
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning in plot.window(...): "support_type" is not a graphical parameter
-#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
-#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/support-refined-1.png)
@@ -401,7 +426,22 @@ check_taxa(backbone, others)
 
 ``` r
 
-npm <- node_presence_matrix(backbone, others)
+support_type <- c(
+  "Matrix1-kpi_ASTRAL"            = "lpp",
+  "Matrix1-smart_ASTRAL"          = "lpp",
+  "Matrix1-kpi_partitioning"      = "sh_alrt",
+  "Matrix1-kpi_PMSF(H2.guide)"    = "sh_alrt",
+  "Matrix1_LG_C20_F_R"            = "sh_alrt",
+  "Matrix1-smart_partitioning"    = "sh_alrt",
+  "Matrix1-smart_PMSF(H1.guide)"  = "sh_alrt",
+  "Matrix1-smart_PMSF(H2.guide)"  = "sh_alrt",
+  "Matrix2_partitioning"          = "sh_alrt"
+)
+```
+
+``` r
+
+npm <- node_presence_matrix(backbone, others, support_type = support_type)
 ```
 
 ### plot the phylorug-presence
@@ -417,45 +457,23 @@ With 9 comparison trees, phylorug automatically arranges the rug grid (3
 columns by 3 rows in this case). The position legend maps each cell
 position to an analysis name.
 
-``` r
-
-# --- Map each comparison tree to its support metric ---
-support_type <- c(
-  "Matrix1-kpi_ASTRAL"            = "lpp",
-  "Matrix1-smart_ASTRAL"          = "lpp",
-  "Matrix1-kpi_partitioning"      = "sh_alrt",
-  "Matrix1-kpi_PMSF(H2.guide)"    = "sh_alrt",
-  "Matrix1_LG_C20_F_R"            = "sh_alrt",
-  "Matrix1-smart_partitioning"    = "sh_alrt",
-  "Matrix1-smart_PMSF(H1.guide)"  = "sh_alrt",
-  "Matrix1-smart_PMSF(H2.guide)"  = "sh_alrt",
-  "Matrix2_partitioning"          = "sh_alrt"
-)
-```
-
 ### support-mode
 
 Here we use show_support = TRUE to overlay the backbone’s own node
-labels in red for cross-referencing, `cell_scale = 0.35` to shrink the
-rug cells slightly for a denser tree, and hide_unsupported = TRUE to
-remove all-white rugs so only contested and stable nodes remain visible.
+labels in red for cross-referencing and `cell_scale = 0.35` to shrink
+the rug cells slightly for a denser tree. All-white rugs are hidden by
+default, so only contested and stable nodes remain visible.
 
 ``` r
 
 plot_phylorug(backbone, npm,
               mode               = "support",
-              support_type       = support_type,
               show_support       = TRUE,
               support_label_cex  = 0.25,
               support_label_col  = "red",
               cell_scale         = 0.35,
               rug_position       = "inside",
-              rug_on_identical   = FALSE,
-              hide_unsupported   = TRUE)
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning in plot.window(...): "support_type" is not a graphical parameter
-#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
-#> Warning in title(...): "support_type" is not a graphical parameter
+              rug_on_identical   = FALSE)
 ```
 
 ![](phylorug_files/figure-html/plot-culico-support-1.png)
@@ -467,16 +485,16 @@ The **rugs** immediately separates stable from contested regions of the
 those clades are recovered by unanimously all 9 analyses. *Culicidae*
 (mosquitoes), *Chironomidae* (non-biting midges), *Ceratopogonidae*
 (biting midges), and the *Simuliidae* + *Thaumaleidae* clade all show
-complete agreement across every inference method and dataset. Fu et
-al. (2025) reported the same, full support for these clades regardless
-of model or matrix.
+complete agreement across every inference method and dataset. Fu et al.
+(2025) reported the same, full support for these clades regardless of
+model or matrix.
 
 The interesting nodes are the contested ones. The central question in
 *Culicomorpha* phylogenetics is where *Ceratopogonidae* and
-*Chironomidae* sit relative to the rest of the infraorder. Fu et
-al. (2025) tested multiple hypotheses. Their preferred topology (H1)
-places *Chironomidae* + *Ceratopogonidae* together as sister to all
-remaining families. The alternative (H2) breaks this pairing and places
+*Chironomidae* sit relative to the rest of the infraorder. Fu et al.
+(2025) tested multiple hypotheses. Their preferred topology (H1) places
+*Chironomidae* + *Ceratopogonidae* together as sister to all remaining
+families. The alternative (H2) breaks this pairing and places
 *Ceratopogonidae* elsewhere, nested closer to the other families. On the
 rug, the node defining the *Chironomidae* + *Ceratopogonidae* clade
 shows a mixed grid. The two ASTRAL cells (cells 1 and 4 in the position
@@ -610,31 +628,6 @@ The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
 
 ``` r
 
-npm <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-```
-
-### Presence mode
-
-At ~316 taxa the tree is dense. For a clean figure,
-`hide_unsupported = TRUE` removes all-white rugs that would clutter the
-backbone, and writing to a file with explicit width and height avoids
-the distortion that GUI windows introduce on large trees.
-
-``` r
-
-plot_phylorug(backbone, npm, hide_unsupported = TRUE)
-```
-
-![](phylorug_files/figure-html/plot%20phylorug%20-1.png)
-
-### Support mode
-
-Map each comparison tree to its support metric. The two ASTRAL trees
-carry local posterior probabilities, the two IQ-TREE trees carry
-UFBoot2:
-
-``` r
-
 support_type <- c(
   "50p_partition_entropy"        = "ufboot",
   "50p_ghost"                    = "ufboot",
@@ -642,6 +635,27 @@ support_type <- c(
   "50p_ASTRAL_partition_entropy" = "lpp"
 )
 ```
+
+``` r
+
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
+                            support_type = support_type)
+```
+
+### Presence mode
+
+At ~316 taxa the tree is dense. For a clean figure, all-white rugs are
+hidden by default, and writing to a file with explicit width and height
+avoid the distortion that GUI windows introduce on large trees.
+
+``` r
+
+plot_phylorug(backbone, npm)
+```
+
+![](phylorug_files/figure-html/plot%20phylorug%20-1.png)
+
+### Support mode
 
 With ~316 taxa, the canvas dimensions matter. `width = 25` and
 `height = 65` give each tip enough vertical space to remain legible, and
@@ -661,19 +675,13 @@ plot_phylorug(
   width              = 25,
   height             = 65,
   mode               = "support",
-  support_type       = support_type,
   show_support       = TRUE,
   support_label_col  = "red",
   support_label_cex  = 0.34,
   cell_scale         = 0.35,
   rug_on_identical   = FALSE,
-  hide_unsupported   = TRUE,
   cex                = 0.8
 )
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning in plot.window(...): "support_type" is not a graphical parameter
-#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
-#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
@@ -730,14 +738,14 @@ presence matrix:
 
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
-npm      <- node_presence_matrix(backbone, others, support_col = c(1, 2))
-
 support_type <- c(
   "70p_ASTRAL_partition_entropy" = "lpp",
   "70p_ASTRAL_uce"               = "lpp",
   "70p_ghost"                    = "ufboot",
   "70p_partition_entropy"        = "ufboot"
 )
+npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
+                            support_type = support_type)
 ```
 
 ### Grid dimensions
@@ -788,8 +796,17 @@ plot_phylorug(backbone, npm, include_backbone = TRUE)
 
 ![](phylorug_files/figure-html/include-bb-1.png)
 
-In support mode with `include_backbone = TRUE`, you must also include
-`"backbone"` in the `support_type` vector.
+In support mode, pass the backbone’s support metric directly to
+`include_backbone` so it gets binned against the correct thresholds:
+
+``` r
+
+plot_phylorug(backbone, npm,
+              mode             = "support",
+              include_backbone = "ufboot")
+```
+
+![](phylorug_files/figure-html/unnamed-chunk-3-1.png)
 
 ### Custom thresholds
 
@@ -804,14 +821,9 @@ my_thresholds <- list(
 
 plot_phylorug(
   backbone, npm,
-  mode = "support",
-  support_type = support_type,
+  mode       = "support",
   thresholds = my_thresholds
 )
-#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
-#> Warning in plot.window(...): "support_type" is not a graphical parameter
-#> Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter
-#> Warning in title(...): "support_type" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/custom-thresh-1.png)
@@ -875,7 +887,7 @@ to reduce all trees to their common taxa.
   19(12), e0309596.
 - Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
   evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
-  40.
+  40. 
 - Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches of
   consensus support in large data sets. *Cladistics*, 26(6), 598–613.
 - Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. & Rokas, A. (2023).

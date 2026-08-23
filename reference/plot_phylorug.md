@@ -34,7 +34,7 @@ plot_phylorug(
   support_label_cex = NULL,
   support_label_col = "red",
   rug_on_identical = FALSE,
-  hide_unsupported = FALSE,
+  hide_unsupported = TRUE,
   ...
 )
 ```
@@ -99,11 +99,12 @@ plot_phylorug(
 
 - include_backbone:
 
-  Logical. If `TRUE`, the backbone tree occupies cell 1 of every rug,
-  showing its own presence (always `1`) or its own support value.
-  Default `FALSE`, since the backbone defines the topology and trivially
-  recovers every clade. Useful when the figure will be edited in a
-  vector editor and every analysis must appear in the grid.
+  Logical or character. If `FALSE` (default), the backbone does not
+  occupy a rug cell. If `TRUE`, the backbone is added as cell 1 using
+  universal thresholds in support mode (with a message). If a character
+  string naming a support metric (`include_backbone = "ufboot"`), the
+  backbone is added as cell 1 and binned against that metric's
+  thresholds.
 
 - legend:
 
@@ -164,10 +165,12 @@ plot_phylorug(
 
 - hide_unsupported:
 
-  Logical. Default `FALSE`. When `TRUE`, nodes where no comparison tree
-  recovers the clade are left bare, no rug is drawn. The absence of both
-  a dot and a rug signals that the clade is unique to the backbone
-  topology.
+  Logical. Default `TRUE`. Nodes where no comparison tree recovers the
+  clade are left bare, the absence of both a dot and a rug signals that
+  the clade is unique to the backbone topology. Set to `FALSE` to draw
+  all-white rugs at these nodes, which can be useful when you want every
+  internal node to carry a visible grid for annotation or figure
+  editing.
 
 - ...:
 

@@ -167,9 +167,15 @@ used as a backbone tree.</p>
 <div class="section level3">
 <h3 id="check-taxon-consistency">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency"></a>
 </h3>
-<p>Before building a rug, verify that every comparison tree carries the
-same taxa as the backbone. <code><a href="../reference/check_taxa.html">check_taxa()</a></code> reports the outcome
-and flags any mismatches:</p>
+<p><code><a href="../reference/check_taxa.html">check_taxa()</a></code> compares the tip labels of the backbone
+against every comparison tree and reports any mismatches , missing taxa,
+extra taxa, or spelling differences. Running it before
+<code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> is good practice, especially the
+first time you work with a new dataset. That said,
+<code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> will stop with a clear error if a
+comparison tree is missing a backbone taxon, so if you already know your
+trees share the same taxa you can skip straight to building the matrix
+:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All 4 comparison trees share the same 15 taxa as the backbone.</span></span>
@@ -191,22 +197,49 @@ to get identical taxa set.</p>
 clades from the backbone appear in which comparison trees, and how
 strongly are they supported? <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> answers
 this by walking every internal node of the backbone and checking each
-comparison tree for the same clade. It returns two matrices: a
-<strong>presence matrix</strong> (1 = clade recovered, 0 = absent) and a
-<strong>support matrix</strong> containing the support values extracted
-from the node labels of each tree. By default, the first support value
-in each node label is used. If your trees carry compound labels like
-<code>100/98</code> (e.g., SH-aLRT/UFBoot2 from IQ-TREE),
+comparison tree for the same clade.</p>
+<p>It returns a named list of matrices: a <strong>presence
+matrix</strong> (1 = clade recovered, 0 = absent) and one or more
+<strong>support matrices</strong> containing the support values
+extracted from the node labels of each tree. By default, the first
+support value in each node label is used. If your trees carry compound
+labels like <code>100/98</code> (e.g., SH-aLRT/UFBoot2 from IQ-TREE),
 <code>support_col</code> lets you select which value to extract,
 <code>support_col = 1</code> takes the first,
 <code>support_col = 2</code> takes the second.</p>
+<p>Two other arguments belong here rather than at plot time.
+<code>support_type</code> is an optional named character vector that
+declares which support metric each comparison tree uses (e.g.,
+<code>"ufboot"</code>, <code>"lpp"</code>, <code>"sh_alrt"</code>,
+<code>"posterior"</code>). It is stored as an attribute of the result
+and read automatically by <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> when drawing in
+support mode, so you only declare it once.</p>
+<p>When a comparison tree file contains multiple equally optimal trees
+(a pool), <code>pool_threshold</code> decides how many of them must
+recover a clade for it to count as present. At <code>1.0</code> (the
+default), all of them must be a strict consensus. At <code>0.5</code>, a
+majority is enough. At <code>0</code>, the cell simply shows the
+fraction that recovered it, with no cutoff applied. The
+<code>sample_trees</code> dataset contains single <code>phylo</code>
+objects, not pools, so <code>pool_threshold</code> does not apply here.
+We declare support_type so that <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> can bin
+each tree’s support values against the correct metric-specific
+thresholds:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The result is a named list.
-<code>npm$presence``is a matrix of 1s and 0s.</code>npm<span class="math inline">$support_1` and
-`npm$</span>support_2<code>hold the raw support values, with NA where  the clade was not recovered. These matrices are what</code>plot_phylorug()`
-uses to draw the <strong>rug</strong>, presence determines whether a
-cell is filled or empty, support determines its shade</p>
+<code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
+<p>The result is a named list. <code>npm$presence</code> is a matrix of
+1s and 0s. <code>npm$support_1</code> and <code>npm$support_2</code>
+hold the raw support values, with <code>NA</code> where the clade was
+not recovered. These matrices are what <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> uses
+to draw the rug, presence determines whether a cell is filled or empty,
+support determines its shade.</p>
 </div>
 <div class="section level3">
 <h3 id="plot-the-rug">Plot the rug<a class="anchor" aria-label="anchor" href="#plot-the-rug"></a>
@@ -218,61 +251,54 @@ defaults: <code>mode = "presence"</code>,
 <code>legend = TRUE</code>, and <code>rug_position = "inside"</code>.
 The internal scaling engine sizes the canvas, fonts, and cell dimensions
 automatically based on tree size.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/quick-presence-1.png" class="r-plt" alt="" width="1950"></p>
 <p>For publication-quality output, setting <code>file</code>,
 <code>width</code>, and <code>height</code> is strongly recommended. All
 other arguments are worth exploring to fine-tune your figure, but these
 three matter most.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, file <span class="op">=</span> <span class="st">"presence.pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, height <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
 </h3>
-<p>Lets switch to support mode to see how strongly each tree supports
+<p>Now switch to support mode to see how strongly each tree supports
 each clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
 own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
 to LPP thresholds, while a tree carrying UFBoot2 values is binned
-against UFBoot2 thresholds independently. <code>phylorug</code> never
-cross-compares values from different support metrics, because LPP 0.95
-and UFBoot2 95 do not measure the same thing despite looking numerically
-quite similar and it can be tempting to convert them by dividing.</p>
-<p>The <code>support_type</code> argument tells <code>phylorug</code>
-which support metric each tree uses, so the correct thresholds are
-applied. IQ-TREE UFBoot2 values are on a 0–100 scale; ASTRAL local
-posterior probabilities are on a 0–1 scale. Define it once and reuse
-across plot calls:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+against UFBoot2 thresholds independently. phylorug never cross-compares
+values from different support metrics, because LPP 0.95 and UFBoot2 95
+do not measure the same thing despite looking numerically similar.</p>
+<p>Since we already declared <code>support_type</code> when building the
+node presence matrix, <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> reads it
+automatically from the stored attribute and applies the correct
+metric-specific thresholds.</p>
+<p>If <code>support_type</code> is not declared,
+<code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> falls back to a universal threshold scale:
+values greater than 1 are divided by 100 to bring them onto a 0–1 scale,
+and all trees are binned against the same set of thresholds regardless
+of metric. This is a reasonable starting point for quick exploration,
+but declaring <code>support_type</code> is always preferred because it
+ensures each value is evaluated against the thresholds published for its
+own method.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
 <span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode         <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="va">support_type</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
-<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
+<span>  mode         <span class="op">=</span> <span class="st">"support"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/support-default-1.png" class="r-plt" alt="" width="1950"></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a>
+<h2 id="reading-the-rug-plot">Reading the rug plot<a class="anchor" aria-label="anchor" href="#reading-the-rug-plot"></a>
 </h2>
-<p>The plot carries two legends. The <strong>position legend</strong>
-(top-left) maps each numbered cell to a tree. For example, cell 1 is the
-first tree, cell 2 the second, and so on. The <strong>threshold
-legend</strong> (top-right, support mode only) shows what each shade
-means.</p>
+<p>The rug plot carries two legends. The <strong>position
+legend</strong> (top-left) maps each numbered cell to a tree. For
+example, cell 1 is the first tree, cell 2 the second, and so on. The
+<strong>threshold legend</strong> (top-right, support mode only) shows
+what each shade means.</p>
 <p>At each node you will see one of these patterns:</p>
 <ul>
 <li>
@@ -284,11 +310,11 @@ drawn to reduce clutter.</li>
 some white. These are the interesting nodes, the position legend tells
 you which analysis agrees and which disagrees.</li>
 <li>
-<strong>All-white grid</strong>: No comparison tree recovers this
-backbone clade. It exists only in the backbone topology. Setting
-<code>hide_unsupported = TRUE</code> removes these all-white rugs for a
-cleaner figure. A node with neither a dot nor a rug then signals a clade
-found only in the backbone.</li>
+<strong>Bare node</strong> (no dot, no rug): no comparison tree
+recovers this backbone clade, it exists only in the backbone topology.
+This is the default behaviour (<code>hide_unsupported = TRUE</code>).
+Set <code>hide_unsupported = FALSE</code> to draw all-white grids at
+these nodes instead.</li>
 </ul>
 <p>In support mode, filled cells are shaded by how strongly each
 analysis supports the clade. The colour scheme uses a greyscale gradient
@@ -300,7 +326,7 @@ section below):</p>
 <ul>
 <li>
 <strong>Black</strong>: very high support (UFBoot2 &gt;= 95, SH-aLRT
-&gt;= 80, LPP &gt;= 0.95).</li>
+&gt;= 80, LPP &gt;=0.95).</li>
 <li>
 <strong>Dark grey</strong>: high support (UFBoot2 80-94, SH-aLRT
 70-79, LPP 0.90-0.94).</li>
@@ -324,18 +350,18 @@ label was not a parseable number.</li>
 <p>The following example shows how optional arguments refine the plot.
 <code>rug_on_identical = TRUE</code> extends the rug to unanimous nodes,
 revealing per-tree support strength even at stable clades.
-<code>hide_unsupported = TRUE</code> removes all-white rugs for a
-cleaner figure. <code>cell_scale</code> adjusts the size of each rug
-cell, <code>rug_position</code> controls whether rugs sit toward the
-root (<code>"inside"</code>) or toward the tips
-(<code>"outside"</code>). <code>dot_cex</code> scales the unanimous-node
-dot, and <code>show_support = TRUE</code> with
-<code>support_label_cex</code> and <code>support_label_col</code>
-overlays the backbone’s own support labels on the tree. <code>cex</code>
-and <code>font</code> are passed directly to the tree plotter. For
-publication output, add <code>file = "output.pdf"</code> along with
-<code>width</code> and <code>height</code> to produce a properly scaled
-figure.</p>
+<code>hide_unsupported = FALSE</code> would draw all-white rugs at nodes
+unique to the backbone; the default (<code>TRUE</code>) leaves them
+bare. <code>cell_scale</code> adjusts the size of each rug cell,
+<code>rug_position</code> controls whether rugs sit toward the root
+(<code>"inside"</code>) or toward the tips (<code>"outside"</code>).
+<code>dot_cex</code> scales the unanimous-node dot, and
+<code>show_support = TRUE</code> with <code>support_label_cex</code> and
+<code>support_label_col</code> overlays the backbone’s own support
+labels on the tree. <code>cex</code> and <code>font</code> are passed
+directly to the tree plotter. For publication output, add
+<code>file = "output.pdf"</code> along with <code>width</code> and
+<code>height</code> to produce a properly scaled figure.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For publication output, add:</span></span>
 <span><span class="co"># file = "my_support_plot.pdf"</span></span>
@@ -344,22 +370,16 @@ figure.</p>
 <span>  width             <span class="op">=</span> <span class="fl">6.5</span>,</span>
 <span>  height            <span class="op">=</span> <span class="fl">5.8</span>,</span>
 <span>  mode              <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type      <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>  rug_position      <span class="op">=</span> <span class="st">"inside"</span>,</span>
 <span>  cell_scale        <span class="op">=</span> <span class="fl">0.38</span>,</span>
 <span>  rug_on_identical  <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  hide_unsupported  <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cex               <span class="op">=</span> <span class="fl">0.90</span>,</span>
 <span>  font              <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  dot_cex           <span class="op">=</span> <span class="fl">1.3</span>,</span>
 <span>  show_support      <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  support_label_col <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  support_label_cex <span class="op">=</span> <span class="fl">0.4</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
-<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/support-refined-1.png" class="r-plt" alt="" width="1950"></p>
 </div>
 <div class="section level2">
@@ -439,20 +459,7 @@ comparisons:</p>
 <h3 id="build-the-matrix-and-plot">Build the matrix and plot<a class="anchor" aria-label="anchor" href="#build-the-matrix-and-plot"></a>
 </h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
-</h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
-<p>With 9 comparison trees, phylorug automatically arranges the rug grid
-(3 columns by 3 rows in this case). The position legend maps each cell
-position to an analysis name.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># --- Map each comparison tree to its support metric ---</span></span>
-<span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Matrix1-kpi_ASTRAL"</span>            <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"Matrix1-smart_ASTRAL"</span>          <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"Matrix1-kpi_partitioning"</span>      <span class="op">=</span> <span class="st">"sh_alrt"</span>,</span>
@@ -463,30 +470,36 @@ position to an analysis name.</p>
 <span>  <span class="st">"Matrix1-smart_PMSF(H2.guide)"</span>  <span class="op">=</span> <span class="st">"sh_alrt"</span>,</span>
 <span>  <span class="st">"Matrix2_partitioning"</span>          <span class="op">=</span> <span class="st">"sh_alrt"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
+</h3>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
+<p>With 9 comparison trees, phylorug automatically arranges the rug grid
+(3 columns by 3 rows in this case). The position legend maps each cell
+position to an analysis name.</p>
 </div>
 <div class="section level3">
 <h3 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
 </h3>
 <p>Here we use show_support = TRUE to overlay the backbone’s own node
-labels in red for cross-referencing, <code>cell_scale = 0.35</code> to
-shrink the rug cells slightly for a denser tree, and hide_unsupported =
-TRUE to remove all-white rugs so only contested and stable nodes remain
+labels in red for cross-referencing and <code>cell_scale = 0.35</code>
+to shrink the rug cells slightly for a denser tree. All-white rugs are
+hidden by default, so only contested and stable nodes remain
 visible.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>              support_type       <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>              show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              support_label_cex  <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>              support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>              cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>              rug_position       <span class="op">=</span> <span class="st">"inside"</span>,</span>
-<span>              rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>              hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
-<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
+<span>              rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
@@ -498,13 +511,13 @@ carry black dots, meaning those clades are recovered by unanimously all
 9 analyses. <em>Culicidae</em> (mosquitoes), <em>Chironomidae</em>
 (non-biting midges), <em>Ceratopogonidae</em> (biting midges), and the
 <em>Simuliidae</em> + <em>Thaumaleidae</em> clade all show complete
-agreement across every inference method and dataset. Fu et al. (2025)
+agreement across every inference method and dataset. Fu et al. (2025)
 reported the same, full support for these clades regardless of model or
 matrix.</p>
 <p>The interesting nodes are the contested ones. The central question in
 <em>Culicomorpha</em> phylogenetics is where <em>Ceratopogonidae</em>
 and <em>Chironomidae</em> sit relative to the rest of the infraorder. Fu
-et al. (2025) tested multiple hypotheses. Their preferred topology (H1)
+et al. (2025) tested multiple hypotheses. Their preferred topology (H1)
 places <em>Chironomidae</em> + <em>Ceratopogonidae</em> together as
 sister to all remaining families. The alternative (H2) breaks this
 pairing and places <em>Ceratopogonidae</em> elsewhere, nested closer to
@@ -631,33 +644,30 @@ translation.</p>
 (<code>SH-aLRT/UFBoot2</code> for <code>IQ-TREE trees</code>). Extract
 both support values with <code>support_col = c(1, 2)</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
-</h3>
-<p>At ~316 taxa the tree is dense. For a clean figure,
-<code>hide_unsupported = TRUE</code> removes all-white rugs that would
-clutter the backbone, and writing to a file with explicit width and
-height avoids the distortion that GUI windows introduce on large
-trees.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, hide_unsupported <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="2400"></p>
-</div>
-<div class="section level3">
-<h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
-</h3>
-<p>Map each comparison tree to its support metric. The two ASTRAL trees
-carry local posterior probabilities, the two IQ-TREE trees carry
-UFBoot2:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"50p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
 <span>  <span class="st">"50p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
 <span>  <span class="st">"50p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"50p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                            support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
+</h3>
+<p>At ~316 taxa the tree is dense. For a clean figure, all-white rugs
+are hidden by default, and writing to a file with explicit width and
+height avoid the distortion that GUI windows introduce on large
+trees.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="2400"></p>
+</div>
+<div class="section level3">
+<h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
+</h3>
 <p>With ~316 taxa, the canvas dimensions matter. <code>width = 25</code>
 and <code>height = 65</code> give each tip enough vertical space to
 remain legible, and <code>cell_scale = 0.25</code> shrinks the rug cells
@@ -675,19 +685,13 @@ shading. For a tree this size, always write to a file (file =
 <span>  width              <span class="op">=</span> <span class="fl">25</span>,</span>
 <span>  height             <span class="op">=</span> <span class="fl">65</span>,</span>
 <span>  mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type       <span class="op">=</span> <span class="va">support_type</span>,</span>
 <span>  show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  support_label_cex  <span class="op">=</span> <span class="fl">0.34</span>,</span>
 <span>  cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>  rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  hide_unsupported   <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
-<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level3">
@@ -741,14 +745,14 @@ rebuild the node presence matrix:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span>
-<span><span class="va">npm</span>      <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
 <span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                            support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="grid-dimensions">Grid dimensions<a class="anchor" aria-label="anchor" href="#grid-dimensions"></a>
 </h3>
@@ -781,15 +785,20 @@ trivially recovers every clade, since it defines the topology). Set
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, include_backbone <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/include-bb-1.png" class="r-plt" alt="" width="672"></p>
-<p>In support mode with <code>include_backbone = TRUE</code>, you must
-also include <code>"backbone"</code> in the <code>support_type</code>
-vector.</p>
+<p>In support mode, pass the backbone’s support metric directly to
+<code>include_backbone</code> so it gets binned against the correct
+thresholds:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>              mode             <span class="op">=</span> <span class="st">"support"</span>,</span>
+<span>              include_backbone <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
 </h3>
 <p>Override the default support bins with your own cutoffs:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  ufboot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">98</span>, high <span class="op">=</span> <span class="fl">90</span>, moderate <span class="op">=</span> <span class="fl">70</span><span class="op">)</span>,</span>
 <span>  lpp    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">0.99</span>, high <span class="op">=</span> <span class="fl">0.90</span>, moderate <span class="op">=</span> <span class="fl">0.70</span><span class="op">)</span></span>
@@ -797,14 +806,9 @@ vector.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
 <span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
-<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
-<span>  support_type <span class="op">=</span> <span class="va">support_type</span>,</span>
+<span>  mode       <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  thresholds <span class="op">=</span> <span class="va">my_thresholds</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span>
-<span><span class="co">#&gt; Warning in plot.window(...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in plot.xy(xy, type, ...): "support_type" is not a graphical parameter</span></span>
-<span><span class="co">#&gt; Warning in title(...): "support_type" is not a graphical parameter</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100"></p>
 </div>
 </div>
@@ -863,7 +867,10 @@ phylogenomics clarifies the systematics of rare dung beetles
 19(12), e0309596.</li>
 <li>Machado, D. J. (2015). YBYRÁ fossile: a command line system for
 total evidence dating and sensitivity analysis. <em>BMC
-Bioinformatics</em>, 16, 40.</li>
+Bioinformatics</em>, 16,
+<ol start="40" style="list-style-type: decimal"><li>
+</li></ol>
+</li>
 <li>Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
 of consensus support in large data sets. <em>Cladistics</em>, 26(6),
 598–613.</li>
