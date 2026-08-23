@@ -90,7 +90,7 @@ handles canvas sizing, legend placement, and font scaling automatically.</p>
 
 <dt id="arg-npm">npm<a class="anchor" aria-label="anchor" href="#arg-npm"></a></dt>
 <dd><p>A named list containing the <code>presence</code> and <code>support</code> matrices,
-exactly as returned by <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>.</p></dd>
+returned by <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-file">file<a class="anchor" aria-label="anchor" href="#arg-file"></a></dt>
@@ -117,19 +117,20 @@ dimension requirements.</p></dd>
 
 <dt id="arg-support-idx">support_idx<a class="anchor" aria-label="anchor" href="#arg-support-idx"></a></dt>
 <dd><p>Integer (1, 2, or 3). Default is <code>1</code>. Specifies which
-single support matrix from the <code>npm</code> list to visualize when
-<code>mode = "support"</code>. This corresponds directly to your extraction order in
-<code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>. For example, if you generated the data using
-<code>support_col = c(1, 2)</code>, passing <code>2</code> here tells the plotting engine to
-physically shade the grid cells using the second metric (stored in your
-list as <code>support_2</code>).</p></dd>
+single support matrix from the <code>npm</code> list to visualize. For example, if you
+generated the data using <code>support_col = c(1, 2)</code>, passing <code>2</code> here tells the
+plotting engine to physically shade the grid cells using the second metric
+(stored in your list as <code>support_2</code>).</p></dd>
 
 
 <dt id="arg-thresholds">thresholds<a class="anchor" aria-label="anchor" href="#arg-thresholds"></a></dt>
-<dd><p>Optional list overriding built-in bin thresholds. While
-default thresholds are provided based on common literature, it is highly
-recommended to define your own custom thresholds to suit your specific
-analytical framework.</p></dd>
+<dd><p>Optional list overriding built-in bin thresholds. Keyed
+by metric name for named metrics, or <code>"universal"</code> when <code>support_type</code>
+is not declared. For example:
+<code>thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))</code>
+or <code>thresholds = list(universal = c(very_high = 0.90, high = 0.70,</code>
+<code>moderate = 0.50))</code>. If <code>NULL</code> (default), literature-based thresholds
+are applied.</p></dd>
 
 
 <dt id="arg-n-rows-n-cols">n_rows, n_cols<a class="anchor" aria-label="anchor" href="#arg-n-rows-n-cols"></a></dt>
@@ -197,8 +198,8 @@ labels. Default <code>NULL</code> auto-scales with tree size.</p></dd>
 
 
 <dt id="arg-rug-on-identical">rug_on_identical<a class="anchor" aria-label="anchor" href="#arg-rug-on-identical"></a></dt>
-<dd><p>Logical. Default <code>FALSE</code>. When  it and
-<code>dot_identical</code>both are  <code>TRUE</code>, unanimous nodes receive both the dot and
+<dd><p>Logical. Default <code>FALSE</code>. When this and
+<code>dot_identical</code> are both <code>TRUE</code>, unanimous nodes receive both the dot and
 a support rug, making per-tree support strength visible even at universally
 recovered clades.</p></dd>
 

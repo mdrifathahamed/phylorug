@@ -10,8 +10,11 @@ supplied rather than named directly.
 ([`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
 selects the tier for the user through its `mode` argument.)
 
-- Tier 1, presence: `support` is `NULL`. Cells are black for present,
-  white for absent, and grey for partial recovery in a pool.
+- Tier 1, presence: `support` is `NULL`. Cells are black for present and
+  white for absent. Grey cells appear only when `pool_threshold = 0` was
+  used in
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md),
+  indicating partial recovery across a pool of equally optimal trees.
 
 - Tier 2, support: both `support` and `support_type` are supplied.
   Recovered cells are shaded by binned support strength, from black
@@ -49,7 +52,8 @@ plot_node_rug(
   [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md).
   One row per internal backbone node (node numbers as rownames), one
   column per comparison tree. Cells are `1` (recovered), `0` (not
-  recovered), or a proportion (pool recovery).
+  recovered), or a proportion between 0 and 1 when `pool_threshold = 0`
+  was used.
 
 - support:
 

@@ -47,8 +47,8 @@ plot_phylorug(
 
 - npm:
 
-  A named list containing the `presence` and `support` matrices, exactly
-  as returned by
+  A named list containing the `presence` and `support` matrices,
+  returned by
   [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md).
 
 - file:
@@ -77,20 +77,20 @@ plot_phylorug(
 - support_idx:
 
   Integer (1, 2, or 3). Default is `1`. Specifies which single support
-  matrix from the `npm` list to visualize when `mode = "support"`. This
-  corresponds directly to your extraction order in
-  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md).
-  For example, if you generated the data using `support_col = c(1, 2)`,
-  passing `2` here tells the plotting engine to physically shade the
-  grid cells using the second metric (stored in your list as
-  `support_2`).
+  matrix from the `npm` list to visualize. For example, if you generated
+  the data using `support_col = c(1, 2)`, passing `2` here tells the
+  plotting engine to physically shade the grid cells using the second
+  metric (stored in your list as `support_2`).
 
 - thresholds:
 
-  Optional list overriding built-in bin thresholds. While default
-  thresholds are provided based on common literature, it is highly
-  recommended to define your own custom thresholds to suit your specific
-  analytical framework.
+  Optional list overriding built-in bin thresholds. Keyed by metric name
+  for named metrics, or `"universal"` when `support_type` is not
+  declared. For example:
+  `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
+  or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,`
+  `moderate = 0.50))`. If `NULL` (default), literature-based thresholds
+  are applied.
 
 - n_rows, n_cols:
 
@@ -157,8 +157,8 @@ plot_phylorug(
 
 - rug_on_identical:
 
-  Logical. Default `FALSE`. When it and `dot_identical`both are `TRUE`,
-  unanimous nodes receive both the dot and a support rug, making
+  Logical. Default `FALSE`. When this and `dot_identical` are both
+  `TRUE`, unanimous nodes receive both the dot and a support rug, making
   per-tree support strength visible even at universally recovered
   clades.
 

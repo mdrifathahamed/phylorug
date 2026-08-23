@@ -1,11 +1,10 @@
 # Add a comparison tree to an existing node presence matrix
 
 Adds a new comparison tree to an existing node presence matrix without
-rerunning
-[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-from scratch. The function computes clade presence and support for the
-new tree only and attaches the results as a new column in every matrix
-of the npm. All existing columns remain unchanged.
+rerunning whole pipeline from scratch. The function computes clade
+recovery(presence) and support for the new tree only and attaches the
+results as a new column in every matrix of the npm. All existing columns
+remain unchanged.
 
 ## Usage
 
@@ -64,8 +63,7 @@ add_tree(
   tree's support values will be auto-normalized (values \>1 divided
   by 100) and binned against universal thresholds at plot time. For this
   reason, raw Bremer support (an unbounded integer) is not supported;
-  use the Bremer ratio `"bremer_ratio"` instead, which is bounded
-  between 0 and 1.
+  use the`"bremer_ratio"` instead, which is bounded between 0 and 1.
 
 - pool_threshold:
 
@@ -73,7 +71,7 @@ add_tree(
   (strict consensus). Should match the value used when the original npm
   was built. See
   [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-  for details.This parameter is only applicable when evaluating
+  for details. This parameter is only applicable when evaluating
   parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
   generated via TNT or similar software).
 

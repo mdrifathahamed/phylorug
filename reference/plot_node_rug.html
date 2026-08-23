@@ -6,8 +6,10 @@ rug.
 The appearance is set by a tier, resolved from which arguments are supplied
 rather than named directly. (plot_phylorug() selects the tier for the user
 through its mode argument.)
-Tier 1, presence: support is NULL. Cells are black for present,
-white for absent, and grey for partial recovery in a pool.
+Tier 1, presence: support is NULL. Cells are black for present
+and white for absent. Grey cells appear only when pool_threshold = 0
+was used in node_presence_matrix(), indicating partial recovery
+across a pool of equally optimal trees.
 Tier 2, support: both support and support_type are supplied.
 Recovered cells are shaded by binned support strength, from black (very
 high) through greys to yellow (low). A cell is white when the tree does
@@ -23,8 +25,10 @@ rug.
 The appearance is set by a tier, resolved from which arguments are supplied
 rather than named directly. (plot_phylorug() selects the tier for the user
 through its mode argument.)
-Tier 1, presence: support is NULL. Cells are black for present,
-white for absent, and grey for partial recovery in a pool.
+Tier 1, presence: support is NULL. Cells are black for present
+and white for absent. Grey cells appear only when pool_threshold = 0
+was used in node_presence_matrix(), indicating partial recovery
+across a pool of equally optimal trees.
 Tier 2, support: both support and support_type are supplied.
 Recovered cells are shaded by binned support strength, from black (very
 high) through greys to yellow (low). A cell is white when the tree does
@@ -73,8 +77,10 @@ node's clade and, in support mode, how strongly. Together these grids are the
 rug.</p>
 <p>The appearance is set by a tier, resolved from which arguments are supplied
 rather than named directly. (<code><a href="plot_phylorug.html">plot_phylorug()</a></code> selects the tier for the user
-through its <code>mode</code> argument.)</p><ul><li><p>Tier 1, presence: <code>support</code> is <code>NULL</code>. Cells are black for present,
-white for absent, and grey for partial recovery in a pool.</p></li>
+through its <code>mode</code> argument.)</p><ul><li><p>Tier 1, presence: <code>support</code> is <code>NULL</code>. Cells are black for present
+and white for absent. Grey cells appear only when <code>pool_threshold = 0</code>
+was used in <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>, indicating partial recovery
+across a pool of equally optimal trees.</p></li>
 <li><p>Tier 2, support: both <code>support</code> and <code>support_type</code> are supplied.
 Recovered cells are shaded by binned support strength, from black (very
 high) through greys to yellow (low). A cell is white when the tree does
@@ -108,8 +114,8 @@ tree and working out the cell geometry.</p>
 <dl><dt id="arg-npm">npm<a class="anchor" aria-label="anchor" href="#arg-npm"></a></dt>
 <dd><p>The presence matrix from <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>. One row per
 internal backbone node (node numbers as rownames), one column per
-comparison tree. Cells are <code>1</code> (recovered), <code>0</code> (not recovered), or a
-proportion (pool recovery).</p></dd>
+comparison tree. Cells are <code>1</code> (recovered), <code>0</code> (not recovered), or
+a proportion between 0 and 1 when <code>pool_threshold = 0</code> was used.</p></dd>
 
 
 <dt id="arg-support">support<a class="anchor" aria-label="anchor" href="#arg-support"></a></dt>
