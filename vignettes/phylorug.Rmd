@@ -87,21 +87,20 @@ analysis under direct optimization (POY). Giribet (2003) named these
 plots "Navajo rugs" and showed that nodal support and nodal stability
 can tell different stories.
 
-Sanders (2010) automated clade detection with Cladescan (Perl), and
-Machado (2015) extended the approach with YBYRÁ (Python). Both tools
-produce individual SVG plots per node that must be manually placed onto
-the tree in a vector editor. Cladescan is no longer available online,
-and YBYRÁ has been archived by its developer and is no longer
-maintained. More importantly, both were designed around sensitivity
-analysis within a single analytical framework, varying parameters and
-cost schemes, rather than comparing trees from fundamentally different
-inference pipelines that report support in incompatible formats (e.g.,
-UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP).
+Sanders (2010) automated parameter-space sensitivity analysis with Cladescan 
+(Perl), and Machado (2015) extended the approach with YBYRÁ (Python). Both tools
+produce individual SVG plots per node that must be manually placed onto the tree
+in a vector editor. Cladescan is no longer available online, and YBYRÁ has been 
+archived by its developer and is no longer maintained. More importantly, both 
+were designed around sensitivity analysis within a single analytical framework, 
+varying parameters and cost schemes, rather than comparing trees from 
+fundamentally different inference pipelines that report support in incompatible 
+formats (e.g.,UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP).
 
 phylorug extends this lineage into R. It reads trees from any pipeline,
-bins support values against metric-specific thresholds rather than
-rescaling them numerically, and draws rugs directly on the reference
-tree — no manual placement, no external software.
+bins support values against metric-specific thresholds rather than rescaling 
+them numerically, and draws rugs directly on the reference tree, no manual 
+placement, no external software.
 
 # Quick start
 
