@@ -755,15 +755,34 @@ rebuild the node presence matrix:</p>
 <span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>                            support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
+<h3 id="universal-thresholds-no-support_type">Universal thresholds (no support_type)<a class="anchor" aria-label="anchor" href="#universal-thresholds-no-support_type"></a>
+</h3>
+<p>If <code>support_type</code> is not declared when building the node
+presence matrix, <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> falls back to universal
+thresholds. Values greater than 1 are divided by 100 to bring them onto
+a 0–1 scale, and all trees are binned against the same cutoffs
+regardless of metric. This is useful for quick exploration but less
+precise than metric-specific binning:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">npm_universal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
+<span>  <span class="va">backbone</span>, <span class="va">npm_universal</span>,</span>
+<span>  mode <span class="op">=</span> <span class="st">"support"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `support_type` declared: values &gt;1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/universal_threshold-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
 <h3 id="grid-dimensions">Grid dimensions<a class="anchor" aria-label="anchor" href="#grid-dimensions"></a>
 </h3>
 <p>By default, phylorug chooses a roughly square grid. Override with
 <code>n_rows</code> and <code>n_cols</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#rug with flatend grid</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">1</span>, n_cols <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/grid-demo-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#rug with squired grid</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">2</span>, n_cols <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="672"></p>
@@ -773,7 +792,7 @@ rebuild the node presence matrix:</p>
 </h3>
 <p><code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> passes additional arguments through
 <code>...</code> to <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code>. Common options:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, cex <span class="op">=</span> <span class="fl">0.6</span>, font <span class="op">=</span> <span class="fl">3</span>, edge.width <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/tree-appearance-1.png" class="r-plt" alt="" width="672"></p>
 </div>
@@ -783,13 +802,13 @@ rebuild the node presence matrix:</p>
 <p>By default, the backbone does not occupy a cell in the rug (it
 trivially recovers every clade, since it defines the topology). Set
 <code>include_backbone = TRUE</code> to add it as cell 1:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, include_backbone <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/include-bb-1.png" class="r-plt" alt="" width="672"></p>
 <p>In support mode, pass the backbone’s support metric directly to
 <code>include_backbone</code> so it gets binned against the correct
 thresholds:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode             <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>              include_backbone <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span></span></code></pre></div>
@@ -799,7 +818,7 @@ thresholds:</p>
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
 </h3>
 <p>Override the default support bins with your own cutoffs:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  ufboot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">98</span>, high <span class="op">=</span> <span class="fl">90</span>, moderate <span class="op">=</span> <span class="fl">70</span><span class="op">)</span>,</span>
 <span>  lpp    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">0.99</span>, high <span class="op">=</span> <span class="fl">0.90</span>, moderate <span class="op">=</span> <span class="fl">0.70</span><span class="op">)</span></span>

@@ -749,6 +749,29 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
                             support_type = support_type)
 ```
 
+### Universal thresholds (no support_type)
+
+If `support_type` is not declared when building the node presence
+matrix,
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+falls back to universal thresholds. Values greater than 1 are divided by
+100 to bring them onto a 0–1 scale, and all trees are binned against the
+same cutoffs regardless of metric. This is useful for quick exploration
+but less precise than metric-specific binning:
+
+``` r
+
+npm_universal <- node_presence_matrix(backbone, others, support_col = c(1, 2))
+
+plot_phylorug(
+  backbone, npm_universal,
+  mode = "support"
+)
+#> No `support_type` declared: values >1 are divided by 100 and binned against universal thresholds (0.95/0.80/0.50). To use metric-specific thresholds, pass `support_type` to `node_presence_matrix()`. To customise the universal thresholds, use the `thresholds` argument, e.g. `thresholds = list(universal = c(very_high = 0.95, high = 0.80, moderate = 0.50))`.
+```
+
+![](phylorug_files/figure-html/universal_threshold-1.png)
+
 ### Grid dimensions
 
 By default, phylorug chooses a roughly square grid. Override with
