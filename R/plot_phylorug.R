@@ -574,6 +574,7 @@ plot_phylorug <- function(backbone, npm,
 
   invisible(if (!is.null(file)) file else NULL)
 }
+
 # auto_canvas -----------------------------------------------------------------
 #' Compute canvas dimensions from actual tree properties
 #'

@@ -151,6 +151,25 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
+  # --- NEW: Validate support_type ---
+  if (!is.null(support_type)) {
+    if (!is.character(support_type)) {
+      stop("`support_type` must be a named character vector.", call. = FALSE)
+    }
+    valid <- c("ufboot", "sh_alrt", "lpp", "posterior",
+               "jackknife", "bootstrap", "bremer_ratio", "transfer_boot")
+    unknown <- setdiff(unique(support_type), valid)
+    if (length(unknown) > 0L) {
+      stop(
+        "Unknown support_type value(s): ",
+        paste0('"', unknown, '"', collapse = ", "),
+        ". Use one of: ",
+        paste0('"', valid, '"', collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+  }
   nm <- names(trees)
   if (is.null(nm)) {
     nm <- paste0("tree_", seq_along(trees))
