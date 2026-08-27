@@ -102,17 +102,19 @@
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">check_taxa</span>(backbone, others)</span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Build the node presence matrix</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>npm <span class="ot">&lt;-</span> <span class="fu">node_presence_matrix</span>(backbone, others, <span class="at">support_type =</span> <span class="fu">c</span>(</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                <span class="st">"70p_ghost"</span>                    <span class="ot">=</span> <span class="st">"ufboot"</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>                <span class="st">"70p_partition_entropy"</span>        <span class="ot">=</span> <span class="st">"ufboot"</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm)</span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co"># Support mode: How strongly?</span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm, <span class="at">mode =</span> <span class="st">"support"</span>))</span></code></pre></div>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># support_type only matters for support mode — skip it if you just want </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># presence/absence</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>npm <span class="ot">&lt;-</span> <span class="fu">node_presence_matrix</span>(backbone, others, <span class="at">support_type =</span> <span class="fu">c</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>                <span class="st">"70p_ghost"</span>                    <span class="ot">=</span> <span class="st">"ufboot"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>                <span class="st">"70p_partition_entropy"</span>        <span class="ot">=</span> <span class="st">"ufboot"</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm)</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co"># Support mode: How strongly?</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm, <span class="at">mode =</span> <span class="st">"support"</span>))</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="core-functions">Core functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>

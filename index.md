@@ -92,6 +92,8 @@ others   <- sample_trees[names(sample_trees) != "70p_uce"]
 check_taxa(backbone, others)
 
 # Build the node presence matrix
+# support_type only matters for support mode — skip it if you just want 
+# presence/absence
 npm <- node_presence_matrix(backbone, others, support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
                 "70p_ASTRAL_uce"               = "lpp",
