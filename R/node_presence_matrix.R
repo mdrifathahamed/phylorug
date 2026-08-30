@@ -151,22 +151,45 @@ node_presence_matrix <- function(backbone,
       call. = FALSE
     )
   }
-  # --- NEW: Validate support_type ---
+  # --- Validate & normalize support_type ---
+  # Accepts common spelling/case variants (e.g. "LPP", "local posterior
+  # probability") and normalizes them to phylorug's canonical labels.
+  # Anything else is kept as-is and falls back to universal thresholds.
   if (!is.null(support_type)) {
     if (!is.character(support_type)) {
       stop("`support_type` must be a named character vector.", call. = FALSE)
     }
-    valid <- c("ufboot", "sh_alrt", "lpp", "posterior",
+    known <- c("ufboot", "sh_alrt", "lpp", "posterior",
                "jackknife", "bootstrap", "bremer_ratio", "transfer_boot")
-    unknown <- setdiff(unique(support_type), valid)
-    if (length(unknown) > 0L) {
-      stop(
-        "Unknown support_type value(s): ",
-        paste0('"', unknown, '"', collapse = ", "),
-        ". Use one of: ",
-        paste0('"', valid, '"', collapse = ", "),
-        ".",
-        call. = FALSE
+    alias_map <- list(
+      ufboot        = c("ufboot", "ufboot2", "ultrafastbootstrap"),
+      sh_alrt       = c("shalrt", "sh"),
+      lpp           = c("lpp", "localposteriorprobability", "localpp"),
+      posterior     = c("posterior", "posteriorprobability", "pp",
+                        "bayesianposterior"),
+      jackknife     = c("jackknife", "jk"),
+      bootstrap     = c("bootstrap", "bs", "standardbootstrap"),
+      bremer_ratio  = c("bremer", "bremerratio", "bremersupport",
+                        "decayindex"),
+      transfer_boot = c("tbe", "transferboot", "transferbootstrap")
+    )
+    normalize_key <- function(x) tolower(gsub("[^a-zA-Z0-9]", "", x))
+    resolved <- vapply(support_type, function(val) {
+      key <- normalize_key(val)
+      hit <- names(alias_map)[
+        vapply(alias_map, function(a) key %in% a, logical(1))
+      ]
+      if (length(hit) > 0L) hit[1] else val
+    }, character(1))
+    names(resolved) <- names(support_type)
+    support_type <- resolved
+    unrecognized <- setdiff(unique(support_type), known)
+    if (length(unrecognized) > 0L) {
+      message(
+        "support_type value(s) not recognized as a built-in metric: ",
+        paste0('"', unrecognized, '"', collapse = ", "),
+        ". Using universal thresholds (0.95/0.80/0.50) for these; pass ",
+        "custom thresholds via `thresholds` in plot_phylorug() to override."
       )
     }
   }

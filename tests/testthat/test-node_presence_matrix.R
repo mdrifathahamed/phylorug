@@ -396,6 +396,73 @@ test_that("support_col = 2 alone names the output support_1", {
 })
 
 
+# ---- support_type validation & normalization ---------------------------------
+test_that("support_type accepts canonical labels unchanged", {
+  result <- node_presence_matrix(
+    make_backbone(), make_comparisons(),
+    support_type = c(tree1 = "lpp", tree2 = "ufboot")
+  )
+  expect_equal(unname(attr(result, "support_type")), c("lpp", "ufboot"))
+})
+
+test_that("support_type normalizes case variants", {
+  result <- node_presence_matrix(
+    make_backbone(), make_comparisons(),
+    support_type = c(tree1 = "LPP", tree2 = "UFBoot2")
+  )
+  expect_equal(unname(attr(result, "support_type")), c("lpp", "ufboot"))
+})
+
+test_that("support_type normalizes spaced-out and hyphenated labels", {
+  result <- node_presence_matrix(
+    make_backbone(), make_comparisons(),
+    support_type = c(tree1 = "local posterior probability", tree2 = "SH-aLRT")
+  )
+  expect_equal(unname(attr(result, "support_type")), c("lpp", "sh_alrt"))
+})
+
+test_that("support_type keeps an unrecognized label as given, no error", {
+  result <- NULL
+  expect_no_error(
+    result <- node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_type = c(tree1 = "made_up_metric", tree2 = "lpp")
+    )
+  )
+  expect_equal(
+    unname(attr(result, "support_type")),
+    c("made_up_metric", "lpp")
+  )
+})
+
+test_that("support_type messages once for unrecognized labels", {
+  expect_message(
+    node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_type = c(tree1 = "made_up_metric", tree2 = "lpp")
+    ),
+    "not recognized as a built-in metric"
+  )
+})
+
+test_that("support_type produces no message when every label is recognized", {
+  expect_no_message(
+    node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_type = c(tree1 = "lpp", tree2 = "UFBoot2")
+    )
+  )
+})
+
+test_that("support_type errors when not a character vector", {
+  expect_error(
+    node_presence_matrix(
+      make_backbone(), make_comparisons(),
+      support_type = list(tree1 = "lpp")
+    ),
+    "must be a named character vector"
+  )
+})
 # ---- attributes -------------------------------------------------------------
 test_that("node_id attribute matches backbone internal nodes", {
   bb     <- make_backbone()
