@@ -21,6 +21,7 @@ plot_phylorug(
   n_rows = NULL,
   n_cols = NULL,
   include_backbone = FALSE,
+  nodes = NULL,
   legend = TRUE,
   show_support = FALSE,
   show_support_idx = 1,
@@ -105,6 +106,30 @@ plot_phylorug(
   string naming a support metric (`include_backbone = "ufboot"`), the
   backbone is added as cell 1 and binned against that metric's
   thresholds.
+
+- nodes:
+
+  Optional. Restricts the plot to a subset of backbone internal nodes.
+  Accepts any one of:
+
+  - A **list of character vectors**, the recommended way to select
+    clades: each element gives \>= 2 tip labels from
+    `backbone$tip.label`, and phylorug resolves each set to its most
+    recent common ancestor (MRCA) internally. For example
+    `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))` selects
+    two clades by the taxa that define them – no node IDs required.
+
+  - A numeric vector of node IDs matching `rownames(npm$presence)`
+    (ape's internal node numbering, `Ntip(backbone) + 1` upward).
+
+  - A character vector of labels matching `backbone$node.label`.
+
+  If `NULL` (the default), every internal node in `npm` is eligible for
+  a dot or rug, subject to `dot_identical` and `hide_unsupported`. When
+  supplied, only the selected nodes are considered at all: unselected
+  nodes get no dot, rug, or support label, regardless of those other
+  settings. An unresolvable node ID, label, or taxon name raises an
+  error naming the offending value(s).
 
 - legend:
 
@@ -230,4 +255,18 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
+#' # --- Restrict to specific nodes ---------------------------------------------
+# By taxa (recommended): select a clade by the tips that define it.
+tmp4 <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm_st,
+              file  = tmp4,
+              nodes = list(backbone$tip.label[1:2]))
+unlink(tmp4)
+
+# By node ID, if you already know it (see rownames(npm_st$presence)):
+tmp5 <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm_st,
+              file  = tmp5,
+              nodes = as.integer(rownames(npm_st$presence))[1:2])
+unlink(tmp5)
 ```
