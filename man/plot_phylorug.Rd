@@ -16,6 +16,7 @@ plot_phylorug(
   n_rows = NULL,
   n_cols = NULL,
   include_backbone = FALSE,
+  nodes = NULL,
   legend = TRUE,
   show_support = FALSE,
   show_support_idx = 1,
@@ -78,6 +79,26 @@ cell 1 using universal thresholds in support mode (with a message). If a
 character string naming a support metric (\code{include_backbone = "ufboot"}),
 the backbone is added as cell 1 and binned against that metric's
 thresholds.}
+
+\item{nodes}{Optional. Restricts the plot to a subset of backbone internal
+nodes. Accepts any one of:
+\itemize{
+\item A \strong{list of character vectors}, the recommended way to select
+clades: each element gives >= 2 tip labels from \code{backbone$tip.label},
+and phylorug resolves each set to its most recent common ancestor
+(MRCA) internally. For example
+\code{nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))} selects
+two clades by the taxa that define them -- no node IDs required.
+\item A numeric vector of node IDs matching \code{rownames(npm$presence)}
+(ape's internal node numbering, \code{Ntip(backbone) + 1} upward).
+\item A character vector of labels matching \code{backbone$node.label}.
+}
+If \code{NULL} (the default), every internal node in \code{npm} is eligible for a
+dot or rug, subject to \code{dot_identical} and \code{hide_unsupported}. When
+supplied, only the selected nodes are considered at all: unselected
+nodes get no dot, rug, or support label, regardless of those other
+settings. An unresolvable node ID, label, or taxon name raises an error
+naming the offending value(s).}
 
 \item{legend}{Logical. Draw the legend. Default TRUE.}
 
@@ -172,6 +193,20 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
+#' # --- Restrict to specific nodes ---------------------------------------------
+# By taxa (recommended): select a clade by the tips that define it.
+tmp4 <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm_st,
+              file  = tmp4,
+              nodes = list(backbone$tip.label[1:2]))
+unlink(tmp4)
+
+# By node ID, if you already know it (see rownames(npm_st$presence)):
+tmp5 <- tempfile(fileext = ".pdf")
+plot_phylorug(backbone, npm_st,
+              file  = tmp5,
+              nodes = as.integer(rownames(npm_st$presence))[1:2])
+unlink(tmp5)
 }
 \seealso{
 \code{\link[=node_presence_matrix]{node_presence_matrix()}} to build the input data,

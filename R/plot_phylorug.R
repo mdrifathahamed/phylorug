@@ -51,6 +51,26 @@
 #'   the backbone is added as cell 1 and binned against that metric's
 #'   thresholds.
 #'
+#' @param nodes Optional. Restricts the plot to a subset of backbone internal
+#'   nodes. Accepts any one of:
+#'   \itemize{
+#'     \item A **list of character vectors**, the recommended way to select
+#'       clades: each element gives >= 2 tip labels from `backbone$tip.label`,
+#'       and phylorug resolves each set to its most recent common ancestor
+#'       (MRCA) internally. For example
+#'       `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))` selects
+#'       two clades by the taxa that define them -- no node IDs required.
+#'     \item A numeric vector of node IDs matching `rownames(npm$presence)`
+#'       (ape's internal node numbering, `Ntip(backbone) + 1` upward).
+#'     \item A character vector of labels matching `backbone$node.label`.
+#'   }
+#'   If `NULL` (the default), every internal node in `npm` is eligible for a
+#'   dot or rug, subject to `dot_identical` and `hide_unsupported`. When
+#'   supplied, only the selected nodes are considered at all: unselected
+#'   nodes get no dot, rug, or support label, regardless of those other
+#'   settings. An unresolvable node ID, label, or taxon name raises an error
+#'   naming the offending value(s).
+#'
 #' @param legend Logical. Draw the legend. Default TRUE.
 #'
 #' @param show_support Logical. If `TRUE`, backbone node support labels are
@@ -143,6 +163,20 @@
 #'               include_backbone = TRUE,
 #'               rug_position     = "outside")
 #' unlink(tmp3)
+#' #' # --- Restrict to specific nodes ---------------------------------------------
+#' # By taxa (recommended): select a clade by the tips that define it.
+#' tmp4 <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm_st,
+#'               file  = tmp4,
+#'               nodes = list(backbone$tip.label[1:2]))
+#' unlink(tmp4)
+#'
+#' # By node ID, if you already know it (see rownames(npm_st$presence)):
+#' tmp5 <- tempfile(fileext = ".pdf")
+#' plot_phylorug(backbone, npm_st,
+#'               file  = tmp5,
+#'               nodes = as.integer(rownames(npm_st$presence))[1:2])
+#' unlink(tmp5)
 plot_phylorug <- function(backbone, npm,
                           file             = NULL,
                           width            = NULL,
@@ -153,6 +187,7 @@ plot_phylorug <- function(backbone, npm,
                           n_rows           = NULL,
                           n_cols           = NULL,
                           include_backbone = FALSE,
+                          nodes            = NULL,
                           legend           = TRUE,
                           show_support     = FALSE,
                           show_support_idx = 1,
@@ -279,7 +314,105 @@ plot_phylorug <- function(backbone, npm,
       support <- cbind(bb_col, support)
     }
   }
+  # --- 2b. Node selection -----------------------------------------------
+  keep_ids <- NULL
+  if (!is.null(nodes)) {
+    if (is.list(nodes)) {
+      # Each element is a character vector of >= 2 tip labels defining one
+      # clade by its most recent common ancestor (MRCA), resolved with
+      # phangorn::mrca.phylo() -- the same package clade_keys() already
+      # uses (via phangorn::Descendants()) for the reverse direction.
+      bb_tips  <- backbone$tip.label
+      keep_ids <- vapply(seq_along(nodes), function(i) {
+        taxa <- nodes[[i]]
+        if (!is.character(taxa)) {
+          stop(
+            "`nodes[[", i, "]]` must be a character vector of tip labels, ",
+            "got class \"", class(taxa)[1], "\".",
+            call. = FALSE
+          )
+        }
+        if (length(taxa) < 2L) {
+          stop(
+            "`nodes[[", i, "]]` has only ", length(taxa), " taxon/taxa. ",
+            "A clade needs at least 2 tips to define an internal node; a ",
+            "single tip has no MRCA to place a rug on.",
+            call. = FALSE
+          )
+        }
+        missing_taxa <- setdiff(taxa, bb_tips)
+        if (length(missing_taxa) > 0L) {
+          stop(
+            "`nodes[[", i, "]]` contains taxa not found in ",
+            "`backbone$tip.label`: ",
+            paste(missing_taxa, collapse = ", "), ".",
+            call. = FALSE
+          )
+        }
+        mrca <- phangorn::mrca.phylo(backbone, node = taxa)
+        if (is.null(mrca)) {
+          stop(
+            "`nodes[[", i, "]]` resolved to no internal node. This can ",
+            "happen if the taxa given are not distinct tips of `backbone`.",
+            call. = FALSE
+          )
+        }
+        as.integer(mrca)
+      }, integer(1))
+    } else if (is.numeric(nodes)) {
+      nodes     <- as.integer(nodes)
+      valid_ids <- as.integer(rownames(presence))
+      bad       <- setdiff(nodes, valid_ids)
+      if (length(bad) > 0L) {
+        stop(
+          "`nodes` contains node ID(s) not present in `npm`: ",
+          paste(bad, collapse = ", "),
+          ". Valid backbone internal node IDs range from ",
+          min(valid_ids), " to ", max(valid_ids),
+          " (see `rownames(npm$presence)`).",
+          call. = FALSE
+        )
+      }
+      keep_ids <- nodes
+    } else if (is.character(nodes)) {
+      if (is.null(backbone$node.label)) {
+        stop(
+          "`nodes` was given as character labels, but `backbone` has no ",
+          "`node.label` to match against. Use integer node IDs instead ",
+          "(see `rownames(npm$presence)`).",
+          call. = FALSE
+        )
+      }
+      labs <- backbone$node.label
+      idx  <- match(nodes, labs)
+      bad  <- nodes[is.na(idx)]
+      if (length(bad) > 0L) {
+        stop(
+          "`nodes` contains label(s) not found in `backbone$node.label`: ",
+          paste(bad, collapse = ", "), ".",
+          call. = FALSE
+        )
+      }
+      keep_ids <- idx + ntip
+    } else {
+      stop(
+        "`nodes` must be NULL, a numeric vector of node IDs, a character ",
+        "vector of node labels matching `backbone$node.label`, or a list ",
+        "of character vectors (>= 2 tip labels each) giving the taxa that ",
+        "define each clade of interest.",
+        call. = FALSE
+      )
+    }
 
+    keep_rows <- rownames(presence) %in% as.character(keep_ids)
+    if (!any(keep_rows)) {
+      stop("`nodes` did not match any backbone node in `npm`.", call. = FALSE)
+    }
+    presence <- presence[keep_rows, , drop = FALSE]
+    if (!is.null(support)) {
+      support <- support[keep_rows, , drop = FALSE]
+    }
+  }
   tree_names <- colnames(presence)
   n_tree     <- length(tree_names)
 
@@ -428,13 +561,11 @@ plot_phylorug <- function(backbone, npm,
       }, character(1), USE.NAMES = FALSE)
     }
     show <- which(!is.na(labs) & nzchar(labs))
+    if (!is.null(keep_ids)) {
+      show <- show[(show + ntip) %in% keep_ids]
+    }
     if (length(show) > 0) {
       node_ids <- show + ntip
-      if (dot_identical && !rug_on_identical) {
-        keep <- !(node_ids %in% as.integer(rownames(presence)[unanimous]))
-        show <- show[keep]
-        node_ids <- node_ids[keep]
-      }
       if (length(show) > 0) {
         num <- suppressWarnings(as.numeric(labs[show]))
         txt <- ifelse(is.na(num), labs[show],

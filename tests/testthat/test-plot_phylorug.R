@@ -656,3 +656,92 @@ test_that("draw_threshold_legend returns invisible y bottom", {
   expect_true(is.numeric(result))
   expect_true(result < 9)
 })
+# ---- nodes --------------------------------------------------------------
+test_that("nodes selects by numeric node id", {
+  expect_no_error(
+    on_null_device(
+      plot_phylorug(make_backbone(), make_npm(), nodes = 6)
+    )
+  )
+})
+test_that("nodes as numeric id errors on unknown id", {
+  expect_error(
+    on_null_device(
+      plot_phylorug(make_backbone(), make_npm(), nodes = 999)
+    ),
+    "not present in `npm`"
+  )
+})
+test_that("nodes selects by character label", {
+  bb <- make_backbone_with_labels()
+  expect_no_error(
+    on_null_device(
+      plot_phylorug(bb, make_npm(), nodes = c("95", "100"))
+    )
+  )
+})
+test_that("nodes as character label errors on unknown label", {
+  bb <- make_backbone_with_labels()
+  expect_error(
+    on_null_device(
+      plot_phylorug(bb, make_npm(), nodes = c("999"))
+    ),
+    "not found in"
+  )
+})
+test_that("nodes as character label errors when backbone has no node.label", {
+  expect_error(
+    on_null_device(
+      plot_phylorug(make_backbone(), make_npm(), nodes = c("95"))
+    ),
+    "has no"
+  )
+})
+test_that("nodes of an invalid type errors", {
+  expect_error(
+    on_null_device(
+      plot_phylorug(make_backbone(), make_npm(), nodes = TRUE)
+    ),
+    "must be NULL, a numeric vector"
+  )
+})
+test_that("nodes accepts a list of taxa defining one clade", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(), nodes = list(c("A", "B")))
+  ))
+})
+test_that("nodes accepts a list of taxa defining multiple clades", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(),
+                  nodes = list(c("A", "B"), c("D", "E")))
+  ))
+})
+test_that("nodes as taxa list errors on non-character element", {
+  expect_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(), nodes = list(6L))
+  ), "must be a character vector of tip labels")
+})
+test_that("nodes as taxa list errors on fewer than 2 taxa", {
+  expect_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(), nodes = list("A"))
+  ), "at least 2 tips")
+})
+test_that("nodes as taxa list errors on taxa not in backbone", {
+  expect_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(),
+                  nodes = list(c("A", "not_a_real_tip")))
+  ), "not found in")
+})
+test_that("nodes as taxa list restricts show_support labels", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_with_labels(), make_npm(),
+                  nodes = list(c("A", "B")), show_support = TRUE)
+  ))
+})
+test_that("nodes combined with hide_unsupported and dot_identical", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone(), make_npm(),
+                  nodes = list(c("A", "B"), c("D", "E")),
+                  hide_unsupported = TRUE, dot_identical = TRUE)
+  ))
+})
