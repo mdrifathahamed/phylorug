@@ -47,8 +47,13 @@ The rug on tree node concept for comparing clade recovery across analytical cond
 
 ![Support mode](man/figures/README-support.png)Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade. Each support value is binned on its own metric's scale. Different formats are never rescaled or cross-compared numerically. Default thresholds are provided, but users are recommended to set their own.
 
-The entire workflow runs in R, from reading raw tree files to publication-ready figures, just a few lines added to an existing phylogenetic script. The package was developed around a 316-taxon dung beetle phylogenomic dataset (Lopes et al. 2024) and tested with simulated trees of over 700 taxa across 15 analyses. Three real-world datasets are bundled with the package so users can try the pipeline on real data before applying it to their own.
-
+The entire workflow runs in R, from reading raw tree files to
+publication-ready figures, just a few lines added to an existing
+phylogenetic script. The package was developed around a dung beetle
+phylogenomic dataset (Montanaro, Lopes et al. 2026) and tested with
+simulated trees of over 700 taxa across 15 analyses. Three real-world
+datasets are bundled with the package so users can try the pipeline on
+real data before applying it to their own.
 ### Installation
 
 **phylorug** is not yet on CRAN. To install the development version from GitHub:
@@ -121,6 +126,7 @@ You can learn more about each step in `vignette("phylorug")`.
 - Supports both `"inside"` and `"outside"` rug positioning relative to the tree
 - Backbone support values can be displayed alongside rug cells via `show_support`
 - Unanimous nodes are collapsed to dots by default; `rug_on_identical = TRUE` forces full display rugs to reveal support variation
+- *phylorug* draws rug plot visualizations directly on the nodes of a reference phylogenetic tree, and lets users choose which nodes to visualize.
 - Saves directly to PDF, PNG, or JPEG via the `file` argument.
 
 ### Getting help
