@@ -145,8 +145,9 @@ reference tree, no manual placement, no external software.</p>
 </h2>
 <p>The fastest way to see phylorug in action is with the built-in
 <code>sample_trees</code> dataset, a 15-taxon subset of the beetle data
-(Lopes et al., 2024), already rooted, pruned, and with tip labels
-translated to species names. Lets start with attaching the package :</p>
+(Montanaro, Lopes et al., 2026), already rooted, pruned, and with tip
+labels translated to species names. Lets start with attaching the
+package :</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -551,15 +552,16 @@ investigation.</p>
 <h2 id="full-pipeline-beetles-with-tip-translation">Full pipeline: beetles with tip translation<a class="anchor" aria-label="anchor" href="#full-pipeline-beetles-with-tip-translation"></a>
 </h2>
 <p>The beetle dataset ships with <code>phylorug</code> in
-<code>inst/extdata/</code>. It contains two sets of trees from Lopes et
-al. (2024): <code>beetles_50p/</code> and <code>beetles_70p/</code>,
-each with 5 analyses of 314 ingroup dung beetle taxa (316 tips including
-2 outgroups) built from UCE loci retained at different completeness
-thresholds (50% and 70%). The two datasets produce slightly different
-topologies, making them a good test case for exploring how data
-filtering affects clade recovery. For this vignette we use the 50p set,
-but users are encouraged to try both. Unlike the <em>Culicomorpha</em>
-trees, these trees store specimen codes as tip labels (e.g.,
+<code>inst/extdata/</code>. It contains two sets of trees, a random
+subset of Montanaro, Lopes et al. (2026): beetles_50p/ and beetles_70p/,
+each with 5 analyses of 50 ingroup dung beetle taxa (52 tips including 2
+outgroups) for the 50p set, and 70 ingroup taxa (72 tips) for the 70p
+set built from UCE loci retained at different completeness thresholds
+(50% and 70%). The two datasets produce slightly different topologies,
+making them a good test case for exploring how data filtering affects
+clade recovery. For this vignette we use the 50p set, but users are
+encouraged to try both. Unlike the <em>Culicomorpha</em> trees, these
+trees store specimen codes as tip labels (e.g.,
 <code>"OntauST002"</code> rather than a species name), so this example
 adds one extra step: translating tip labels using a lookup table before
 building the rug.</p>
@@ -616,11 +618,11 @@ translation.</p>
 <code class="sourceCode R"><span><span class="va">trees</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/translate_tips.html">translate_tips</a></span><span class="op">(</span><span class="va">trees</span>, <span class="va">biogeo</span>,</span>
 <span>                        from_col <span class="op">=</span> <span class="st">"specimen_code"</span>,</span>
 <span>                        to_col   <span class="op">=</span> <span class="st">"species_name"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 50p_ASTRAL_partition_entropy: 314 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_ASTRAL_uce: 314 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_ghost: 314 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_partition_entropy: 314 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_uce: 314 tips translated, 0 unchanged</span></span></code></pre></div>
+<span><span class="co">#&gt; 50p_ASTRAL_partition_entropy: 50 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 50p_ASTRAL_uce: 50 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 50p_ghost: 50 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 50p_partition_entropy: 50 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 50p_uce: 50 tips translated, 0 unchanged</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="choose-a-backbone-and-check-taxa">Choose a backbone and check taxa<a class="anchor" aria-label="anchor" href="#choose-a-backbone-and-check-taxa"></a>
@@ -629,14 +631,14 @@ translation.</p>
 <code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[[</span><span class="st">"50p_uce"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"50p_uce"</span><span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
-<span><span class="co">#&gt; All 4 comparison trees share the same 314 taxa as the backbone.</span></span>
+<span><span class="co">#&gt; All 4 comparison trees share the same 50 taxa as the backbone.</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co">#&gt; attr(,"diagnostics")</span></span>
 <span><span class="co">#&gt;                     comparison    status n_taxa missing extra</span></span>
-<span><span class="co">#&gt; 1 50p_ASTRAL_partition_entropy identical    314              </span></span>
-<span><span class="co">#&gt; 2               50p_ASTRAL_uce identical    314              </span></span>
-<span><span class="co">#&gt; 3                    50p_ghost identical    314              </span></span>
-<span><span class="co">#&gt; 4        50p_partition_entropy identical    314</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 50p_ASTRAL_partition_entropy identical     50              </span></span>
+<span><span class="co">#&gt; 2               50p_ASTRAL_uce identical     50              </span></span>
+<span><span class="co">#&gt; 3                    50p_ghost identical     50              </span></span>
+<span><span class="co">#&gt; 4        50p_partition_entropy identical     50</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="build-the-node-presence-matrix-1">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix-1"></a>
@@ -669,7 +671,7 @@ trees.</p>
 <div class="section level3">
 <h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
 </h3>
-<p>With ~316 taxa, the canvas dimensions matter. <code>width = 25</code>
+<p>With ~52 taxa, the canvas dimensions matter. <code>width = 25</code>
 and <code>height = 65</code> give each tip enough vertical space to
 remain legible, and <code>cell_scale = 0.25</code> shrinks the rug cells
 to avoid overlap in dense regions. <code>show_support = TRUE</code> with
@@ -887,6 +889,12 @@ relationship to nodal support. <em>Systematic Biology</em>, 52(4),
 phylogenomics clarifies the systematics of rare dung beetles
 (Coleoptera: Scarabaeinae) from museum collections. <em>PLOS ONE</em>,
 19(12), e0309596.</li>
+<li>Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
+Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
+Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
+200-year-old puzzle: a revised tribal classification of Afro-Eurasian
+dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a>
+</li>
 <li>Machado, D. J. (2015). YBYRÁ fossile: a command line system for
 total evidence dating and sensitivity analysis. <em>BMC
 Bioinformatics</em>, 16,

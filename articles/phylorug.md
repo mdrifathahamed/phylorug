@@ -84,9 +84,9 @@ tree, no manual placement, no external software.
 ## Quick start
 
 The fastest way to see phylorug in action is with the built-in
-`sample_trees` dataset, a 15-taxon subset of the beetle data (Lopes et
-al., 2024), already rooted, pruned, and with tip labels translated to
-species names. Lets start with attaching the package :
+`sample_trees` dataset, a 15-taxon subset of the beetle data (Montanaro,
+Lopes et al., 2026), already rooted, pruned, and with tip labels
+translated to species names. Lets start with attaching the package :
 
 ``` r
 
@@ -524,9 +524,10 @@ robust to analytical choice and which deserve further investigation.
 ## Full pipeline: beetles with tip translation
 
 The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains
-two sets of trees from Lopes et al. (2024): `beetles_50p/` and
-`beetles_70p/`, each with 5 analyses of 314 ingroup dung beetle taxa
-(316 tips including 2 outgroups) built from UCE loci retained at
+two sets of trees, a random subset of Montanaro, Lopes et al. (2026):
+beetles_50p/ and beetles_70p/, each with 5 analyses of 50 ingroup dung
+beetle taxa (52 tips including 2 outgroups) for the 50p set, and 70
+ingroup taxa (72 tips) for the 70p set built from UCE loci retained at
 different completeness thresholds (50% and 70%). The two datasets
 produce slightly different topologies, making them a good test case for
 exploring how data filtering affects clade recovery. For this vignette
@@ -597,11 +598,11 @@ find “*NicorbUCE*” after translation.
 trees <- translate_tips(trees, biogeo,
                         from_col = "specimen_code",
                         to_col   = "species_name")
-#> 50p_ASTRAL_partition_entropy: 314 tips translated, 0 unchanged
-#> 50p_ASTRAL_uce: 314 tips translated, 0 unchanged
-#> 50p_ghost: 314 tips translated, 0 unchanged
-#> 50p_partition_entropy: 314 tips translated, 0 unchanged
-#> 50p_uce: 314 tips translated, 0 unchanged
+#> 50p_ASTRAL_partition_entropy: 50 tips translated, 0 unchanged
+#> 50p_ASTRAL_uce: 50 tips translated, 0 unchanged
+#> 50p_ghost: 50 tips translated, 0 unchanged
+#> 50p_partition_entropy: 50 tips translated, 0 unchanged
+#> 50p_uce: 50 tips translated, 0 unchanged
 ```
 
 ### Choose a backbone and check taxa
@@ -611,14 +612,14 @@ trees <- translate_tips(trees, biogeo,
 backbone <- trees[["50p_uce"]]
 others   <- trees[names(trees) != "50p_uce"]
 check_taxa(backbone, others)
-#> All 4 comparison trees share the same 314 taxa as the backbone.
+#> All 4 comparison trees share the same 50 taxa as the backbone.
 #> [1] TRUE
 #> attr(,"diagnostics")
 #>                     comparison    status n_taxa missing extra
-#> 1 50p_ASTRAL_partition_entropy identical    314              
-#> 2               50p_ASTRAL_uce identical    314              
-#> 3                    50p_ghost identical    314              
-#> 4        50p_partition_entropy identical    314
+#> 1 50p_ASTRAL_partition_entropy identical     50              
+#> 2               50p_ASTRAL_uce identical     50              
+#> 3                    50p_ghost identical     50              
+#> 4        50p_partition_entropy identical     50
 ```
 
 ### Build the node presence matrix
@@ -658,7 +659,7 @@ plot_phylorug(backbone, npm)
 
 ### Support mode
 
-With ~316 taxa, the canvas dimensions matter. `width = 25` and
+With ~52 taxa, the canvas dimensions matter. `width = 25` and
 `height = 65` give each tip enough vertical space to remain legible, and
 `cell_scale = 0.25` shrinks the rug cells to avoid overlap in dense
 regions. `show_support = TRUE` with `support_label_col = "red"` overlays
@@ -912,6 +913,12 @@ to reduce all trees to their common taxa.
   phylogenomics clarifies the systematics of rare dung beetles
   (Coleoptera: Scarabaeinae) from museum collections. *PLOS ONE*,
   19(12), e0309596.
+- Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
+  Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone,
+  R.L., Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
+  200-year-old puzzle: a revised tribal classification of Afro-Eurasian
+  dung beetles (Coleoptera: Scarabaeinae). *bioRxiv*.
+  <https://doi.org/10.64898/2026.07.22.740134>
 - Machado, D. J. (2015). YBYRÁ fossile: a command line system for total
   evidence dating and sensitivity analysis. *BMC Bioinformatics*, 16,
   40. 

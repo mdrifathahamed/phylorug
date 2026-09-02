@@ -76,16 +76,12 @@
 <h2 id="support-mode">Support Mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
 </h2>
 <p><img src="reference/figures/README-support.png" alt="Support mode">Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade. Each support value is binned on its own metric’s scale. Different formats are never rescaled or cross-compared numerically. Default thresholds are provided, but users are recommended to set their own.</p>
-<p>The entire workflow runs in R, from reading raw tree files to publication-ready figures, just a few lines added to an existing phylogenetic script. The package was developed around a 316-taxon dung beetle phylogenomic dataset (Lopes et al. 2024) and tested with simulated trees of over 700 taxa across 15 analyses. Three real-world datasets are bundled with the package so users can try the pipeline on real data before applying it to their own.</p>
-<div class="section level3">
-<h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h3>
+<p>The entire workflow runs in R, from reading raw tree files to publication-ready figures, just a few lines added to an existing phylogenetic script. The package was developed around a dung beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and tested with simulated trees of over 700 taxa across 15 analyses. Three real-world datasets are bundled with the package so users can try the pipeline on real data before applying it to their own. ### Installation</p>
 <p><strong>phylorug</strong> is not yet on CRAN. To install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"mdrifathahamed/phylorug"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span></code></pre></div>
-</div>
 <div class="section level3">
 <h3 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h3>
@@ -153,6 +149,8 @@
 <li>Backbone support values can be displayed alongside rug cells via <code>show_support</code>
 </li>
 <li>Unanimous nodes are collapsed to dots by default; <code>rug_on_identical = TRUE</code> forces full display rugs to reveal support variation</li>
+<li>
+<em>phylorug</em> draws rug plot visualizations directly on the nodes of a reference phylogenetic tree, and lets users choose which nodes to visualize.</li>
 <li>Saves directly to PDF, PNG, or JPEG via the <code>file</code> argument.</li>
 </ul>
 </div>
