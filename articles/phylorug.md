@@ -10,8 +10,7 @@ genomes), different analytical strategies (concatenation, coalescent
 methods, site-heterogeneous models), and different inference software
 (IQ-TREE, ASTRAL, MrBayes) each yield a tree with slightly different
 topology and its own support values in its own format. At the same time,
-no single tree inference method is proven to be the all-rounder that is
-immune to all sources of error.
+no single tree inference method is proven to be the all-rounder.
 
 Incomplete lineage sorting, long-branch attraction, model
 misspecification, and compositional heterogeneity each affect different
@@ -27,10 +26,11 @@ Does this clade appear in all analyses, and how strongly does each one
 support it?
 
 Answering that by flipping between tree files is tedious, error-prone,
-and does not scale. **phylorug** solves it by drawing a compact coloured
-grid a **rug** at every internal node of a reference tree(backbone).
-Each cell represents one tree, its colour shows whether that tree
-recovered the clade and how strongly it supported it.
+and is very time-consuming with bigger trees. **phylorug** solves it by
+drawing a compact coloured grid a **rug plot** at every internal node of
+a reference tree(backbone). Each cell represents one tree, its colour
+shows whether that tree recovered the clade and how strongly it
+supported it.
 
 ## Nodal support versus nodal stability
 
@@ -44,25 +44,34 @@ framework. These can decouple: a clade may receive 100% bootstrap under
 one model yet collapse under all others, or carry only 30–50% support
 everywhere yet appear in every tree.
 
-phylorug shows both. In `presence` mode, each node gets a black dot if
-every analysis recovers the clade (stable) or a rug showing which
-analyses recover it and which do not.
+Giribet (2003) drew a distinction that motivates the two modes of
+phylorug. **Nodal support** measures how confident a single analysis is
+in a clade such as bootstrap, posterior probability, or LPP. **Nodal
+stability** measures whether that clade is consistently recovered across
+different analytical strategies, data types, and inference methods,
+extending Wheeler’s (1995) parameter-space sensitivity analysis
+framework. These can decouple: a clade may receive 100% bootstrap under
+one model yet collapse under all others, or carry only 30–50% support
+everywhere yet appear in every tree.
 
-In `support` mode, contested nodes receive a rug where each cell gives a
-quantitative visual of the support value in that analysis , not just
-presence or absence, but how strongly the clade is endorsed. Stable
-nodes receive a black dot by default. Setting `rug_on_identical = TRUE`
-extends the rug to these universally recovered nodes as well, revealing
-cases where a clade is stable across all analyses but some analyses
-support it weakly.
+phylorug shows both. In `presence` mode, each node gets a black dot if
+every analysis recovers the clade (stable), or a rug showing which
+analyses recover it and which do not — presence or absence only.
+
+`support` mode builds on that: it keeps the same presence/absence
+information but adds how strongly each analysis supports the clade,
+shading each cell by its support value instead of just marking it filled
+or empty. Stable nodes still get a black dot by default. Setting
+`rug_on_identical = TRUE` extends the rug to these nodes too — useful in
+support mode, since it shows whether a clade recovered by every analysis
+is actually supported equally strongly by all of them.
 
 ### Brief history
 
 The rug plot concept originated with Wheeler (1995), who plotted clade
 recovery across gap and transversion–transition cost ratios in parsimony
-analysis under direct optimization (POY). Giribet (2003) named these
-plots “Navajo rugs” and showed that nodal support and nodal stability
-can tell different stories.
+analysis. Giribet (2003) named these plots “Navajo rugs” and showed that
+nodal support and nodal stability can tell different stories.
 
 Sanders (2010) automated parameter-space sensitivity analysis with
 Cladescan (Perl), and Machado (2015) extended the approach with YBYRÁ
@@ -77,9 +86,10 @@ incompatible formats (e.g.,UFBoot2, SH-aLRT, posterior probability,
 ASTRAL LPP).
 
 phylorug extends this lineage into R. It reads trees from any pipeline,
-bins support values against metric-specific thresholds rather than
-rescaling them numerically, and draws rugs directly on the reference
-tree, no manual placement, no external software.
+bins support values against thresholds built for their own metric
+instead of rescaling everything onto one numeric scale, and draws the
+rug directly on the reference tree, no manual placement, no outside
+software.
 
 ## Quick start
 
@@ -646,26 +656,24 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 
 ### Presence mode
 
-At ~316 taxa the tree is dense. For a clean figure, all-white rugs are
+At ~52 taxa the tree is still comfortably readable. All-white rugs are
 hidden by default, and writing to a file with explicit width and height
-avoid the distortion that GUI windows introduce on large trees.
+avoids the distortion that GUI windows introduce.
 
 ``` r
 
 plot_phylorug(backbone, npm)
 ```
 
-![](phylorug_files/figure-html/plot%20phylorug-1.png)
+![](phylorug_files/figure-html/plot%20phylorug%20-1.png)
 
 ### Support mode
 
-With ~52 taxa, the canvas dimensions matter. `width = 25` and
-`height = 65` give each tip enough vertical space to remain legible, and
-`cell_scale = 0.25` shrinks the rug cells to avoid overlap in dense
-regions. `show_support = TRUE` with `support_label_col = "red"` overlays
-the backbone’s own support values for cross-referencing against the
-**rug** shading. For a tree this size, always write to a file (file =
-“beetles_support.pdf”) rather than rendering in the GUI.
+With ~52 taxa, the canvas still comfortably fits a single page.
+`show_support = TRUE` with `support_label_col = "red"` overlays the
+backbone’s own support values for cross-referencing against the **rug**
+shading, and `cell_scale = 0.35` keeps the rug cells from crowding each
+other.
 
 ``` r
 
@@ -674,8 +682,6 @@ the backbone’s own support values for cross-referencing against the
 plot_phylorug(
   backbone,
   npm,
-  width              = 25,
-  height             = 65,
   mode               = "support",
   show_support       = TRUE,
   support_label_col  = "red",
@@ -688,47 +694,32 @@ plot_phylorug(
 
 ![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
 
-### What the rug reveals ?
+### What the rug reveals?
 
-The **rug** on the 20-taxon beetle subset (Lopes et al. 2024) exposes a
-recurring split between coalescent and concatenation methods. At several
-nodes the two ASTRAL analyses (cells 1–2) and the two concatenation
-analyses (cells 3–4, GHOST and partitioned IQ-TREE) tell opposite
-stories.
+Even at 50 taxa, the rug lines up with real structure from the source
+study. The *Helictopleurus* clade sits beside *Onthophagus*,
+*Proagoderus*, *Cheironitis*, and *Megalonitis* together these form
+Onthophagini *sensu novo*, the tribe Montanaro, Lopes et al. (2026)
+redefined to merge the former Onthophagini and Oniticellini, with
+*Helictopleurus* placed in the newly established subtribe
+Helictopleurina.
 
-The node uniting *Coptorhina* and *Frankenbergerius* (backbone support
-100/100) is a clear example. Both IQ-TREE trees recover the clade with
-maximum support (black), but both ASTRAL trees either fail to recover it
-altogether (white) or place it with very low posterior probability
-(yellow). The inverse pattern appears at a deeper backbone node (30/52):
-ASTRAL weakly recovers the grouping (dark and light grey), while neither
-concatenation tree finds it at all (white). These two nodes sit on short
-internal branches, exactly where incomplete lineage sorting is expected
-to overwhelm the species-tree signal in individual gene trees.
+Three nodes disagree across the four analyses. The clearest case is the
+node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
+support 82.8): both ASTRAL trees fail to recover it, while both
+concatenation trees (GHOST and the partitioned IQ-TREE run) do — a clean
+coalescent-versus-concatenation split. The other two disagreements are
+messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
+(backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
+the other three analyses, including the other ASTRAL run, do not. That
+lines up with what the source study itself flags: the *Nanos* generic
+group is left unresolved on purpose, its placement reserved for a
+forthcoming study.
 
-The node grouping *Gyronotus*, *Circellium*, *Scarabaeus*, and *Kheper*
-(98.9/98) is recovered by three of four analyses, but GHOST disagrees.
-Because GHOST explicitly models among-site rate variation that standard
-partitioned models may absorb, its failure to recover the clade raises
-the possibility that the grouping in the other trees is partly driven by
-unmodelled heterotachy rather than genuine phylogenetic signal.
-
-The *Onthophagus* clade (100/99, 100/100) is one of the few nodes where
-all four cells are black or near-black, a pattern consistent with the
-strong molecular support for *Onthophagini* monophyly reported across
-beetle phylogenomic studies generally.
-
-Near the base of the outgroup (63.5/44), only a single cell is black;
-the remaining three are white. This is the weakest node in the tree, and
-the rug makes immediately visible what a single pair of support numbers
-can obscure: one method’s confidence does not translate into consensus.
-
-The overall pattern, concatenation and coalescent methods systematically
-disagreeing at short branches, agreeing at long ones, is precisely the
-kind of method-space comparison `phylorug` was designed to display. A
-table of support values would record the same numbers, but the rug
-places the conflict directly on the tree, at the node where it matters,
-making it legible at a glance.
+At the node uniting *Helictopleurus sicardi* and *H. viettei* (backbone
+support 100.0), only one analysis (ASTRAL on the partitioned dataset)
+disagrees, with the other three in agreement — a single dissenting
+result rather than a genuine method-level split.
 
 ## Customisation
 
