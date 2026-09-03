@@ -2,10 +2,8 @@
 
 ## What problem does phylorug solve?
 
-Phylogenetic trees represent best-supported, statistically convincing
-hypotheses of evolutionary history, not ground truths (Steenwyk et al.
-2023). Modern phylogenomic studies routinely produce multiple trees from
-the same set of taxa. Different data types (UCEs, transcriptomes, whole
+Modern phylogenomic studies routinely produce multiple trees from the
+same set of taxa. Different data types (UCEs, transcriptomes, whole
 genomes), different analytical strategies (concatenation, coalescent
 methods, site-heterogeneous models), and different inference software
 (IQ-TREE, ASTRAL, MrBayes) each yield a tree with slightly different
@@ -33,16 +31,6 @@ shows whether that tree recovered the clade and how strongly it
 supported it.
 
 ## Nodal support versus nodal stability
-
-Giribet (2003) drew a distinction that motivates the two modes of
-phylorug. **Nodal support** measures how confident a single analysis is
-in a clade such as bootstrap, posterior probability, or LPP. **Nodal
-stability** measures whether that clade is consistently recovered across
-different analytical strategies, data types, and inference methods,
-extending Wheeler’s (1995) parameter-space sensitivity analysis
-framework. These can decouple: a clade may receive 100% bootstrap under
-one model yet collapse under all others, or carry only 30–50% support
-everywhere yet appear in every tree.
 
 Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. **Nodal support** measures how confident a single analysis is

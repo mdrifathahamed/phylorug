@@ -66,10 +66,8 @@
 <div class="section level2">
 <h2 id="what-problem-does-phylorug-solve">What problem does phylorug solve?<a class="anchor" aria-label="anchor" href="#what-problem-does-phylorug-solve"></a>
 </h2>
-<p>Phylogenetic trees represent best-supported, statistically convincing
-hypotheses of evolutionary history, not ground truths (Steenwyk et al.
-2023). Modern phylogenomic studies routinely produce multiple trees from
-the same set of taxa. Different data types (UCEs, transcriptomes, whole
+<p>Modern phylogenomic studies routinely produce multiple trees from the
+same set of taxa. Different data types (UCEs, transcriptomes, whole
 genomes), different analytical strategies (concatenation, coalescent
 methods, site-heterogeneous models), and different inference software
 (IQ-TREE, ASTRAL, MrBayes) each yield a tree with slightly different
@@ -95,15 +93,6 @@ that tree recovered the clade and how strongly it supported it.</p>
 <div class="section level2">
 <h2 id="nodal-support-versus-nodal-stability">Nodal support versus nodal stability<a class="anchor" aria-label="anchor" href="#nodal-support-versus-nodal-stability"></a>
 </h2>
-<p>Giribet (2003) drew a distinction that motivates the two modes of
-phylorug. <strong>Nodal support</strong> measures how confident a single
-analysis is in a clade such as bootstrap, posterior probability, or LPP.
-<strong>Nodal stability</strong> measures whether that clade is
-consistently recovered across different analytical strategies, data
-types, and inference methods, extending Wheeler’s (1995) parameter-space
-sensitivity analysis framework. These can decouple: a clade may receive
-100% bootstrap under one model yet collapse under all others, or carry
-only 30–50% support everywhere yet appear in every tree.</p>
 <p>Giribet (2003) drew a distinction that motivates the two modes of
 phylorug. <strong>Nodal support</strong> measures how confident a single
 analysis is in a clade such as bootstrap, posterior probability, or LPP.
