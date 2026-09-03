@@ -655,7 +655,7 @@ avoid the distortion that GUI windows introduce on large trees.
 plot_phylorug(backbone, npm)
 ```
 
-![](phylorug_files/figure-html/plot%20phylorug%20-1.png)
+![](phylorug_files/figure-html/plot%20phylorug-1.png)
 
 ### Support mode
 
