@@ -540,7 +540,7 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 At \~316 taxa the tree is dense. For a clean figure,
 all-white rugs are hidden by default, and writing to a file with explicit width and height avoid the distortion that GUI windows introduce on large trees.
 
-```{r plot phylorug , fig.width = 25, fig.height = 65}
+```{r plot phylorug }
 plot_phylorug(backbone, npm)
 ```
 
@@ -554,7 +554,7 @@ the backbone's own support values for cross-referencing against the
 **rug** shading. For a tree this size, always write to a file (file =
 "beetles_support.pdf") rather than rendering in the GUI.
 
-```{r plot phylorug beetles 50 p, fig.width = 25, fig.height = 65}
+```{r plot phylorug beetles 50 p}
 # For publication output, add:
 # file = "beetles_support.pdf"
 plot_phylorug(
