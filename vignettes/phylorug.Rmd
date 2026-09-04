@@ -520,9 +520,7 @@ plot_phylorug(backbone, npm)
 
 ## Support mode
 With \~52 taxa, the canvas still comfortably fits a single page. 
-`show_support = TRUE` with `support_label_col = "red"` overlays the backbone's 
-own support values for cross-referencing against the **rug** shading, and 
-`cell_scale = 0.35` keeps the rug cells from crowding each other.
+`show_support = TRUE` with `support_label_col = "red"` overlays the backbone's own support values for cross-referencing against the **rug** shading, and  `cell_scale = 0.35` keeps the rug cells from crowding each other.
 
 ```{r plot phylorug beetles 50 p, fig.height= 12, fig.width= 10}
 # For publication output, add:
@@ -542,28 +540,13 @@ plot_phylorug(
 
 ## What the rug reveals?
 
-Even at 50 taxa, the rug lines up with real structure from the source
-study. The *Helictopleurus* clade sits beside *Onthophagus*,
-*Proagoderus*, *Cheironitis*, and *Megalonitis*  together these form
-Onthophagini *sensu novo*, the tribe Montanaro, Lopes et al. (2026)
-redefined to merge the former Onthophagini and Oniticellini, with
-*Helictopleurus* placed in the newly established subtribe Helictopleurina.
+Even at 50 taxa, the rug lines up with real structure from the source study. The *Helictopleurus* clade sits beside *Onthophagus*, *Proagoderus*, *Cheironitis*, and *Megalonitis*  together these form Onthophagini *sensu novo*, the tribe Montanaro, Lopes et al. (2026) redefined to merge the former *Onthophagini* and *Oniticellini*, with *Helictopleurus* placed in the newly established subtribe *Helictopleurina*.
 
-Three nodes disagree across the four analyses. The clearest case is the
-node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
-support 82.8): both ASTRAL trees fail to recover it, while both
-concatenation trees (GHOST and the partitioned IQ-TREE run) do, a
-clean coalescent-versus-concatenation split. The other two disagreements
-are messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
-(backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
-the other three analyses, including the other ASTRAL run, do not. That
-lines up with what the source study itself flags: the *Nanos* generic
-group is left unresolved on purpose, its placement reserved for a
-forthcoming study.
+Three nodes disagree across the four analyses. The clearest case is the node uniting *Helictopleurus semivirens* and *H. undatus* (backbone support 82.8): both ASTRAL trees fail to recover it, while both concatenation trees (GHOST and the partitioned IQ-TREE run) do, a clean coalescent-versus-concatenation split. The other two disagreements are messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus* (backbone support 100.0), only the ASTRAL UCE tree recovers the clade; the other three analyses, including the other ASTRAL run, do not. That lines up with what the source study itself flags: the *Nanos* generic group is left unresolved on purpose, its placement reserved for a forth coming study.
 
 At the node uniting *Helictopleurus sicardi* and *H. viettei* (backbone
 support 100.0), only one analysis (ASTRAL on the partitioned dataset)
-disagrees, with the other three in agreement — a single dissenting
+disagrees, with the other three in agreement, a single dissenting
 result rather than a genuine method-level split.
 
 # Customisation
@@ -587,10 +570,7 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 
 ## Universal thresholds (no support_type)
 If `support_type` is not declared when building the node presence matrix, 
-`plot_phylorug()` falls back to universal thresholds. Values greater than 1 are 
-divided by 100 to bring them onto a 0–1 scale, and all trees are binned against 
-the same cutoffs regardless of metric. This is useful for quick exploration but 
-less precise than metric-specific binning:
+`plot_phylorug()` falls back to universal thresholds. Values greater than 1 are divided by 100 to bring them onto a 0–1 scale, and all trees are binned against the same cutoffs regardless of metric. This is useful for quick exploration but less precise than metric-specific binning:
 ```{r universal_threshold }
 npm_universal <- node_presence_matrix(backbone, others, support_col = c(1, 2))
 
@@ -627,8 +607,7 @@ plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
 ## Including the backbone
 
 By default, the backbone does not occupy a cell in the rug (it trivially
-recovers every clade, since it defines the topology). Set
-`include_backbone = TRUE` to add it as cell 1:
+recovers every clade, since it defines the topology). Set `include_backbone = TRUE` to add it as cell 1:
 
 ```{r include-bb}
 plot_phylorug(backbone, npm, include_backbone = TRUE)
@@ -658,29 +637,53 @@ plot_phylorug(
 )
 ```
 
+## Selecting which nodes to visualize
+Sometimes you only want to look at a few clades, not the whole tree.
+`nodes` restricts the rug to just those, using the tip labels that
+define each clade:
+
+```{r nodes-by-taxa}
+plot_phylorug(
+  backbone, npm,
+  nodes = list(
+    c("Gyronotus_pumilus_STL10003", "Coptorhina_klugii__STL10039"),
+    c("Nesosisyphus_pygmaeus__STL3", "Sisyphus_muricatus__STL5")
+  )
+)
+```
+
+Only these two clades get a dot or rug, every other node is left bare.
+If you already know the internal node ID, pass it directly as a numeric
+vector instead:
+
+```{r nodes-by-id}
+plot_phylorug(backbone, npm, nodes = 18)
+```
+
+But how do you find the right node ID in the first place? To find the nodes where analyses disagree,filter the presence matrix for rows with at least one 0, then look up the tips at each one:
+
+```{r find-disagreeing-nodes}
+disagree_ids <- as.integer(rownames(npm$presence))[
+  apply(npm$presence, 1, function(row) any(row == 0))
+]
+disagree_ids
+
+lapply(disagree_ids, function(id) ape::extract.clade(backbone, id)$tip.label)
+```
+
+That shows you exactly which taxa sit at each disagreeing node, so you
+can pick the one you actually want to zoom in on with `nodes`, rather
+than guessing from a bare number.
+
 # Tips and best practices
 
-**Root and prune before translating.** `translate_tips()` replaces
-specimen codes with species names. Once translated, you cannot match
-outgroup names for rooting. Always: (1) root, (2) drop outgroup, (3)
-translate.
+**Root and prune before translating.** `translate_tips()` replaces specimen codes with species names. Once translated, you cannot match outgroup names for rooting. Always: (1) root, (2) drop outgroup, (3) translate.
 
-**One file = one analysis.** `read_trees()` treats each file as one
-analysis. A single-tree file returns a `phylo`; a file with multiple
-equally optimal trees (as POY, TNT, or PAUP\* write them) returns a
-`multiPhylo` scored as a pool.
+**One file = one analysis.** `read_trees()` treats each file as one analysis. A single-tree file returns a `phylo`; a file with multiple equally optimal trees (as POY, TNT, or PAUP\* write them) returns a `multiPhylo` scored as a pool.
 
-**Pool scoring in presence mode.** By default (`pool_threshold = 1.0`), a clade counts as present only if every tree in the pool recovers it — equivalent to a strict consensus. Set `pool_threshold = 0.5` for majority rule, or `pool_threshold = 0` to record the raw proportion (e.g., 2 out of 3 gives 0.67). A single-tree analysis always records 1 or 0.
+**Pool scoring in presence mode.** By default (`pool_threshold = 1.0`), a clade counts as present only if every tree in the pool recovers it equivalent to a strict consensus. Set `pool_threshold = 0.5` for majority rule, or `pool_threshold = 0` to record the raw proportion (e.g., 2 out of 3 gives 0.67). A single-tree analysis always records 1 or 0.
 
-**Support mode is not available for pools.** Node labels on tied optima
-are not independent support values. Meaningful support (bootstrap,
-posterior, SH-aLRT) comes only from explicit resampling or model-based
-procedures. To visualize support for a parsimony analysis, compute it
-externally (e.g., map bootstrap replicates onto the strict consensus,
-per Simmons and Freudenstein 2011), save the summarized tree, and pass
-that single file to phylorug. Passing raw tied optima into support mode
-would display arbitrary node labels as though they were support values,
-producing an artifactual rug.
+**Support mode is not available for pools.** Node labels on tied optima are not independent support values. Meaningful support (bootstrap, posterior, SH-aLRT) comes only from explicit resampling or model-based procedures. To visualize support for a parsimony analysis, compute it externally (e.g., map bootstrap replicates onto the strict consensus, per Simmons and Freudenstein 2011), save the summarized tree, and pass that single file to phylorug. Passing raw tied optima into support mode would display arbitrary node labels as though they were support values, producing an artifactual rug.
 
 **Wrap bare `multiPhylo` in a list.** If you construct comparison trees
 manually, each element of the list passed to `node_presence_matrix()`
@@ -701,10 +704,6 @@ to reduce all trees to their common taxa.
   Diversity*, 9(6), ixaf056.
 - Giribet, G. (2003). Stability in phylogenetic formulations and its
   relationship to nodal support. *Systematic Biology*, 52(4), 554–564.
-- Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-  phylogenomics clarifies the systematics of rare dung beetles
-  (Coleoptera: Scarabaeinae) from museum collections. *PLOS ONE*,
-  19(12), e0309596.
 - Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
   Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
   Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
