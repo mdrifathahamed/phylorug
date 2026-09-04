@@ -424,7 +424,17 @@ robust to analytical choice and which deserve further investigation.
 # Full pipeline: beetles with tip translation
 
 The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains
-two sets of trees, a random subset of Montanaro, Lopes et al. (2026): beetles_50p/ and beetles_70p/, each with 5 analyses of 50 ingroup dung beetle taxa (52 tips including 2 outgroups) for the 50p set, and 70 ingroup taxa (72 tips) for the 70p set built from UCE loci retained at different completeness thresholds (50% and 70%). The two datasets produce slightly different topologies, making them a good test case for exploring how data filtering affects clade recovery. For this vignette we use the 50p set, but users are encouraged to try both. Unlike the *Culicomorpha* trees, these trees store specimen codes as tip labels (e.g., `"OntauST002"` rather than a species name), so this example adds one extra step: translating tip labels using a lookup table befor building the rug.
+two sets of trees, a random subset of Montanaro, Lopes et al. (2026): 
+beetles_50p/ and beetles_70p/, each with 5 analyses of 50 ingroup dung beetle 
+taxa (52 tips including 2 outgroups) for the 50p set, and 70 ingroup taxa 
+(72 tips) for the 70p set built from UCE loci retained at different completeness
+thresholds (50% and 70%). The two datasets produce slightly different 
+topologies, making them a good test case for exploring how data filtering 
+affects clade recovery. For this vignette we use the 50p set, but users are 
+encouraged to try both. Unlike the *Culicomorpha* trees, these trees store 
+specimen codes as tip labels (e.g., `"OntauST002"` rather than a species name), 
+so this example adds one extra step: translating tip labels using a lookup 
+table before building the rug.
 
 ## Read the trees
 
@@ -434,11 +444,11 @@ trees    <- read_trees(tree_dir)
 names(trees)
 ```
 
-## Root and remove outgroups
+## Root and drop outgroups
 
-The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*.
-We ill root on them first, then drop them. As before, rooting must
-happen while the outgroup tips are still in the tree.
+The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*. We will
+root on them first, then drop them. As before, rooting must happen while the 
+outgroup tips are still in the tree.
 
 ```{r root and remove outgroup- bettle-50p}
 trees <- lapply(trees, function(tr) {
@@ -450,9 +460,9 @@ trees <- lapply(trees, function(tr) {
 
 ## Translate tip labels
 
-The trees still carry specimen codes at this point. A CSV file
-`biogeo.csv` included with the package maps each code to its species
-name. Lets load it and check the first few rows:
+The trees still carry specimen codes at this point. A CSV file `biogeo.csv` 
+included with the package maps each code to its species name. Lets load it and 
+check the first few rows:
 
 ```{r load the lookup table}
 biogeo_path <- system.file("extdata", "beetles_50p", "biogeo.csv",
@@ -461,10 +471,9 @@ biogeo <- read.csv(biogeo_path)
 head(biogeo)
 ```
 
-Now translate. The ordering rule from earlier applies here. Frist root
-and drop outgroups before translating, because `translate_tips()`
-replaces the original codes and `ape::root()` would no longer find
-"*NicorbUCE*" after translation.
+Now translate. The ordering rule from earlier applies here. Frist root and drop 
+outgroups before translating, because `translate_tips()` replaces the original 
+codes and `ape::root()` would no longer find " *NicorbUCE* " after translation.
 
 ```{r translate tree tips-beetle-50p}
 trees <- translate_tips(trees, biogeo,
@@ -482,9 +491,9 @@ check_taxa(backbone, others)
 
 ## Build the node presence matrix
 
-The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
-`IQ-TREE trees`). Extract both support values with
-`support_col = c(1, 2)`:
+The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for 
+`IQ-TREE trees`). Extract both support values with `support_col = c(1, 2)`:
+
 ```{r support_type_define}
 support_type <- c(
   "50p_partition_entropy"        = "ufboot",
@@ -501,16 +510,19 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 
 ## Presence mode
 
-At \~52 taxa the tree is still comfortably readable. All-white rugs are
-hidden by default, and writing to a file with explicit width and height
-avoids the distortion that GUI windows introduce.
+At \~52 taxa the tree is still comfortably readable. All-white rugs are hidden 
+by default, and writing to a file with explicit width and height avoids the 
+distortion that GUI windows introduce.
 
 ```{r plot phylorug , fig.height= 12, fig.width= 10 }
 plot_phylorug(backbone, npm)
 ```
 
 ## Support mode
-With ~52 taxa, the canvas still comfortably fits a single page. `show_support = TRUE` with `support_label_col = "red"` overlays the backbone's own support values for cross-referencing against the **rug** shading, and `cell_scale = 0.35` keeps the rug cells from crowding each other.
+With \~52 taxa, the canvas still comfortably fits a single page. 
+`show_support = TRUE` with `support_label_col = "red"` overlays the backbone's 
+own support values for cross-referencing against the **rug** shading, and 
+`cell_scale = 0.35` keeps the rug cells from crowding each other.
 
 ```{r plot phylorug beetles 50 p, fig.height= 12, fig.width= 10}
 # For publication output, add:
@@ -529,6 +541,7 @@ plot_phylorug(
 ```
 
 ## What the rug reveals?
+
 Even at 50 taxa, the rug lines up with real structure from the source
 study. The *Helictopleurus* clade sits beside *Onthophagus*,
 *Proagoderus*, *Cheironitis*, and *Megalonitis*  together these form
@@ -539,7 +552,7 @@ redefined to merge the former Onthophagini and Oniticellini, with
 Three nodes disagree across the four analyses. The clearest case is the
 node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
 support 82.8): both ASTRAL trees fail to recover it, while both
-concatenation trees (GHOST and the partitioned IQ-TREE run) do — a
+concatenation trees (GHOST and the partitioned IQ-TREE run) do, a
 clean coalescent-versus-concatenation split. The other two disagreements
 are messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
 (backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
