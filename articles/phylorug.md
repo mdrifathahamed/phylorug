@@ -536,7 +536,7 @@ exploring how data filtering affects clade recovery. For this vignette
 we use the 50p set, but users are encouraged to try both. Unlike the
 *Culicomorpha* trees, these trees store specimen codes as tip labels
 (e.g., `"OntauST002"` rather than a species name), so this example adds
-one extra step: translating tip labels using a lookup table befor
+one extra step: translating tip labels using a lookup table before
 building the rug.
 
 ### Read the trees
@@ -552,10 +552,10 @@ names(trees)
 #> [5] "50p_uce"
 ```
 
-### Root and remove outgroups
+### Root and drop outgroups
 
 The beetle trees include two outgroup taxa, *NicorbUCE* and *NicvesUCE*.
-We ill root on them first, then drop them. As before, rooting must
+We will root on them first, then drop them. As before, rooting must
 happen while the outgroup tips are still in the tree.
 
 ``` r
@@ -593,7 +593,7 @@ and drop outgroups before translating, because
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
 replaces the original codes and
 [`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) would no longer
-find “*NicorbUCE*” after translation.
+find ” *NicorbUCE* ” after translation.
 
 ``` r
 
@@ -699,7 +699,7 @@ Helictopleurina.
 Three nodes disagree across the four analyses. The clearest case is the
 node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
 support 82.8): both ASTRAL trees fail to recover it, while both
-concatenation trees (GHOST and the partitioned IQ-TREE run) do — a clean
+concatenation trees (GHOST and the partitioned IQ-TREE run) do, a clean
 coalescent-versus-concatenation split. The other two disagreements are
 messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
 (backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
