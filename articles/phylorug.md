@@ -44,15 +44,15 @@ everywhere yet appear in every tree.
 
 phylorug shows both. In `presence` mode, each node gets a black dot if
 every analysis recovers the clade (stable), or a rug showing which
-analyses recover it and which do not — presence or absence only.
+analyses recover it and which do not.
 
-`support` mode builds on that: it keeps the same presence/absence
-information but adds how strongly each analysis supports the clade,
-shading each cell by its support value instead of just marking it filled
-or empty. Stable nodes still get a black dot by default. Setting
-`rug_on_identical = TRUE` extends the rug to these nodes too — useful in
-support mode, since it shows whether a clade recovered by every analysis
-is actually supported equally strongly by all of them.
+`support` mode builds on it, keeps the same presence/absence information
+but adds how strongly each analysis supports the clade, shading each
+cell by its support value instead of just marking it filled or empty.
+Stable nodes still get a black dot by default. Setting
+`rug_on_identical = TRUE` extends the rug to these nodes too. It is
+useful in support mode, since it shows whether a clade recovered by
+every analysis is actually supported equally strongly by all of them.
 
 ### Brief history
 
@@ -84,7 +84,7 @@ software.
 The fastest way to see phylorug in action is with the built-in
 `sample_trees` dataset, a 15-taxon subset of the beetle data (Montanaro,
 Lopes et al., 2026), already rooted, pruned, and with tip labels
-translated to species names. Lets start with attaching the package :
+translated to scientific names. Lets start with attaching the package :
 
 ``` r
 
@@ -112,7 +112,7 @@ others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
 compares the tip labels of the backbone against every comparison tree
-and reports any mismatches , missing taxa, extra taxa, or spelling
+and reports any mismatches, missing taxa, extra taxa, or spelling
 differences. Running it before
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
 is good practice, especially the first time you work with a new dataset.
@@ -135,46 +135,50 @@ check_taxa(backbone, others)
 #> 4        70p_partition_entropy identical     15
 ```
 
-All trees share the same 15 taxa, so we can proceed. IF a mismatch is
+All trees share the same 15 taxa, so we can proceed. If a mismatch is
 reported the helper function
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
 can be used to get identical taxa set.
 
 ### Build the node presence matrix
 
-Once the trees share the same taxa, the next question is: which clades
-from the backbone appear in which comparison trees, and how strongly are
-they supported?
+Now this is the core computing function of `phylorug`, the next question
+is which clades from the backbone show up in which comparison trees, and
+how strongly each one is supported.
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
 answers this by walking every internal node of the backbone and checking
-each comparison tree for the same clade.
+each comparison tree for that same clade.
 
-It returns a named list of matrices: a **presence matrix** (1 = clade
-recovered, 0 = absent) and one or more **support matrices** containing
-the support values extracted from the node labels of each tree. By
-default, the first support value in each node label is used. If your
-trees carry compound labels like `100/98` (e.g., SH-aLRT/UFBoot2 from
-IQ-TREE), `support_col` lets you select which value to extract,
-`support_col = 1` takes the first, `support_col = 2` takes the second.
+It returns a named list: a **presence matrix** (1 = clade recovered, 0 =
+absent), plus one or more **support matrices** holding the support
+values pulled from each tree’s node labels. By default it reads the
+first value in each label. If your trees carry compound labels like
+`100/98` (SH-aLRT/UFBoot2 from IQ-TREE, for example), `support_col`
+picks which one to use `support_col = 1` for the first,
+`support_col = 2` for the second, or `support_col = c(1, 2)` to pull
+both at once and makes two **support matrices**.
 
-Two other arguments belong here rather than at plot time. `support_type`
-is an optional named character vector that declares which support metric
-each comparison tree uses (e.g., `"ufboot"`, `"lpp"`, `"sh_alrt"`,
-`"posterior"`). It is stored as an attribute of the result and read
-automatically by
+Two more arguments belong here. `support_type` is a named character
+vector telling
+[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+which support metric each comparison tree uses (`"ufboot"`, `"lpp"`,
+`"sh_alrt"`, `"posterior"`). It gets stored with the result and
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
-when drawing in support mode, so you only declare it once.
+reads it automatically in support mode, so you only declare it once,
+here.
 
-When a comparison tree file contains multiple equally optimal trees (a
-pool), `pool_threshold` decides how many of them must recover a clade
-for it to count as present. At `1.0` (the default), all of them must be
-a strict consensus. At `0.5`, a majority is enough. At `0`, the cell
-simply shows the fraction that recovered it, with no cutoff applied. The
-`sample_trees` dataset contains single `phylo` objects, not pools, so
-`pool_threshold` does not apply here. We declare support_type so that
+`pool_threshold` matters when a comparison tree file holds several
+equally optimal trees (a pool) instead of one. It sets how many of them
+need to recover a clade before it counts as present: `1.0` (the default)
+a strict consensus; `0.5` needs just a majority; `0` skips the cutoff
+entirely and records the raw fraction that recovered it. `sample_trees`
+is all single `phylo` objects, no pools, so `pool_threshold` doesn’t
+come into play here.
+
+We declare `support_type` now so
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
-can bin each tree’s support values against the correct metric-specific
-thresholds:
+can bin each tree’s support values against the right thresholds for its
+own metric:
 
 ``` r
 
@@ -368,8 +372,8 @@ names(trees)
 The *Culicomorpha* trees include three outgroup taxa from outside the
 infraorder: *Phlebotomus chinensis* and *Clogmia albipunctata
 (Psychodidae)* and *Coboldia fuscipes (Scatopsidae)*. Root on all three,
-then drop them. The order matters — you must root while the outgroup
-tips are still present, because
+then drop them. The order matters, you must root while the outgroup tips
+are still present, because
 [`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) needs to find
 them in the tree:
 
@@ -458,7 +462,7 @@ position to an analysis name.
 
 ### support-mode
 
-Here we use show_support = TRUE to overlay the backbone’s own node
+Here we use `show_support = TRUE` to overlay the backbone’s own node
 labels in red for cross-referencing and `cell_scale = 0.35` to shrink
 the rug cells slightly for a denser tree. All-white rugs are hidden by
 default, so only contested and stable nodes remain visible.
@@ -481,7 +485,7 @@ plot_phylorug(backbone, npm,
 
 The **rugs** immediately separates stable from contested regions of the
 *Culicomorpha* tree. Most family-level clades carry black dots, meaning
-those clades are recovered by unanimously all 9 analyses. *Culicidae*
+those clades are recovered by unanimously all analyses. *Culicidae*
 (mosquitoes), *Chironomidae* (non-biting midges), *Ceratopogonidae*
 (biting midges), and the *Simuliidae* + *Thaumaleidae* clade all show
 complete agreement across every inference method and dataset. Fu et al.
@@ -491,7 +495,7 @@ model or matrix.
 The interesting nodes are the contested ones. The central question in
 *Culicomorpha* phylogenetics is where *Ceratopogonidae* and
 *Chironomidae* sit relative to the rest of the infraorder. Fu et al.
-(2025) tested multiple hypotheses. Their preferred topology (H1) places
+(2025) tested some hypotheses. Their preferred topology (H1) places
 *Chironomidae* + *Ceratopogonidae* together as sister to all remaining
 families. The alternative (H2) breaks this pairing and places
 *Ceratopogonidae* elsewhere, nested closer to the other families. On the
@@ -532,7 +536,7 @@ exploring how data filtering affects clade recovery. For this vignette
 we use the 50p set, but users are encouraged to try both. Unlike the
 *Culicomorpha* trees, these trees store specimen codes as tip labels
 (e.g., `"OntauST002"` rather than a species name), so this example adds
-one extra step: translating tip labels using a lookup table before
+one extra step: translating tip labels using a lookup table befor
 building the rug.
 
 ### Read the trees

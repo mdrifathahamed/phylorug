@@ -104,16 +104,15 @@ sensitivity analysis framework. These can decouple: a clade may receive
 only 30–50% support everywhere yet appear in every tree.</p>
 <p>phylorug shows both. In <code>presence</code> mode, each node gets a
 black dot if every analysis recovers the clade (stable), or a rug
-showing which analyses recover it and which do not — presence or absence
-only.</p>
-<p><code>support</code> mode builds on that: it keeps the same
+showing which analyses recover it and which do not.</p>
+<p><code>support</code> mode builds on it, keeps the same
 presence/absence information but adds how strongly each analysis
 supports the clade, shading each cell by its support value instead of
 just marking it filled or empty. Stable nodes still get a black dot by
 default. Setting <code>rug_on_identical = TRUE</code> extends the rug to
-these nodes too — useful in support mode, since it shows whether a clade
-recovered by every analysis is actually supported equally strongly by
-all of them.</p>
+these nodes too. It is useful in support mode, since it shows whether a
+clade recovered by every analysis is actually supported equally strongly
+by all of them.</p>
 <div class="section level3">
 <h3 id="brief-history">Brief history<a class="anchor" aria-label="anchor" href="#brief-history"></a>
 </h3>
@@ -146,7 +145,7 @@ software.</p>
 <p>The fastest way to see phylorug in action is with the built-in
 <code>sample_trees</code> dataset, a 15-taxon subset of the beetle data
 (Montanaro, Lopes et al., 2026), already rooted, pruned, and with tip
-labels translated to species names. Lets start with attaching the
+labels translated to scientific names. Lets start with attaching the
 package :</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span></code></pre></div>
@@ -170,7 +169,7 @@ used as a backbone tree.</p>
 <h3 id="check-taxon-consistency">Check taxon consistency<a class="anchor" aria-label="anchor" href="#check-taxon-consistency"></a>
 </h3>
 <p><code><a href="../reference/check_taxa.html">check_taxa()</a></code> compares the tip labels of the backbone
-against every comparison tree and reports any mismatches , missing taxa,
+against every comparison tree and reports any mismatches, missing taxa,
 extra taxa, or spelling differences. Running it before
 <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> is good practice, especially the
 first time you work with a new dataset. That said,
@@ -188,45 +187,46 @@ trees share the same taxa you can skip straight to building the matrix
 <span><span class="co">#&gt; 2               70p_ASTRAL_uce identical     15              </span></span>
 <span><span class="co">#&gt; 3                    70p_ghost identical     15              </span></span>
 <span><span class="co">#&gt; 4        70p_partition_entropy identical     15</span></span></code></pre></div>
-<p>All trees share the same 15 taxa, so we can proceed. IF a mismatch is
+<p>All trees share the same 15 taxa, so we can proceed. If a mismatch is
 reported the helper function <code><a href="../reference/prune_to_shared.html">prune_to_shared()</a></code> can be used
 to get identical taxa set.</p>
 </div>
 <div class="section level3">
 <h3 id="build-the-node-presence-matrix">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix"></a>
 </h3>
-<p>Once the trees share the same taxa, the next question is: which
-clades from the backbone appear in which comparison trees, and how
-strongly are they supported? <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> answers
-this by walking every internal node of the backbone and checking each
-comparison tree for the same clade.</p>
-<p>It returns a named list of matrices: a <strong>presence
-matrix</strong> (1 = clade recovered, 0 = absent) and one or more
-<strong>support matrices</strong> containing the support values
-extracted from the node labels of each tree. By default, the first
-support value in each node label is used. If your trees carry compound
-labels like <code>100/98</code> (e.g., SH-aLRT/UFBoot2 from IQ-TREE),
-<code>support_col</code> lets you select which value to extract,
-<code>support_col = 1</code> takes the first,
-<code>support_col = 2</code> takes the second.</p>
-<p>Two other arguments belong here rather than at plot time.
-<code>support_type</code> is an optional named character vector that
-declares which support metric each comparison tree uses (e.g.,
-<code>"ufboot"</code>, <code>"lpp"</code>, <code>"sh_alrt"</code>,
-<code>"posterior"</code>). It is stored as an attribute of the result
-and read automatically by <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> when drawing in
-support mode, so you only declare it once.</p>
-<p>When a comparison tree file contains multiple equally optimal trees
-(a pool), <code>pool_threshold</code> decides how many of them must
-recover a clade for it to count as present. At <code>1.0</code> (the
-default), all of them must be a strict consensus. At <code>0.5</code>, a
-majority is enough. At <code>0</code>, the cell simply shows the
-fraction that recovered it, with no cutoff applied. The
-<code>sample_trees</code> dataset contains single <code>phylo</code>
-objects, not pools, so <code>pool_threshold</code> does not apply here.
-We declare support_type so that <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> can bin
-each tree’s support values against the correct metric-specific
-thresholds:</p>
+<p>Now this is the core computing function of <code>phylorug</code>, the
+next question is which clades from the backbone show up in which
+comparison trees, and how strongly each one is supported.
+<code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> answers this by walking every
+internal node of the backbone and checking each comparison tree for that
+same clade.</p>
+<p>It returns a named list: a <strong>presence matrix</strong> (1 =
+clade recovered, 0 = absent), plus one or more <strong>support
+matrices</strong> holding the support values pulled from each tree’s
+node labels. By default it reads the first value in each label. If your
+trees carry compound labels like <code>100/98</code> (SH-aLRT/UFBoot2
+from IQ-TREE, for example), <code>support_col</code> picks which one to
+use <code>support_col = 1</code> for the first,
+<code>support_col = 2</code> for the second, or
+<code>support_col = c(1, 2)</code> to pull both at once and makes two
+<strong>support matrices</strong>.</p>
+<p>Two more arguments belong here. <code>support_type</code> is a named
+character vector telling <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> which
+support metric each comparison tree uses (<code>"ufboot"</code>,
+<code>"lpp"</code>, <code>"sh_alrt"</code>, <code>"posterior"</code>).
+It gets stored with the result and <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> reads it
+automatically in support mode, so you only declare it once, here.</p>
+<p><code>pool_threshold</code> matters when a comparison tree file holds
+several equally optimal trees (a pool) instead of one. It sets how many
+of them need to recover a clade before it counts as present:
+<code>1.0</code> (the default) a strict consensus; <code>0.5</code>
+needs just a majority; <code>0</code> skips the cutoff entirely and
+records the raw fraction that recovered it. <code>sample_trees</code> is
+all single <code>phylo</code> objects, no pools, so
+<code>pool_threshold</code> doesn’t come into play here.</p>
+<p>We declare <code>support_type</code> now so
+<code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> can bin each tree’s support values against
+the right thresholds for its own metric:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
@@ -412,9 +412,9 @@ returns a named list:</p>
 <p>The <em>Culicomorpha</em> trees include three outgroup taxa from
 outside the infraorder: <em>Phlebotomus chinensis</em> and <em>Clogmia
 albipunctata (Psychodidae)</em> and <em>Coboldia fuscipes
-(Scatopsidae)</em>. Root on all three, then drop them. The order matters
-— you must root while the outgroup tips are still present, because
-<code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> needs to find them in the tree:</p>
+(Scatopsidae)</em>. Root on all three, then drop them. The order
+matters, you must root while the outgroup tips are still present,
+because <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> needs to find them in the tree:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trees</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">trees</span>, <span class="kw">function</span><span class="op">(</span><span class="va">tr</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">root</a></span><span class="op">(</span><span class="va">tr</span>, outgroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Coboldia_fuscipes"</span>,</span>
@@ -488,11 +488,11 @@ position to an analysis name.</p>
 <div class="section level3">
 <h3 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
 </h3>
-<p>Here we use show_support = TRUE to overlay the backbone’s own node
-labels in red for cross-referencing and <code>cell_scale = 0.35</code>
-to shrink the rug cells slightly for a denser tree. All-white rugs are
-hidden by default, so only contested and stable nodes remain
-visible.</p>
+<p>Here we use <code>show_support = TRUE</code> to overlay the
+backbone’s own node labels in red for cross-referencing and
+<code>cell_scale = 0.35</code> to shrink the rug cells slightly for a
+denser tree. All-white rugs are hidden by default, so only contested and
+stable nodes remain visible.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
@@ -510,7 +510,7 @@ visible.</p>
 <p>The <strong>rugs</strong> immediately separates stable from contested
 regions of the <em>Culicomorpha</em> tree. Most family-level clades
 carry black dots, meaning those clades are recovered by unanimously all
-9 analyses. <em>Culicidae</em> (mosquitoes), <em>Chironomidae</em>
+analyses. <em>Culicidae</em> (mosquitoes), <em>Chironomidae</em>
 (non-biting midges), <em>Ceratopogonidae</em> (biting midges), and the
 <em>Simuliidae</em> + <em>Thaumaleidae</em> clade all show complete
 agreement across every inference method and dataset. Fu et al. (2025)
@@ -519,7 +519,7 @@ matrix.</p>
 <p>The interesting nodes are the contested ones. The central question in
 <em>Culicomorpha</em> phylogenetics is where <em>Ceratopogonidae</em>
 and <em>Chironomidae</em> sit relative to the rest of the infraorder. Fu
-et al. (2025) tested multiple hypotheses. Their preferred topology (H1)
+et al. (2025) tested some hypotheses. Their preferred topology (H1)
 places <em>Chironomidae</em> + <em>Ceratopogonidae</em> together as
 sister to all remaining families. The alternative (H2) breaks this
 pairing and places <em>Ceratopogonidae</em> elsewhere, nested closer to
@@ -563,7 +563,7 @@ clade recovery. For this vignette we use the 50p set, but users are
 encouraged to try both. Unlike the <em>Culicomorpha</em> trees, these
 trees store specimen codes as tip labels (e.g.,
 <code>"OntauST002"</code> rather than a species name), so this example
-adds one extra step: translating tip labels using a lookup table before
+adds one extra step: translating tip labels using a lookup table befor
 building the rug.</p>
 <div class="section level3">
 <h3 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
