@@ -1,12 +1,12 @@
 bibentry(
   "Manual",
-  title  = "phylorug: Visualize Node Support Across Multiple Phylogenomic Analyses",
+  title  = "phylorug: Visualize and Compare Clade Recovery and Support Across Phylogenetic Trees",
   author = c(
     person("Md Rifath", "Ahamed"),
-    person("Sergei", "Tarasov"),
-    person("J. Salvador", "Arias")
+    person("J. Salvador", "Arias"),
+    person("Sergei", "Tarasov")
   ),
   year   = 2026,
-  note   = "R package version 0.0.0.9000",
+  note   = "R package version 0.1.0",
   url    = "https://github.com/mdrifathahamed/phylorug"
 )

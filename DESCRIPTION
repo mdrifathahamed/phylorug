@@ -1,5 +1,5 @@
 Package: phylorug
-Title: Visualize Clade Recovery and Support Across Phylogenetic Trees
+Title: Visualize and Compare Clade Recovery and Support Across Phylogenetic Trees
 Version: 0.1.0
 Authors@R: c(
     person("Md Rifath", "Ahamed", , "rifath.ahamed@helsinki.fi",
