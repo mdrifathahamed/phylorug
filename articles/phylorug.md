@@ -692,9 +692,9 @@ Even at 50 taxa, the rug lines up with real structure from the source
 study. The *Helictopleurus* clade sits beside *Onthophagus*,
 *Proagoderus*, *Cheironitis*, and *Megalonitis* together these form
 Onthophagini *sensu novo*, the tribe Montanaro, Lopes et al. (2026)
-redefined to merge the former Onthophagini and Oniticellini, with
+redefined to merge the former *Onthophagini* and *Oniticellini*, with
 *Helictopleurus* placed in the newly established subtribe
-Helictopleurina.
+*Helictopleurina*.
 
 Three nodes disagree across the four analyses. The clearest case is the
 node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
@@ -705,13 +705,13 @@ messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
 (backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
 the other three analyses, including the other ASTRAL run, do not. That
 lines up with what the source study itself flags: the *Nanos* generic
-group is left unresolved on purpose, its placement reserved for a
-forthcoming study.
+group is left unresolved on purpose, its placement reserved for a forth
+coming study.
 
 At the node uniting *Helictopleurus sicardi* and *H. viettei* (backbone
 support 100.0), only one analysis (ASTRAL on the partitioned dataset)
-disagrees, with the other three in agreement — a single dissenting
-result rather than a genuine method-level split.
+disagrees, with the other three in agreement, a single dissenting result
+rather than a genuine method-level split.
 
 ## Customisation
 
@@ -836,6 +836,91 @@ plot_phylorug(
 
 ![](phylorug_files/figure-html/custom-thresh-1.png)
 
+### Selecting which nodes to visualize
+
+Sometimes you only want to look at a few clades, not the whole tree.
+`nodes` restricts the rug to just those, using the tip labels that
+define each clade:
+
+``` r
+
+plot_phylorug(
+  backbone, npm,
+  nodes = list(
+    c("Gyronotus_pumilus_STL10003", "Coptorhina_klugii__STL10039"),
+    c("Nesosisyphus_pygmaeus__STL3", "Sisyphus_muricatus__STL5")
+  )
+)
+```
+
+![](phylorug_files/figure-html/nodes-by-taxa-1.png)
+
+Only these two clades get a dot or rug, every other node is left bare.
+If you already know the internal node ID, pass it directly as a numeric
+vector instead:
+
+``` r
+
+plot_phylorug(backbone, npm, nodes = 18)
+```
+
+![](phylorug_files/figure-html/nodes-by-id-1.png)
+
+But how do you find the right node ID in the first place? To find the
+nodes where analyses disagree,filter the presence matrix for rows with
+at least one 0, then look up the tips at each one:
+
+``` r
+
+disagree_ids <- as.integer(rownames(npm$presence))[
+  apply(npm$presence, 1, function(row) any(row == 0))
+]
+disagree_ids
+#> [1] 17 18 19 20 21 22 23
+
+lapply(disagree_ids, function(id) ape::extract.clade(backbone, id)$tip.label)
+#> [[1]]
+#>  [1] "Gyronotus_pumilus_STL10003"        "Epactoides_hanski__STL29"         
+#>  [3] "Nesosisyphus_pygmaeus__STL3"       "Sisyphus_muricatus__STL5"         
+#>  [5] "Sisyphus_schaefferi_STL44"         "Nanos_dubitatus_STL5001"          
+#>  [7] "Scarabaeus_westwoodi_STL10034"     "Kheper_nigroaeneus_STL10036"      
+#>  [9] "Circellium_bacchus__STL10270"      "Epilissus_cuprarius_STL5011"      
+#> [11] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          
+#> [13] "Copris_fidius_ST005"              
+#> 
+#> [[2]]
+#> [1] "Gyronotus_pumilus_STL10003"        "Nanos_dubitatus_STL5001"          
+#> [3] "Scarabaeus_westwoodi_STL10034"     "Kheper_nigroaeneus_STL10036"      
+#> [5] "Circellium_bacchus__STL10270"      "Epilissus_cuprarius_STL5011"      
+#> [7] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          
+#> [9] "Copris_fidius_ST005"              
+#> 
+#> [[3]]
+#> [1] "Nanos_dubitatus_STL5001"           "Scarabaeus_westwoodi_STL10034"    
+#> [3] "Kheper_nigroaeneus_STL10036"       "Circellium_bacchus__STL10270"     
+#> [5] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"
+#> [7] "Catharsius_sp._STL10033"           "Copris_fidius_ST005"              
+#> 
+#> [[4]]
+#> [1] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"
+#> [3] "Catharsius_sp._STL10033"           "Copris_fidius_ST005"              
+#> 
+#> [[5]]
+#> [1] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"
+#> [3] "Catharsius_sp._STL10033"          
+#> 
+#> [[6]]
+#> [1] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          
+#> 
+#> [[7]]
+#> [1] "Nanos_dubitatus_STL5001"       "Scarabaeus_westwoodi_STL10034"
+#> [3] "Kheper_nigroaeneus_STL10036"   "Circellium_bacchus__STL10270"
+```
+
+That shows you exactly which taxa sit at each disagreeing node, so you
+can pick the one you actually want to zoom in on with `nodes`, rather
+than guessing from a bare number.
+
 ## Tips and best practices
 
 **Root and prune before translating.**
@@ -851,7 +936,7 @@ a file with multiple equally optimal trees (as POY, TNT, or PAUP\* write
 them) returns a `multiPhylo` scored as a pool.
 
 **Pool scoring in presence mode.** By default (`pool_threshold = 1.0`),
-a clade counts as present only if every tree in the pool recovers it —
+a clade counts as present only if every tree in the pool recovers it
 equivalent to a strict consensus. Set `pool_threshold = 0.5` for
 majority rule, or `pool_threshold = 0` to record the raw proportion
 (e.g., 2 out of 3 gives 0.67). A single-tree analysis always records 1
@@ -892,10 +977,6 @@ to reduce all trees to their common taxa.
   Diversity*, 9(6), ixaf056.
 - Giribet, G. (2003). Stability in phylogenetic formulations and its
   relationship to nodal support. *Systematic Biology*, 52(4), 554–564.
-- Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-  phylogenomics clarifies the systematics of rare dung beetles
-  (Coleoptera: Scarabaeinae) from museum collections. *PLOS ONE*,
-  19(12), e0309596.
 - Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
   Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone,
   R.L., Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a

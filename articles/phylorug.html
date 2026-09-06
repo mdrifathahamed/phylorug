@@ -700,8 +700,9 @@ study. The <em>Helictopleurus</em> clade sits beside
 <em>Onthophagus</em>, <em>Proagoderus</em>, <em>Cheironitis</em>, and
 <em>Megalonitis</em> together these form Onthophagini <em>sensu
 novo</em>, the tribe Montanaro, Lopes et al. (2026) redefined to merge
-the former Onthophagini and Oniticellini, with <em>Helictopleurus</em>
-placed in the newly established subtribe Helictopleurina.</p>
+the former <em>Onthophagini</em> and <em>Oniticellini</em>, with
+<em>Helictopleurus</em> placed in the newly established subtribe
+<em>Helictopleurina</em>.</p>
 <p>Three nodes disagree across the four analyses. The clearest case is
 the node uniting <em>Helictopleurus semivirens</em> and <em>H.
 undatus</em> (backbone support 82.8): both ASTRAL trees fail to recover
@@ -712,10 +713,10 @@ disagreements are messier. At the node uniting <em>Nanos sp1</em> and
 ASTRAL UCE tree recovers the clade; the other three analyses, including
 the other ASTRAL run, do not. That lines up with what the source study
 itself flags: the <em>Nanos</em> generic group is left unresolved on
-purpose, its placement reserved for a forthcoming study.</p>
+purpose, its placement reserved for a forth coming study.</p>
 <p>At the node uniting <em>Helictopleurus sicardi</em> and <em>H.
 viettei</em> (backbone support 100.0), only one analysis (ASTRAL on the
-partitioned dataset) disagrees, with the other three in agreement — a
+partitioned dataset) disagrees, with the other three in agreement, a
 single dissenting result rather than a genuine method-level split.</p>
 </div>
 </div>
@@ -813,6 +814,78 @@ thresholds:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/custom-thresh-1.png" class="r-plt" alt="" width="2100"></p>
 </div>
+<div class="section level3">
+<h3 id="selecting-which-nodes-to-visualize">Selecting which nodes to visualize<a class="anchor" aria-label="anchor" href="#selecting-which-nodes-to-visualize"></a>
+</h3>
+<p>Sometimes you only want to look at a few clades, not the whole tree.
+<code>nodes</code> restricts the rug to just those, using the tip labels
+that define each clade:</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
+<span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>  nodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gyronotus_pumilus_STL10003"</span>, <span class="st">"Coptorhina_klugii__STL10039"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nesosisyphus_pygmaeus__STL3"</span>, <span class="st">"Sisyphus_muricatus__STL5"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/nodes-by-taxa-1.png" class="r-plt" alt="" width="672"></p>
+<p>Only these two clades get a dot or rug, every other node is left
+bare. If you already know the internal node ID, pass it directly as a
+numeric vector instead:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, nodes <span class="op">=</span> <span class="fl">18</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/nodes-by-id-1.png" class="r-plt" alt="" width="672"></p>
+<p>But how do you find the right node ID in the first place? To find the
+nodes where analyses disagree,filter the presence matrix for rows with
+at least one 0, then look up the tips at each one:</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">disagree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span><span class="op">)</span><span class="op">)</span><span class="op">[</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">row</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">]</span></span>
+<span><span class="va">disagree_ids</span></span>
+<span><span class="co">#&gt; [1] 17 18 19 20 21 22 23</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">disagree_ids</span>, <span class="kw">function</span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">extract.clade</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">id</span><span class="op">)</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt;  [1] "Gyronotus_pumilus_STL10003"        "Epactoides_hanski__STL29"         </span></span>
+<span><span class="co">#&gt;  [3] "Nesosisyphus_pygmaeus__STL3"       "Sisyphus_muricatus__STL5"         </span></span>
+<span><span class="co">#&gt;  [5] "Sisyphus_schaefferi_STL44"         "Nanos_dubitatus_STL5001"          </span></span>
+<span><span class="co">#&gt;  [7] "Scarabaeus_westwoodi_STL10034"     "Kheper_nigroaeneus_STL10036"      </span></span>
+<span><span class="co">#&gt;  [9] "Circellium_bacchus__STL10270"      "Epilissus_cuprarius_STL5011"      </span></span>
+<span><span class="co">#&gt; [11] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          </span></span>
+<span><span class="co">#&gt; [13] "Copris_fidius_ST005"              </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] "Gyronotus_pumilus_STL10003"        "Nanos_dubitatus_STL5001"          </span></span>
+<span><span class="co">#&gt; [3] "Scarabaeus_westwoodi_STL10034"     "Kheper_nigroaeneus_STL10036"      </span></span>
+<span><span class="co">#&gt; [5] "Circellium_bacchus__STL10270"      "Epilissus_cuprarius_STL5011"      </span></span>
+<span><span class="co">#&gt; [7] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          </span></span>
+<span><span class="co">#&gt; [9] "Copris_fidius_ST005"              </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[3]]</span></span>
+<span><span class="co">#&gt; [1] "Nanos_dubitatus_STL5001"           "Scarabaeus_westwoodi_STL10034"    </span></span>
+<span><span class="co">#&gt; [3] "Kheper_nigroaeneus_STL10036"       "Circellium_bacchus__STL10270"     </span></span>
+<span><span class="co">#&gt; [5] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"</span></span>
+<span><span class="co">#&gt; [7] "Catharsius_sp._STL10033"           "Copris_fidius_ST005"              </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[4]]</span></span>
+<span><span class="co">#&gt; [1] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"</span></span>
+<span><span class="co">#&gt; [3] "Catharsius_sp._STL10033"           "Copris_fidius_ST005"              </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[5]]</span></span>
+<span><span class="co">#&gt; [1] "Epilissus_cuprarius_STL5011"       "Helictopleurus_fissicollis__STL28"</span></span>
+<span><span class="co">#&gt; [3] "Catharsius_sp._STL10033"          </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[6]]</span></span>
+<span><span class="co">#&gt; [1] "Helictopleurus_fissicollis__STL28" "Catharsius_sp._STL10033"          </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[7]]</span></span>
+<span><span class="co">#&gt; [1] "Nanos_dubitatus_STL5001"       "Scarabaeus_westwoodi_STL10034"</span></span>
+<span><span class="co">#&gt; [3] "Kheper_nigroaeneus_STL10036"   "Circellium_bacchus__STL10270"</span></span></code></pre></div>
+<p>That shows you exactly which taxa sit at each disagreeing node, so
+you can pick the one you actually want to zoom in on with
+<code>nodes</code>, rather than guessing from a bare number.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="tips-and-best-practices">Tips and best practices<a class="anchor" aria-label="anchor" href="#tips-and-best-practices"></a>
@@ -828,8 +901,8 @@ TNT, or PAUP* write them) returns a <code>multiPhylo</code> scored as a
 pool.</p>
 <p><strong>Pool scoring in presence mode.</strong> By default
 (<code>pool_threshold = 1.0</code>), a clade counts as present only if
-every tree in the pool recovers it — equivalent to a strict consensus.
-Set <code>pool_threshold = 0.5</code> for majority rule, or
+every tree in the pool recovers it equivalent to a strict consensus. Set
+<code>pool_threshold = 0.5</code> for majority rule, or
 <code>pool_threshold = 0</code> to record the raw proportion (e.g., 2
 out of 3 gives 0.67). A single-tree analysis always records 1 or 0.</p>
 <p><strong>Support mode is not available for pools.</strong> Node labels
@@ -865,10 +938,6 @@ Diversity</em>, 9(6), ixaf056.</li>
 <li>Giribet, G. (2003). Stability in phylogenetic formulations and its
 relationship to nodal support. <em>Systematic Biology</em>, 52(4),
 554–564.</li>
-<li>Lopes, F. et al. (2024). From museum drawer to tree: Historical DNA
-phylogenomics clarifies the systematics of rare dung beetles
-(Coleoptera: Scarabaeinae) from museum collections. <em>PLOS ONE</em>,
-19(12), e0309596.</li>
 <li>Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
 Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
 Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
