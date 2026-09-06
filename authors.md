@@ -15,14 +15,14 @@
 Source:
 [`inst/CITATION`](https://github.com/mdrifathahamed/phylorug/blob/master/inst/CITATION)
 
-Ahamed M, Tarasov S, Arias J (2026). *phylorug: Visualize Node Support
-Across Multiple Phylogenomic Analyses*. R package version 0.0.0.9000,
-<https://github.com/mdrifathahamed/phylorug>.
+Ahamed M, Arias J, Tarasov S (2026). *phylorug: Visualize and Compare
+Clade Recovery and Support Across Phylogenetic Trees*. R package version
+0.1.0, <https://github.com/mdrifathahamed/phylorug>.
 
     @Manual{,
-      title = {phylorug: Visualize Node Support Across Multiple Phylogenomic Analyses},
-      author = {Md Rifath Ahamed and Sergei Tarasov and J. Salvador Arias},
+      title = {phylorug: Visualize and Compare Clade Recovery and Support Across Phylogenetic Trees},
+      author = {Md Rifath Ahamed and J. Salvador Arias and Sergei Tarasov},
       year = {2026},
-      note = {R package version 0.0.0.9000},
+      note = {R package version 0.1.0},
       url = {https://github.com/mdrifathahamed/phylorug},
     }
