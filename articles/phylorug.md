@@ -526,15 +526,15 @@ robust to analytical choice and which deserve further investigation.
 ## Full pipeline: beetles with tip translation
 
 The beetle dataset ships with `phylorug` in `inst/extdata/`. It contains
-two sets of trees, a random subset of Montanaro, Lopes et al. (2026):
-beetles_50p/ and beetles_70p/, each with 5 analyses of 50 ingroup dung
-beetle taxa (52 tips including 2 outgroups) for the 50p set, and 70
-ingroup taxa (72 tips) for the 70p set built from UCE loci retained at
-different completeness thresholds (50% and 70%). The two datasets
-produce slightly different topologies, making them a good test case for
-exploring how data filtering affects clade recovery. For this vignette
-we use the 50p set, but users are encouraged to try both. Unlike the
-*Culicomorpha* trees, these trees store specimen codes as tip labels
+two sets of trees, a 43-taxon subset of Montanaro, Lopes et al. (2026)
+representing the subtribe Onthophagina *sensu lato*: beetles_50p/ and
+beetles_70p/, each with 5 independent analyses (45 tips including 2
+outgroups) built from UCE loci retained at different completeness
+thresholds (50% and 70%). The two datasets produce slightly different
+topologies, making them a good test case for exploring how data
+filtering affects clade recovery. For this vignette we use the 70p set
+to match the paper figure, but users are encouraged to try both. Unlike
+the *Culicomorpha* trees, these trees store specimen codes as tip labels
 (e.g., `"OntauST002"` rather than a species name), so this example adds
 one extra step: translating tip labels using a lookup table before
 building the rug.
@@ -543,13 +543,13 @@ building the rug.
 
 ``` r
 
-tree_dir <- system.file("extdata", "beetles_50p", package = "phylorug")
+tree_dir <- system.file("extdata", "beetles_70p", package = "phylorug")
 trees    <- read_trees(tree_dir)
-#> Read 5 analyses (5 trees) from: /home/runner/work/_temp/Library/phylorug/extdata/beetles_50p
+#> Read 5 analyses (5 trees) from: /home/runner/work/_temp/Library/phylorug/extdata/beetles_70p
 names(trees)
-#> [1] "50p_ASTRAL_partition_entropy" "50p_ASTRAL_uce"              
-#> [3] "50p_ghost"                    "50p_partition_entropy"       
-#> [5] "50p_uce"
+#> [1] "70p_ASTRAL_partition_entropy" "70p_ASTRAL_uce"              
+#> [3] "70p_ghost"                    "70p_partition_entropy"       
+#> [5] "70p_uce"
 ```
 
 ### Root and drop outgroups
@@ -575,7 +575,7 @@ name. Lets load it and check the first few rows:
 
 ``` r
 
-biogeo_path <- system.file("extdata", "beetles_50p", "biogeo.csv",
+biogeo_path <- system.file("extdata", "beetles_70p", "biogeo.csv",
                            package = "phylorug")
 biogeo <- read.csv(biogeo_path)
 head(biogeo)
@@ -588,8 +588,8 @@ head(biogeo)
 #> 6   STL10140140 Apotolamprus_aff_ambohitsitondronensi__STL10140
 ```
 
-Now translate. The ordering rule from earlier applies here. Frist root
-and drop outgroups before translating, because
+Now lets translate. The ordering rule from earlier applies here. Frist
+root and drop outgroups before translating, because
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
 replaces the original codes and
 [`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) would no longer
@@ -600,28 +600,28 @@ find ” *NicorbUCE* ” after translation.
 trees <- translate_tips(trees, biogeo,
                         from_col = "specimen_code",
                         to_col   = "species_name")
-#> 50p_ASTRAL_partition_entropy: 50 tips translated, 0 unchanged
-#> 50p_ASTRAL_uce: 50 tips translated, 0 unchanged
-#> 50p_ghost: 50 tips translated, 0 unchanged
-#> 50p_partition_entropy: 50 tips translated, 0 unchanged
-#> 50p_uce: 50 tips translated, 0 unchanged
+#> 70p_ASTRAL_partition_entropy: 43 tips translated, 0 unchanged
+#> 70p_ASTRAL_uce: 43 tips translated, 0 unchanged
+#> 70p_ghost: 43 tips translated, 0 unchanged
+#> 70p_partition_entropy: 43 tips translated, 0 unchanged
+#> 70p_uce: 43 tips translated, 0 unchanged
 ```
 
 ### Choose a backbone and check taxa
 
 ``` r
 
-backbone <- trees[["50p_uce"]]
-others   <- trees[names(trees) != "50p_uce"]
+backbone <- trees[["70p_uce"]]
+others   <- trees[names(trees) != "70p_uce"]
 check_taxa(backbone, others)
-#> All 4 comparison trees share the same 50 taxa as the backbone.
+#> All 4 comparison trees share the same 43 taxa as the backbone.
 #> [1] TRUE
 #> attr(,"diagnostics")
 #>                     comparison    status n_taxa missing extra
-#> 1 50p_ASTRAL_partition_entropy identical     50              
-#> 2               50p_ASTRAL_uce identical     50              
-#> 3                    50p_ghost identical     50              
-#> 4        50p_partition_entropy identical     50
+#> 1 70p_ASTRAL_partition_entropy identical     43              
+#> 2               70p_ASTRAL_uce identical     43              
+#> 3                    70p_ghost identical     43              
+#> 4        70p_partition_entropy identical     43
 ```
 
 ### Build the node presence matrix
@@ -633,10 +633,10 @@ The beetle trees carry compound node labels (`SH-aLRT/UFBoot2` for
 ``` r
 
 support_type <- c(
-  "50p_partition_entropy"        = "ufboot",
-  "50p_ghost"                    = "ufboot",
-  "50p_ASTRAL_uce"               = "lpp",
-  "50p_ASTRAL_partition_entropy" = "lpp"
+  "70p_partition_entropy"        = "ufboot",
+  "70p_ghost"                    = "ufboot",
+  "70p_ASTRAL_uce"               = "lpp",
+  "70p_ASTRAL_partition_entropy" = "lpp"
 )
 ```
 
@@ -648,9 +648,10 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 
 ### Presence mode
 
-At ~52 taxa the tree is still comfortably readable. All-white rugs are
-hidden by default, and writing to a file with explicit width and height
-avoids the distortion that GUI windows introduce.
+At 43 taxa the tree is comfortably readable. All-white rugs are hidden
+by default, and writing to a file with explicit width and height is
+strongly recommended to avoids the distortion that GUI windows
+introduce.
 
 ``` r
 
@@ -661,16 +662,17 @@ plot_phylorug(backbone, npm)
 
 ### Support mode
 
-With ~52 taxa, the canvas still comfortably fits a single page.
-`show_support = TRUE` with `support_label_col = "red"` overlays the
-backbone’s own support values for cross-referencing against the **rug**
-shading, and `cell_scale = 0.35` keeps the rug cells from crowding each
-other.
+With 43 taxa, the canvas still fits a single page. `show_support = TRUE`
+with `support_label_col = "red"` overlays the backbone’s own support
+values for cross-referencing against the rug shading, and
+`cell_scale = 0.35` keeps the rug cells from crowding each other.
 
 ``` r
 
 # For publication output, add:
 # file = "beetles_support.pdf"
+# height = 12 
+# width = 10
 plot_phylorug(
   backbone,
   npm,
@@ -684,34 +686,37 @@ plot_phylorug(
 )
 ```
 
-![](phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png)
+![](phylorug_files/figure-html/plot-support-beetles-70p-1.png)
 
-### What the rug reveals?
+### What the rug reveals
 
-Even at 50 taxa, the rug lines up with real structure from the source
-study. The *Helictopleurus* clade sits beside *Onthophagus*,
-*Proagoderus*, *Cheironitis*, and *Megalonitis* together these form
-Onthophagini *sensu novo*, the tribe Montanaro, Lopes et al. (2026)
-redefined to merge the former *Onthophagini* and *Oniticellini*, with
-*Helictopleurus* placed in the newly established subtribe
-*Helictopleurina*.
+The 43-taxon subset corresponds exactly to the subtribe Onthophagina
+*sensu lato* as circumscribed by Montanaro, Lopes et al. (2026, Fig. 2).
+The topology recovered by phylorug matches the source study: *Kurtops*,
+*Hamonthophagus*, *Digitonthophagus*, and *Phalops* form an
+early-branching grade, while the bulk of *Onthophagus* species form a
+large, densely supported crown clade.
 
-Three nodes disagree across the four analyses. The clearest case is the
-node uniting *Helictopleurus semivirens* and *H. undatus* (backbone
-support 82.8): both ASTRAL trees fail to recover it, while both
-concatenation trees (GHOST and the partitioned IQ-TREE run) do, a clean
-coalescent-versus-concatenation split. The other two disagreements are
-messier. At the node uniting *Nanos sp1* and *N.* aff. *Bicoloratus*
-(backbone support 100.0), only the ASTRAL UCE tree recovers the clade;
-the other three analyses, including the other ASTRAL run, do not. That
-lines up with what the source study itself flags: the *Nanos* generic
-group is left unresolved on purpose, its placement reserved for a forth
-coming study.
+Most nodes are unanimously recovered with strong support (black cells)
+across all four comparison analyses. Two regions show conflict. The
+deepest split within Onthophagina — the node subtending *Caccobius
+schreberi* and *Cleptocaccobius viridicollis* relative to the remaining
+*Onthophagus* (backbone support 43.7) — is the weakest node in the
+subtribe: the low backbone support and mixed rug shading indicate that
+this placement is unstable across methods, consistent with the red
+43.7/64 support values flagged in the source study’s own figure. The
+node uniting *Eusaproceius* sp1 with *Onthophagus giraffa* and *O.
+pilosus* (backbone support 59.8) also shows disagreement, with at least
+one ASTRAL tree failing to recover the clade while concatenation trees
+do — another coalescent-versus-concatenation split pattern similar to
+those reported by the source study at deeper nodes.
 
-At the node uniting *Helictopleurus sicardi* and *H. viettei* (backbone
-support 100.0), only one analysis (ASTRAL on the partitioned dataset)
-disagrees, with the other three in agreement, a single dissenting result
-rather than a genuine method-level split.
+In contrast, the Proagoderus + Parascatonomus clade and the
+early-branching *Kurtops*–*Hamonthophagus*–*Onthophagus
+probus*–*Digitonthophagus*–*Phalops* grade are uniformly black across
+all analyses, indicating strong and stable support regardless of method
+— exactly as the source study reports with 100% support and filled dots
+at every node in this region.
 
 ## Customisation
 

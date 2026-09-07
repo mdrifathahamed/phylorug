@@ -75,9 +75,9 @@ dict  <- utils::read.csv(file)
 translated <- translate_tips(trees, dict,
                              from_col = "specimen_code",
                              to_col   = "species_name")
-#> 50p_ASTRAL_partition_entropy: 52 tips translated, 0 unchanged
-#> 50p_ASTRAL_uce: 52 tips translated, 0 unchanged
-#> 50p_ghost: 52 tips translated, 0 unchanged
-#> 50p_partition_entropy: 52 tips translated, 0 unchanged
-#> 50p_uce: 52 tips translated, 0 unchanged
+#> 50p_ASTRAL_partition_entropy: 45 tips translated, 0 unchanged
+#> 50p_ASTRAL_uce: 45 tips translated, 0 unchanged
+#> 50p_ghost: 45 tips translated, 0 unchanged
+#> 50p_partition_entropy: 45 tips translated, 0 unchanged
+#> 50p_uce: 45 tips translated, 0 unchanged
 ```

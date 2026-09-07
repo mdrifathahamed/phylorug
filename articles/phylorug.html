@@ -552,16 +552,16 @@ investigation.</p>
 <h2 id="full-pipeline-beetles-with-tip-translation">Full pipeline: beetles with tip translation<a class="anchor" aria-label="anchor" href="#full-pipeline-beetles-with-tip-translation"></a>
 </h2>
 <p>The beetle dataset ships with <code>phylorug</code> in
-<code>inst/extdata/</code>. It contains two sets of trees, a random
-subset of Montanaro, Lopes et al. (2026): beetles_50p/ and beetles_70p/,
-each with 5 analyses of 50 ingroup dung beetle taxa (52 tips including 2
-outgroups) for the 50p set, and 70 ingroup taxa (72 tips) for the 70p
-set built from UCE loci retained at different completeness thresholds
-(50% and 70%). The two datasets produce slightly different topologies,
-making them a good test case for exploring how data filtering affects
-clade recovery. For this vignette we use the 50p set, but users are
-encouraged to try both. Unlike the <em>Culicomorpha</em> trees, these
-trees store specimen codes as tip labels (e.g.,
+<code>inst/extdata/</code>. It contains two sets of trees, a 43-taxon
+subset of Montanaro, Lopes et al. (2026) representing the subtribe
+Onthophagina <em>sensu lato</em>: beetles_50p/ and beetles_70p/, each
+with 5 independent analyses (45 tips including 2 outgroups) built from
+UCE loci retained at different completeness thresholds (50% and 70%).
+The two datasets produce slightly different topologies, making them a
+good test case for exploring how data filtering affects clade recovery.
+For this vignette we use the 70p set to match the paper figure, but
+users are encouraged to try both. Unlike the <em>Culicomorpha</em>
+trees, these trees store specimen codes as tip labels (e.g.,
 <code>"OntauST002"</code> rather than a species name), so this example
 adds one extra step: translating tip labels using a lookup table before
 building the rug.</p>
@@ -569,13 +569,13 @@ building the rug.</p>
 <h3 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
 </h3>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tree_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_50p"</span>, package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">tree_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_70p"</span>, package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
 <span><span class="va">trees</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_trees.html">read_trees</a></span><span class="op">(</span><span class="va">tree_dir</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Read 5 analyses (5 trees) from: /home/runner/work/_temp/Library/phylorug/extdata/beetles_50p</span></span>
+<span><span class="co">#&gt; Read 5 analyses (5 trees) from: /home/runner/work/_temp/Library/phylorug/extdata/beetles_70p</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "50p_ASTRAL_partition_entropy" "50p_ASTRAL_uce"              </span></span>
-<span><span class="co">#&gt; [3] "50p_ghost"                    "50p_partition_entropy"       </span></span>
-<span><span class="co">#&gt; [5] "50p_uce"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "70p_ASTRAL_partition_entropy" "70p_ASTRAL_uce"              </span></span>
+<span><span class="co">#&gt; [3] "70p_ghost"                    "70p_partition_entropy"       </span></span>
+<span><span class="co">#&gt; [5] "70p_uce"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="root-and-drop-outgroups">Root and drop outgroups<a class="anchor" aria-label="anchor" href="#root-and-drop-outgroups"></a>
@@ -598,7 +598,7 @@ tree.</p>
 <code>biogeo.csv</code> included with the package maps each code to its
 species name. Lets load it and check the first few rows:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">biogeo_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_50p"</span>, <span class="st">"biogeo.csv"</span>,</span>
+<code class="sourceCode R"><span><span class="va">biogeo_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_70p"</span>, <span class="st">"biogeo.csv"</span>,</span>
 <span>                           package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
 <span><span class="va">biogeo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">biogeo_path</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">biogeo</span><span class="op">)</span></span>
@@ -609,8 +609,8 @@ species name. Lets load it and check the first few rows:</p>
 <span><span class="co">#&gt; 4   Anop1COL892                         Anoplostethus_sp_COL892</span></span>
 <span><span class="co">#&gt; 5    ApimmST003                         Aphodius_immundus_ST003</span></span>
 <span><span class="co">#&gt; 6   STL10140140 Apotolamprus_aff_ambohitsitondronensi__STL10140</span></span></code></pre></div>
-<p>Now translate. The ordering rule from earlier applies here. Frist
-root and drop outgroups before translating, because
+<p>Now lets translate. The ordering rule from earlier applies here.
+Frist root and drop outgroups before translating, because
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> replaces the original codes and
 <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> would no longer find ” <em>NicorbUCE</em> ”
 after translation.</p>
@@ -618,27 +618,27 @@ after translation.</p>
 <code class="sourceCode R"><span><span class="va">trees</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/translate_tips.html">translate_tips</a></span><span class="op">(</span><span class="va">trees</span>, <span class="va">biogeo</span>,</span>
 <span>                        from_col <span class="op">=</span> <span class="st">"specimen_code"</span>,</span>
 <span>                        to_col   <span class="op">=</span> <span class="st">"species_name"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 50p_ASTRAL_partition_entropy: 50 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_ASTRAL_uce: 50 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_ghost: 50 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_partition_entropy: 50 tips translated, 0 unchanged</span></span>
-<span><span class="co">#&gt; 50p_uce: 50 tips translated, 0 unchanged</span></span></code></pre></div>
+<span><span class="co">#&gt; 70p_ASTRAL_partition_entropy: 43 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 70p_ASTRAL_uce: 43 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 70p_ghost: 43 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 70p_partition_entropy: 43 tips translated, 0 unchanged</span></span>
+<span><span class="co">#&gt; 70p_uce: 43 tips translated, 0 unchanged</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="choose-a-backbone-and-check-taxa">Choose a backbone and check taxa<a class="anchor" aria-label="anchor" href="#choose-a-backbone-and-check-taxa"></a>
 </h3>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[[</span><span class="st">"50p_uce"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"50p_uce"</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
-<span><span class="co">#&gt; All 4 comparison trees share the same 50 taxa as the backbone.</span></span>
+<span><span class="co">#&gt; All 4 comparison trees share the same 43 taxa as the backbone.</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="co">#&gt; attr(,"diagnostics")</span></span>
 <span><span class="co">#&gt;                     comparison    status n_taxa missing extra</span></span>
-<span><span class="co">#&gt; 1 50p_ASTRAL_partition_entropy identical     50              </span></span>
-<span><span class="co">#&gt; 2               50p_ASTRAL_uce identical     50              </span></span>
-<span><span class="co">#&gt; 3                    50p_ghost identical     50              </span></span>
-<span><span class="co">#&gt; 4        50p_partition_entropy identical     50</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 70p_ASTRAL_partition_entropy identical     43              </span></span>
+<span><span class="co">#&gt; 2               70p_ASTRAL_uce identical     43              </span></span>
+<span><span class="co">#&gt; 3                    70p_ghost identical     43              </span></span>
+<span><span class="co">#&gt; 4        70p_partition_entropy identical     43</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="build-the-node-presence-matrix-1">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix-1"></a>
@@ -648,10 +648,10 @@ after translation.</p>
 both support values with <code>support_col = c(1, 2)</code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">support_type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"50p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>  <span class="st">"50p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
-<span>  <span class="st">"50p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
-<span>  <span class="st">"50p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
+<span>  <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>  <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>  <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>  <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -660,25 +660,28 @@ both support values with <code>support_col = c(1, 2)</code>:</p>
 <div class="section level3">
 <h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
 </h3>
-<p>At ~52 taxa the tree is still comfortably readable. All-white rugs
-are hidden by default, and writing to a file with explicit width and
-height avoids the distortion that GUI windows introduce.</p>
+<p>At 43 taxa the tree is comfortably readable. All-white rugs are
+hidden by default, and writing to a file with explicit width and height
+is strongly recommended to avoids the distortion that GUI windows
+introduce.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="960"></p>
+<p><img src="phylorug_files/figure-html/plot%20phylorug%20-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
 </h3>
-<p>With ~52 taxa, the canvas still comfortably fits a single page.
+<p>With 43 taxa, the canvas still fits a single page.
 <code>show_support = TRUE</code> with
 <code>support_label_col = "red"</code> overlays the backbone’s own
-support values for cross-referencing against the <strong>rug</strong>
-shading, and <code>cell_scale = 0.35</code> keeps the rug cells from
-crowding each other.</p>
+support values for cross-referencing against the rug shading, and
+<code>cell_scale = 0.35</code> keeps the rug cells from crowding each
+other.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For publication output, add:</span></span>
 <span><span class="co"># file = "beetles_support.pdf"</span></span>
+<span><span class="co"># height = 12 </span></span>
+<span><span class="co"># width = 10</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
 <span>  <span class="va">backbone</span>,</span>
 <span>  <span class="va">npm</span>,</span>
@@ -690,34 +693,38 @@ crowding each other.</p>
 <span>  rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot%20phylorug%20beetles%2050%20p-1.png" class="r-plt" alt="" width="960"></p>
+<p><img src="phylorug_files/figure-html/plot-support-beetles-70p-1.png" class="r-plt" alt="" width="960"></p>
 </div>
 <div class="section level3">
-<h3 id="what-the-rug-reveals-1">What the rug reveals?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals-1"></a>
+<h3 id="what-the-rug-reveals-1">What the rug reveals<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals-1"></a>
 </h3>
-<p>Even at 50 taxa, the rug lines up with real structure from the source
-study. The <em>Helictopleurus</em> clade sits beside
-<em>Onthophagus</em>, <em>Proagoderus</em>, <em>Cheironitis</em>, and
-<em>Megalonitis</em> together these form Onthophagini <em>sensu
-novo</em>, the tribe Montanaro, Lopes et al. (2026) redefined to merge
-the former <em>Onthophagini</em> and <em>Oniticellini</em>, with
-<em>Helictopleurus</em> placed in the newly established subtribe
-<em>Helictopleurina</em>.</p>
-<p>Three nodes disagree across the four analyses. The clearest case is
-the node uniting <em>Helictopleurus semivirens</em> and <em>H.
-undatus</em> (backbone support 82.8): both ASTRAL trees fail to recover
-it, while both concatenation trees (GHOST and the partitioned IQ-TREE
-run) do, a clean coalescent-versus-concatenation split. The other two
-disagreements are messier. At the node uniting <em>Nanos sp1</em> and
-<em>N.</em> aff. <em>Bicoloratus</em> (backbone support 100.0), only the
-ASTRAL UCE tree recovers the clade; the other three analyses, including
-the other ASTRAL run, do not. That lines up with what the source study
-itself flags: the <em>Nanos</em> generic group is left unresolved on
-purpose, its placement reserved for a forth coming study.</p>
-<p>At the node uniting <em>Helictopleurus sicardi</em> and <em>H.
-viettei</em> (backbone support 100.0), only one analysis (ASTRAL on the
-partitioned dataset) disagrees, with the other three in agreement, a
-single dissenting result rather than a genuine method-level split.</p>
+<p>The 43-taxon subset corresponds exactly to the subtribe Onthophagina
+<em>sensu lato</em> as circumscribed by Montanaro, Lopes et al. (2026,
+Fig. 2). The topology recovered by phylorug matches the source study:
+<em>Kurtops</em>, <em>Hamonthophagus</em>, <em>Digitonthophagus</em>,
+and <em>Phalops</em> form an early-branching grade, while the bulk of
+<em>Onthophagus</em> species form a large, densely supported crown
+clade.</p>
+<p>Most nodes are unanimously recovered with strong support (black
+cells) across all four comparison analyses. Two regions show conflict.
+The deepest split within Onthophagina — the node subtending
+<em>Caccobius schreberi</em> and <em>Cleptocaccobius viridicollis</em>
+relative to the remaining <em>Onthophagus</em> (backbone support 43.7) —
+is the weakest node in the subtribe: the low backbone support and mixed
+rug shading indicate that this placement is unstable across methods,
+consistent with the red 43.7/64 support values flagged in the source
+study’s own figure. The node uniting <em>Eusaproceius</em> sp1 with
+<em>Onthophagus giraffa</em> and <em>O. pilosus</em> (backbone support
+59.8) also shows disagreement, with at least one ASTRAL tree failing to
+recover the clade while concatenation trees do — another
+coalescent-versus-concatenation split pattern similar to those reported
+by the source study at deeper nodes.</p>
+<p>In contrast, the Proagoderus + Parascatonomus clade and the
+early-branching <em>Kurtops</em>–<em>Hamonthophagus</em>–<em>Onthophagus
+probus</em>–<em>Digitonthophagus</em>–<em>Phalops</em> grade are
+uniformly black across all analyses, indicating strong and stable
+support regardless of method — exactly as the source study reports with
+100% support and filled dots at every node in this region.</p>
 </div>
 </div>
 <div class="section level2">
