@@ -75,7 +75,9 @@ phylogenetic script. The package was developed around a dung beetle
 phylogenomic dataset (Montanaro, Lopes et al. 2026) and tested with
 simulated trees of over 700 taxa across 15 analyses. Three real-world
 datasets are bundled with the package so users can try the pipeline on
-real data before applying it to their own. \### Installation
+real data before applying it to their own.
+
+### Installation
 
 **phylorug** is not yet on CRAN. To install the development version from
 GitHub:
