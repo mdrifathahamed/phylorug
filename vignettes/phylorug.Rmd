@@ -543,31 +543,56 @@ plot_phylorug(
 ## What the rug reveals
 
 The 43-taxon subset corresponds exactly to the subtribe Onthophagina
-*sensu lato* as circumscribed by Montanaro, Lopes et al. (2026, Fig. 2).
-The topology recovered by phylorug matches the source study: *Kurtops*,
-*Hamonthophagus*, *Digitonthophagus*, and *Phalops* form an early-branching
-grade, while the bulk of *Onthophagus* species form a large, densely
-supported crown clade.
+*sensu lato* as defined by Montanaro, Lopes et al. (2026, Fig. 2).
+Above we applied both presence mode and support mode to the same
+dataset. Presence mode shows which analyses recovered each clade;
+support mode goes further by showing how strongly each analysis backs
+each node.
 
-Most nodes are unanimously recovered with strong support (black cells)
-across all four comparison analyses. Two regions show conflict. The
-deepest split within Onthophagina — the node subtending *Caccobius
-schreberi* and *Cleptocaccobius viridicollis* relative to the remaining
-*Onthophagus* (backbone support 43.7) — is the weakest node in the
-subtribe: the low backbone support and mixed rug shading indicate that
-this placement is unstable across methods, consistent with the red
-43.7/64 support values flagged in the source study's own figure. The
-node uniting *Eusaproceius* sp1 with *Onthophagus giraffa* and *O.
-pilosus* (backbone support 59.8) also shows disagreement, with at least
-one ASTRAL tree failing to recover the clade while concatenation trees
-do — another coalescent-versus-concatenation split pattern similar to
-those reported by the source study at deeper nodes.
+Most nodes within Onthophagina are unanimously recovered (black dots)
+across all four comparison analyses, consistent with the source
+study's figure. The added value of support mode becomes visible at
+the nodes where genera intergrade. The node uniting the genus
+*Caccobius* (including *Cleptocaccobius*) with a clade of
+*Onthophagus* species (backbone
+support 43.7/64 SH-aLRT/UFBoot2) is the most weakly
+supported node in the entire subtribe, only the backbone (70p_uce)
+recovered this grouping. In phylorug's support mode, the grey and
+yellow shading reveals that the analyses that do recover the clade
+support it weakly, confirming that the placement of *Caccobius*
+relative to *Onthophagus* is genuinely uncertain at this level.
 
-In contrast, the Proagoderus + Parascatonomus clade and the early-branching
-*Kurtops*–*Hamonthophagus*–*Onthophagus probus*–*Digitonthophagus*–*Phalops*
-grade are uniformly black across all analyses, indicating strong and
-stable support regardless of method — exactly as the source study reports
-with 100% support and filled dots at every node in this region.
+A similar pattern appears on node up, where the genus *Eusaproceius*
+is united with a clade of *Onthophagus* (*O. giraffa*, *O. pilosus*,
+*O. bicavifrons*, *O. quadrimaculatus*; backbone support 59.8): the
+rug shows moderate-to-low support shading in the analyses that
+recover the clade, while others fail to recover it entirely, a mix
+that a binary presence grid cannot distinguish from a strongly
+supported clade that one analysis simply missed.
+
+At the base of Onthophagina, the early-branching genera *Kurtops*,
+*Hamonthophagus*, *Digitonthophagus*, and *Phalops* (together with
+*Onthophagus probus*) form a grade that is unanimously recovered
+across all analyses despite the backbone's own compound support
+values of 63.8/73 (SH-aLRT/UFBoot2) and 99.9/97 at these nodes. By
+default, `show_support = TRUE` displays the full compound label; we
+used `show_support_idx = 1` in the figure above to show only the
+first metric and reduce clutter. Users can set `show_support_idx = 2`
+to display the second metric instead.
+
+This distinction between low support within a single analysis and
+genuine disagreement across analyses is precisely what support mode
+is designed to reveal.
+
+The black dots at unanimous nodes are compact summaries — they tell
+you the clade was recovered everywhere, but not how strongly. To
+inspect the support values across analyses even at unanimous nodes,
+set `rug_on_identical = TRUE` in the `plot_phylorug()` call above.
+This expands every node into its full grid, revealing that nearly all
+unanimous dots are also uniformly strongly supported. Only the two
+weakly supported nodes described above show mixed shading. Once
+satisfied, switch back to `rug_on_identical = FALSE` (the default)
+for a cleaner figure.
 
 # Customisation
 

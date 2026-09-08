@@ -77,8 +77,9 @@
 #'   drawn beside each node. Default `FALSE`.
 #'
 #' @param show_support_idx Integer or NULL. Which value from compound node
-#'   labels (e.g. "80/95") to display when `show_support = TRUE`. Default `1`
-#'   (first value). Set to `NULL` to display the full compound label as-is.
+#'   labels (e.g. "80/95") to display when `show_support = TRUE`. Default
+#'   `NULL` displays the full compound label as-is. Set to `1` or `2` to
+#'   display only a single metric.
 #'
 #' @param cell_scale Numeric multiplier on cell height. Default 0.45.
 #'
@@ -190,7 +191,7 @@ plot_phylorug <- function(backbone, npm,
                           nodes            = NULL,
                           legend           = TRUE,
                           show_support     = FALSE,
-                          show_support_idx = 1,
+                          show_support_idx = NULL,
                           cell_scale       = 0.45,
                           x_offset         = 0,
                           y_offset         = 0,

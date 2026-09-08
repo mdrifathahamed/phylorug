@@ -19,7 +19,7 @@ plot_phylorug(
   nodes = NULL,
   legend = TRUE,
   show_support = FALSE,
-  show_support_idx = 1,
+  show_support_idx = NULL,
   cell_scale = 0.45,
   x_offset = 0,
   y_offset = 0,
@@ -106,8 +106,9 @@ naming the offending value(s).}
 drawn beside each node. Default \code{FALSE}.}
 
 \item{show_support_idx}{Integer or NULL. Which value from compound node
-labels (e.g. "80/95") to display when \code{show_support = TRUE}. Default \code{1}
-(first value). Set to \code{NULL} to display the full compound label as-is.}
+labels (e.g. "80/95") to display when \code{show_support = TRUE}. Default
+\code{NULL} displays the full compound label as-is. Set to \code{1} or \code{2} to
+display only a single metric.}
 
 \item{cell_scale}{Numeric multiplier on cell height. Default 0.45.}
 
