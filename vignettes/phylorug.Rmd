@@ -522,7 +522,7 @@ with `support_label_col = "red"` overlays the backbone's own support
 values for cross-referencing against the rug shading, and `cell_scale = 0.35`
 keeps the rug cells from crowding each other .
 
-```{r plot-support-beetles-70p, fig.height = 12, fig.width = 10}
+```{r plot-support-beetles-70p, fig.height = 12, fig.width = 10, dpi= 300}
 # For publication output, add:
 # file = "beetles_support.pdf"
 # height = 12 
