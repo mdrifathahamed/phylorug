@@ -665,7 +665,7 @@ plot_phylorug(backbone, npm)
 With 43 taxa, the canvas still fits a single page. `show_support = TRUE`
 with `support_label_col = "red"` overlays the backbone’s own support
 values for cross-referencing against the rug shading, and
-`cell_scale = 0.35` keeps the rug cells from crowding each other.
+`cell_scale = 0.35` keeps the rug cells from crowding each other .
 
 ``` r
 
