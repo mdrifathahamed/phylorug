@@ -79,7 +79,7 @@ value(s) to extract from multi-metric node labels. For example, if an
 IQ-TREE tree stores SH-aLRT and UFBoot as "80/95", passing <code>1</code> extracts
 only the first metric into a <code>support_1</code> matrix. Passing <code>c(1, 2)</code>
 efficiently extracts both simultaneously into <code>support_1</code> and <code>support_2</code>
-matrices, allowing you to easily switch between them during plotting
+matrices, allowing user to easily switch between them during plotting
 without recalculating. Default is <code>1</code> .</p></dd>
 
 
@@ -93,15 +93,10 @@ thresholds.</p></dd>
 
 
 <dt id="arg-pool-threshold">pool_threshold<a class="anchor" aria-label="anchor" href="#arg-pool-threshold"></a></dt>
-<dd><p>Numeric between 0 and 1. Controls how pools of equally
-optimal trees (e.g. from TNT or PAUP*) are scored. Default <code>1.0</code>
-(strict consensus): a clade must appear in every pool tree to be scored as
-present. Set to <code>0.5</code> for majority rule (&gt;50% of pool trees). Set to <code>0</code> to
-record the raw proportion (gradient cells in the rug). See Simmons &amp;
-Freudenstein (2011) for why strict consensus is the recommended default for
-parsimony analyses. This parameter is only applicable when evaluating
-parsimony-based <code>multiPhylo</code> objects (e.g., Most Parsimonious Trees
-generated via TNT or similar software).</p></dd>
+<dd><p>Numeric between 0 and 1. Controls how pools of
+equally optimal trees are scored. <code>1.0</code> (default) = strict consensus,
+<code>0.5</code> = majority rule, <code>0</code> = raw proportion. Only applies to
+<code>multiPhylo</code> comparisons (e.g. MPTs from TNT or PAUP*).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -109,48 +104,53 @@ generated via TNT or similar software).</p></dd>
     <p>A named list with one row per internal backbone node and one column
 per comparison tree:</p><dl><dt>presence</dt>
 <dd><p>Clade presence: <code>1</code> where recovered, <code>0</code> where absent.
-For pools, the value depends on <code>pool_threshold</code>: strict consensus
-(default) gives <code>1</code> or <code>0</code>; <code>pool_threshold = 0</code> gives the raw
-proportion.</p></dd>
+For pools, the value depends on <code>pool_threshold</code> (see above).</p></dd>
 
-<dt>support_1, support_2, ...</dt>
-<dd><p>One matrix per value in <code>support_col</code>.
-Raw support values where the clade was recovered,<code>NA</code> where absent.
-Named in the order requested, so <code>support_col = c(1, 2)</code> produces
-<code>support_1</code> and <code>support_2</code>.</p></dd>
+
+html<div class="sourceCode">\item{support_1, support_2, ...}{One matrix per value in `support_col`.
+ Raw support values where the clade was recovered, `NA` where absent
+ or where the clade was recovered but no support value could be parsed
+ from the node label. Named in the order requested, so
+ `support_col = c(1, 2)` produces `support_1` and `support_2`.}
+html</div>
 
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This is the core function of the phylorug pipeline. It can be called
-directly after <code><a href="read_trees.html">read_trees()</a></code>, <code><a href="check_taxa.html">check_taxa()</a></code> is a useful diagnosis but not
-a prerequisite, as <code>node_presence_matrix()</code> requires perfectly matched taxon
-sets and the pipline can not proceed if any mismatches in taxa set are
-detected between the backbone and comparison trees.</p>
+directly after <code><a href="read_trees.html">read_trees()</a></code>. Running <code><a href="check_taxa.html">check_taxa()</a></code> first is recommended
+but not required <code>node_presence_matrix()</code> will stop with an error if any
+comparison tree is missing backbone taxa.</p>
 <p>Every tree must include the complete set of backbone taxa. Because a tree
-lacking a backbone taxon cannot assess the presence of a clade containing
-that taxon, scoring such a clade as 'absent' would introduce a false
-negative. The function therefore enforces strict taxon matching. Use
+lacking a backbone taxon cannot be assessed for the presence of a clade
+containing that taxon, scoring such a clade as 'absent' would introduce a
+false negative. The function therefore enforces strict taxon matching. Use
 <code><a href="check_taxa.html">check_taxa()</a></code> to diagnose the discrepancies and <code><a href="prune_to_shared.html">prune_to_shared()</a></code> to
-harmonize the backbone and comparing tree taxa.</p>
+harmonize the backbone and comparison tree taxa.</p>
 <p>The function always computes both a presence matrix and a support matrix
-in a single pass. The plotting function <code><a href="plot_phylorug.html">plot_phylorug()</a></code> decide which to
+in a single pass. The plotting function <code><a href="plot_phylorug.html">plot_phylorug()</a></code> decides which to
 use based on the visualisation context.</p>
 <p>The <code>presence</code> matrix records clade recovery: <code>1</code> where the bipartition
 is found, <code>0</code> where absent. For multiple equally most parsimonious trees
 (MPTs), the behaviour depends on <code>pool_threshold</code>: the default (<code>1.0</code>,
 strict consensus) requires the clade to appear in every pool tree;
 <code>0.5</code> applies majority rule; <code>0</code> records the raw proportion.</p>
-<p>Each <code>support_*</code> matrix records the raw support value from the node label
-of the tree that recovered the clade, such as bootstrap percentage or
-posterior probability. Support extraction is only meaningful for single
-trees (<code>phylo</code>), not for pools of equally optimal trees (<code>multiPhylo</code>).
-Averaging node labels across MPTs is not scientifically valid: support
-values come from resampling analyses (bootstrap, jackknife), which
-produce a separate consensus tree that should be passed to phylorug as
-a single <code>phylo</code> comparison tree. If a pool is supplied, only presence
-mode is meaningful; support cells for that column will be <code>NA</code>.</p>
+<p>Each <code>support_*</code> matrix records the raw support value from the node label of
+the tree that recovered the clade (e.g. bootstrap, posterior probability).
+Support values are not computed for pools of equally optimal trees
+(<code>multiPhylo</code>), only presence mode is available for these, and their support
+cells will be <code>NA</code>. If you need support mode for a parsimony analysis, build
+a consensus tree with support values mapped onto it (e.g. bootstrap on the
+strict consensus) in your upstream analysis, and pass that single tree to
+phylorug instead.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="check_taxa.html">check_taxa()</a></code> to diagnose taxon mismatches before building
+the matrix, <code><a href="plot_phylorug.html">plot_phylorug()</a></code> to visualize the result, and
+<code><a href="add_tree.html">add_tree()</a></code> to append additional comparison trees to an existing
+matrix without recomputing it from scratch.</p></div>
     </div>
 
     <div class="section level2">
@@ -162,7 +162,7 @@ mode is meaningful; support cells for that column will be <code>NA</code>.</p>
 <span class="r-in"><span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Optional: diagnose taxon overlap before building the matrix.</span></span></span>
-<span class="r-in"><span><span class="co"># This is not required — node_presence_matrix() enforces matching internally.</span></span></span>
+<span class="r-in"><span><span class="co"># This is not required, node_presence_matrix() enforces matching internally.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> All 4 comparison trees share the same 15 taxa as the backbone.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>

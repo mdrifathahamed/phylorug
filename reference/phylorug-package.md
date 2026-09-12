@@ -45,12 +45,12 @@ Useful links:
 ## Author
 
 **Maintainer**: Md Rifath Ahamed <rifath.ahamed@helsinki.fi>
-([ORCID](https://orcid.org/0009-0005-6158-8658))
+([ORCID](https://orcid.org/0009-0005-6158-8658)) \[copyright holder\]
 
 Authors:
 
 - Md Rifath Ahamed <rifath.ahamed@helsinki.fi>
-  ([ORCID](https://orcid.org/0009-0005-6158-8658))
+  ([ORCID](https://orcid.org/0009-0005-6158-8658)) \[copyright holder\]
 
 - Sergei Tarasov <sergei.tarasov@helsinki.fi>
   ([ORCID](https://orcid.org/0000-0002-1737-9403))

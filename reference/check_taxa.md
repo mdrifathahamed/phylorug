@@ -1,15 +1,13 @@
 # Diagnose taxon consistency between backbone and comparison trees
 
-For each comparison tree, checks whether its tip labels (taxon) match
-the backbone's exactly, contain extra labels, or are missing some. A
-tree missing a tip label of the backbone cannot be scored for any clade
-containing that tip. We recommend running this diagnostic before
-building the matrix, especially when combining trees from different
-studies or pipelines. However, it is not a mandatory step
+Checks whether the backbone and comparison trees share the same set of
+taxa or not. If a comparison tree is missing a backbone taxon, every
+backbone clade that includes that taxon would be falsely scored as
+absent,
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-enforces taxon matching internally and will error with a clear message
-if any comparison tree is missing backbone taxa. If you are certain all
-trees share the same taxon set, you can proceed directly to
+prevents this by stopping with an error, but this function helps you
+diagnose the mismatch before that happens. If you already know all trees
+share the same taxa, skip straight to
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md).
 
 ## Usage
@@ -61,18 +59,20 @@ Three outcomes are
 
 - superset:
 
-  One or more comparison trees contain every backbone taxon, plus some
-  extra. Every backbone clade can still be evaluated, so no action is
-  needed; the extra taxa can be ignored.
+  One or more comparison trees contain every backbone taxon plus
+  additional taxa. All backbone clades can still be evaluated; the extra
+  taxa are ignored by
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md).
 
 - missing:
 
-  One or more comparison trees lack one or more backbone taxa. Any
-  backbone clade containing a missing taxon might produce false absence
-  in that tree. Scoring such a clade as absent would report a rejection
-  where no question was ever put. Use
+  One or more comparison trees lack backbone taxa. A clade cannot be
+  searched in a tree that does not contain all of its taxa, so
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
+  will stop with an error. Use
   [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
-  to reduce the backbone and the comparison trees to their common taxa.
+  to reduce all trees to their common taxon set before building the
+  matrix.
 
 Where a comparison tree is a pool of several equally optimal trees,
 every tree in the pool is checked. A pool whose trees disagree about
@@ -81,9 +81,11 @@ their own taxa is a data problem, and is an error.
 ## See also
 
 [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)
-to load the trees and
+to load the trees,
+[`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
+to harmonize naming conventions, and
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
-to reduce them to a common taxon set.
+to reduce trees to a common taxon set.
 
 ## Examples
 

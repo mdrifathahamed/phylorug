@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Md Rifath Ahamed**. Author, maintainer.
+- **Md Rifath Ahamed**. Author, maintainer, copyright holder.
   [](https://orcid.org/0009-0005-6158-8658)
 
 - **Sergei Tarasov**. Author. [](https://orcid.org/0000-0002-1737-9403)
