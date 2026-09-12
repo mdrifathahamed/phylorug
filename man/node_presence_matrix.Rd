@@ -27,7 +27,7 @@ value(s) to extract from multi-metric node labels. For example, if an
 IQ-TREE tree stores SH-aLRT and UFBoot as "80/95", passing \code{1} extracts
 only the first metric into a \code{support_1} matrix. Passing \code{c(1, 2)}
 efficiently extracts both simultaneously into \code{support_1} and \code{support_2}
-matrices, allowing you to easily switch between them during plotting
+matrices, allowing user to easily switch between them during plotting
 without recalculating. Default is \code{1} .}
 
 \item{support_type}{Optional named character vector mapping comparison trees
@@ -37,28 +37,25 @@ automatically by \code{\link[=plot_phylorug]{plot_phylorug()}} when \code{mode =
 \code{\link[=plot_phylorug]{plot_phylorug()}} will auto-normalize support values and apply universal
 thresholds.}
 
-\item{pool_threshold}{Numeric between 0 and 1. Controls how pools of equally
-optimal trees (e.g. from TNT or PAUP*) are scored. Default \code{1.0}
-(strict consensus): a clade must appear in every pool tree to be scored as
-present. Set to \code{0.5} for majority rule (>50\% of pool trees). Set to \code{0} to
-record the raw proportion (gradient cells in the rug). See Simmons &
-Freudenstein (2011) for why strict consensus is the recommended default for
-parsimony analyses. This parameter is only applicable when evaluating
-parsimony-based \code{multiPhylo} objects (e.g., Most Parsimonious Trees
-generated via TNT or similar software).}
+\item{pool_threshold}{Numeric between 0 and 1. Controls how pools of
+equally optimal trees are scored. \code{1.0} (default) = strict consensus,
+\code{0.5} = majority rule, \code{0} = raw proportion. Only applies to
+\code{multiPhylo} comparisons (e.g. MPTs from TNT or PAUP*).}
 }
 \value{
 A named list with one row per internal backbone node and one column
 per comparison tree:
 \describe{
 \item{presence}{Clade presence: \code{1} where recovered, \code{0} where absent.
-For pools, the value depends on \code{pool_threshold}: strict consensus
-(default) gives \code{1} or \code{0}; \code{pool_threshold = 0} gives the raw
-proportion.}
-\item{support_1, support_2, ...}{One matrix per value in \code{support_col}.
-Raw support values where the clade was recovered,\code{NA} where absent.
-Named in the order requested, so \code{support_col = c(1, 2)} produces
-\code{support_1} and \code{support_2}.}
+For pools, the value depends on \code{pool_threshold} (see above).}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{\\item\{support_1, support_2, ...\}\{One matrix per value in `support_col`.
+ Raw support values where the clade was recovered, `NA` where absent
+ or where the clade was recovered but no support value could be parsed
+ from the node label. Named in the order requested, so
+ `support_col = c(1, 2)` produces `support_1` and `support_2`.\}
+}\if{html}{\out{</div>}}
+
 }
 }
 \description{
@@ -69,20 +66,19 @@ or its support value.
 }
 \details{
 This is the core function of the phylorug pipeline. It can be called
-directly after \code{\link[=read_trees]{read_trees()}}, \code{\link[=check_taxa]{check_taxa()}} is a useful diagnosis but not
-a prerequisite, as \code{\link[=node_presence_matrix]{node_presence_matrix()}} requires perfectly matched taxon
-sets and the pipline can not proceed if any mismatches in taxa set are
-detected between the backbone and comparison trees.
+directly after \code{\link[=read_trees]{read_trees()}}. Running \code{\link[=check_taxa]{check_taxa()}} first is recommended
+but not required \code{\link[=node_presence_matrix]{node_presence_matrix()}} will stop with an error if any
+comparison tree is missing backbone taxa.
 
 Every tree must include the complete set of backbone taxa. Because a tree
-lacking a backbone taxon cannot assess the presence of a clade containing
-that taxon, scoring such a clade as 'absent' would introduce a false
-negative. The function therefore enforces strict taxon matching. Use
+lacking a backbone taxon cannot be assessed for the presence of a clade
+containing that taxon, scoring such a clade as 'absent' would introduce a
+false negative. The function therefore enforces strict taxon matching. Use
 \code{\link[=check_taxa]{check_taxa()}} to diagnose the discrepancies and \code{\link[=prune_to_shared]{prune_to_shared()}} to
-harmonize the backbone and comparing tree taxa.
+harmonize the backbone and comparison tree taxa.
 
 The function always computes both a presence matrix and a support matrix
-in a single pass. The plotting function \code{\link[=plot_phylorug]{plot_phylorug()}} decide which to
+in a single pass. The plotting function \code{\link[=plot_phylorug]{plot_phylorug()}} decides which to
 use based on the visualisation context.
 
 The \code{presence} matrix records clade recovery: \code{1} where the bipartition
@@ -91,15 +87,14 @@ is found, \code{0} where absent. For multiple equally most parsimonious trees
 strict consensus) requires the clade to appear in every pool tree;
 \code{0.5} applies majority rule; \code{0} records the raw proportion.
 
-Each \verb{support_*} matrix records the raw support value from the node label
-of the tree that recovered the clade, such as bootstrap percentage or
-posterior probability. Support extraction is only meaningful for single
-trees (\code{phylo}), not for pools of equally optimal trees (\code{multiPhylo}).
-Averaging node labels across MPTs is not scientifically valid: support
-values come from resampling analyses (bootstrap, jackknife), which
-produce a separate consensus tree that should be passed to phylorug as
-a single \code{phylo} comparison tree. If a pool is supplied, only presence
-mode is meaningful; support cells for that column will be \code{NA}.
+Each \verb{support_*} matrix records the raw support value from the node label of
+the tree that recovered the clade (e.g. bootstrap, posterior probability).
+Support values are not computed for pools of equally optimal trees
+(\code{multiPhylo}), only presence mode is available for these, and their support
+cells will be \code{NA}. If you need support mode for a parsimony analysis, build
+a consensus tree with support values mapped onto it (e.g. bootstrap on the
+strict consensus) in your upstream analysis, and pass that single tree to
+phylorug instead.
 }
 \examples{
 # phylorug ships `sample_trees`: a named list of 5 phylo objects (beetles),
@@ -109,7 +104,7 @@ backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
 # Optional: diagnose taxon overlap before building the matrix.
-# This is not required — node_presence_matrix() enforces matching internally.
+# This is not required, node_presence_matrix() enforces matching internally.
 check_taxa(backbone, others)
 
 # --- Presence/absence matrix -----------------------------------------------
@@ -138,4 +133,10 @@ support_type <- c(
 npm_typed <- node_presence_matrix(backbone, others,
                                   support_type = support_type)
 attr(npm_typed, "support_type")   # stored as an attribute
+}
+\seealso{
+\code{\link[=check_taxa]{check_taxa()}} to diagnose taxon mismatches before building
+the matrix, \code{\link[=plot_phylorug]{plot_phylorug()}} to visualize the result, and
+\code{\link[=add_tree]{add_tree()}} to append additional comparison trees to an existing
+matrix without recomputing it from scratch.
 }

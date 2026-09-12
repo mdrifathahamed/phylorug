@@ -32,11 +32,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID})
+\strong{Maintainer}: Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID})
+  \item Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
   \item Sergei Tarasov \email{sergei.tarasov@helsinki.fi} (\href{https://orcid.org/0000-0002-1737-9403}{ORCID})
 }
 

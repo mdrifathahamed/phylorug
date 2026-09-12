@@ -28,15 +28,13 @@ extra to, the backbone. Diagnostics are attached whatever \code{verbose} is set
 to.
 }
 \description{
-For each comparison tree, checks whether its tip labels (taxon) match the
-backbone's exactly, contain extra labels, or are missing some. A tree
-missing a tip label of the backbone cannot be scored for any clade
-containing that tip. We recommend running this diagnostic before building
-the matrix, especially when combining trees from different studies or
-pipelines. However, it is not a mandatory step \code{\link[=node_presence_matrix]{node_presence_matrix()}}
-enforces taxon matching internally and will error with a clear message if any
-comparison tree is missing backbone taxa. If you are certain all trees share
-the same taxon set, you can proceed directly to \code{\link[=node_presence_matrix]{node_presence_matrix()}}.
+Checks whether the backbone and comparison trees share the same set of
+taxa or not. If a comparison tree is missing a backbone taxon, every backbone
+clade that includes that taxon would be falsely scored as absent,
+\code{\link[=node_presence_matrix]{node_presence_matrix()}} prevents this by stopping with an error, but
+this function helps you diagnose the mismatch before that happens. If you
+already know all trees share the same taxa, skip straight to
+\code{\link[=node_presence_matrix]{node_presence_matrix()}}.
 }
 \details{
 This function reports; it does not modify the trees. If the backbone is
@@ -46,15 +44,15 @@ outcomes are
 \describe{
 \item{identical}{All comparison trees share the backbone's taxa exactly.}
 
-\item{superset}{One or more comparison trees contain every backbone taxon,
-plus some extra. Every backbone clade can still be evaluated, so no
-action is needed; the extra taxa can be ignored.}
+\item{superset}{One or more comparison trees contain every backbone taxon
+plus additional taxa. All backbone clades can still be evaluated;
+the extra taxa are ignored by \code{\link[=node_presence_matrix]{node_presence_matrix()}}.}
 
-\item{missing}{One or more comparison trees lack one or more backbone
-taxa. Any backbone clade containing a missing taxon might produce false
-absence in that tree. Scoring such a clade as absent would report a
-rejection where no question was ever put. Use \code{\link[=prune_to_shared]{prune_to_shared()}} to
-reduce the backbone and the comparison trees to their common taxa.}
+\item{missing}{One or more comparison trees lack backbone taxa.
+A clade cannot be searched in a tree that does not contain all
+of its taxa, so \code{\link[=node_presence_matrix]{node_presence_matrix()}} will stop with an
+error. Use \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce all trees to their
+common taxon set before building the matrix.}
 }
 
 Where a comparison tree is a pool of several equally optimal trees, every
@@ -75,6 +73,7 @@ result <- check_taxa(backbone, others)
 attr(result, "diagnostics")
 }
 \seealso{
-\code{\link[=read_trees]{read_trees()}} to load the trees and \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce
-them to a common taxon set.
+\code{\link[=read_trees]{read_trees()}} to load the trees, \code{\link[=translate_tips]{translate_tips()}} to
+harmonize naming conventions, and \code{\link[=prune_to_shared]{prune_to_shared()}} to reduce
+trees to a common taxon set.
 }

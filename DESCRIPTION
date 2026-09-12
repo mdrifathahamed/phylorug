@@ -3,7 +3,7 @@ Title: Visualize Clade Recovery and Support Across Phylogenetic Trees
 Version: 0.1.0
 Authors@R: c(
     person("Md Rifath", "Ahamed", , "rifath.ahamed@helsinki.fi",
-            role = c("aut", "cre"),
+            role = c("aut", "cre", "cph"),
             comment = c(ORCID = "0009-0005-6158-8658")),
     person("Sergei", "Tarasov", , "sergei.tarasov@helsinki.fi", role = "aut",
            comment = c(ORCID = "0000-0002-1737-9403")),

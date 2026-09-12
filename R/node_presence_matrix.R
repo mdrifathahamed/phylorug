@@ -7,20 +7,19 @@
 #'
 #' @details
 #' This is the core function of the phylorug pipeline. It can be called
-#' directly after [read_trees()], [check_taxa()] is a useful diagnosis but not
-#' a prerequisite, as [node_presence_matrix()] requires perfectly matched taxon
-#' sets and the pipline can not proceed if any mismatches in taxa set are
-#' detected between the backbone and comparison trees.
+#' directly after [read_trees()]. Running [check_taxa()] first is recommended
+#' but not required [node_presence_matrix()] will stop with an error if any
+#' comparison tree is missing backbone taxa.
 #'
 #' Every tree must include the complete set of backbone taxa. Because a tree
-#' lacking a backbone taxon cannot assess the presence of a clade containing
-#' that taxon, scoring such a clade as 'absent' would introduce a false
-#' negative. The function therefore enforces strict taxon matching. Use
+#' lacking a backbone taxon cannot be assessed for the presence of a clade
+#' containing that taxon, scoring such a clade as 'absent' would introduce a
+#' false negative. The function therefore enforces strict taxon matching. Use
 #' [check_taxa()] to diagnose the discrepancies and [prune_to_shared()] to
-#' harmonize the backbone and comparing tree taxa.
+#' harmonize the backbone and comparison tree taxa.
 #'
 #' The function always computes both a presence matrix and a support matrix
-#' in a single pass. The plotting function [plot_phylorug()] decide which to
+#' in a single pass. The plotting function [plot_phylorug()] decides which to
 #' use based on the visualisation context.
 #'
 #' The `presence` matrix records clade recovery: `1` where the bipartition
@@ -29,15 +28,14 @@
 #' strict consensus) requires the clade to appear in every pool tree;
 #' `0.5` applies majority rule; `0` records the raw proportion.
 #'
-#' Each `support_*` matrix records the raw support value from the node label
-#' of the tree that recovered the clade, such as bootstrap percentage or
-#' posterior probability. Support extraction is only meaningful for single
-#' trees (`phylo`), not for pools of equally optimal trees (`multiPhylo`).
-#' Averaging node labels across MPTs is not scientifically valid: support
-#' values come from resampling analyses (bootstrap, jackknife), which
-#' produce a separate consensus tree that should be passed to phylorug as
-#' a single `phylo` comparison tree. If a pool is supplied, only presence
-#' mode is meaningful; support cells for that column will be `NA`.
+#' Each `support_*` matrix records the raw support value from the node label of
+#' the tree that recovered the clade (e.g. bootstrap, posterior probability).
+#' Support values are not computed for pools of equally optimal trees
+#' (`multiPhylo`), only presence mode is available for these, and their support
+#' cells will be `NA`. If you need support mode for a parsimony analysis, build
+#' a consensus tree with support values mapped onto it (e.g. bootstrap on the
+#' strict consensus) in your upstream analysis, and pass that single tree to
+#' phylorug instead.
 #'
 #' @inheritParams check_taxa
 #'
@@ -46,7 +44,7 @@
 #'   IQ-TREE tree stores SH-aLRT and UFBoot as "80/95", passing `1` extracts
 #'   only the first metric into a `support_1` matrix. Passing `c(1, 2)`
 #'   efficiently extracts both simultaneously into `support_1` and `support_2`
-#'   matrices, allowing you to easily switch between them during plotting
+#'   matrices, allowing user to easily switch between them during plotting
 #'   without recalculating. Default is `1` .
 #'
 #' @param support_type Optional named character vector mapping comparison trees
@@ -56,28 +54,29 @@
 #'   [plot_phylorug()] will auto-normalize support values and apply universal
 #'   thresholds.
 #'
-#' @param pool_threshold Numeric between 0 and 1. Controls how pools of equally
-#'   optimal trees (e.g. from TNT or PAUP*) are scored. Default `1.0`
-#'   (strict consensus): a clade must appear in every pool tree to be scored as
-#'   present. Set to `0.5` for majority rule (>50% of pool trees). Set to `0` to
-#'   record the raw proportion (gradient cells in the rug). See Simmons &
-#'   Freudenstein (2011) for why strict consensus is the recommended default for
-#'   parsimony analyses. This parameter is only applicable when evaluating
-#'   parsimony-based `multiPhylo` objects (e.g., Most Parsimonious Trees
-#'   generated via TNT or similar software).
+#' @param pool_threshold Numeric between 0 and 1. Controls how pools of
+#'   equally optimal trees are scored. `1.0` (default) = strict consensus,
+#'   `0.5` = majority rule, `0` = raw proportion. Only applies to
+#'   `multiPhylo` comparisons (e.g. MPTs from TNT or PAUP*).
 #'
 #' @return A named list with one row per internal backbone node and one column
 #'   per comparison tree:
 #'   \describe{
 #'     \item{presence}{Clade presence: `1` where recovered, `0` where absent.
-#'      For pools, the value depends on `pool_threshold`: strict consensus
-#'      (default) gives `1` or `0`; `pool_threshold = 0` gives the raw
-#'      proportion.}
+#'      For pools, the value depends on `pool_threshold` (see above).}
+#'
 #'     \item{support_1, support_2, ...}{One matrix per value in `support_col`.
-#'      Raw support values where the clade was recovered,`NA` where absent.
-#'      Named in the order requested, so `support_col = c(1, 2)` produces
-#'      `support_1` and `support_2`.}
+#'      Raw support values where the clade was recovered, `NA` where absent
+#'      or where the clade was recovered but no support value could be parsed
+#'      from the node label. Named in the order requested, so
+#'      `support_col = c(1, 2)` produces `support_1` and `support_2`.}
 #'   }
+#'
+#' @seealso [check_taxa()] to diagnose taxon mismatches before building
+#'   the matrix, [plot_phylorug()] to visualize the result, and
+#'   [add_tree()] to append additional comparison trees to an existing
+#'   matrix without recomputing it from scratch.
+#'
 #' @export
 #'
 #' @examples
@@ -88,7 +87,7 @@
 #' others   <- sample_trees[names(sample_trees) != "70p_uce"]
 #'
 #' # Optional: diagnose taxon overlap before building the matrix.
-#' # This is not required — node_presence_matrix() enforces matching internally.
+#' # This is not required, node_presence_matrix() enforces matching internally.
 #' check_taxa(backbone, others)
 #'
 #' # --- Presence/absence matrix -----------------------------------------------
