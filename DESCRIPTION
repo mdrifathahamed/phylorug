@@ -7,7 +7,7 @@ Authors@R: c(
             comment = c(ORCID = "0009-0005-6158-8658")),
     person("Sergei", "Tarasov", , "sergei.tarasov@helsinki.fi", role = "aut",
            comment = c(ORCID = "0000-0002-1737-9403")),
-    person("J. Salvador", "Arias", , "salvador.ariasbecerra@helsinki.fi", 
+    person("J. Salvador", "Arias", , "js.arias@conicet.gov.ar", 
             role = "ctb",
             comment = c(ORCID = "0000-0002-3717-435X"))
             )

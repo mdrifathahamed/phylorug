@@ -142,8 +142,7 @@ absent), plus one or more **support matrices** holding the support
 values pulled from each tree's node labels. By default it reads the
 first value in each label. If your trees carry compound labels like
 `100/98` (SH-aLRT/UFBoot2 from IQ-TREE, for example), `support_col`
-picks which one to use `support_col = 1` for the first, `support_col
-= 2` for the second, or `support_col = c(1, 2)` to pull both at once and makes two **support matrices**.
+picks which one to use `support_col = 1` for the first, `support_col = 2` for the second, or `support_col = c(1, 2)` to pull both at once and makes two **support matrices**.
 
 Two more arguments belong here. `support_type` is a named character vector telling `node_presence_matrix()` which support metric each comparison tree uses (`"ufboot"`, `"lpp"`, `"sh_alrt"`, `"posterior"`). It gets stored with the result and `plot_phylorug()` reads it automatically in support mode, so you only declare it once, here.
 

@@ -42,7 +42,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item J. Salvador Arias \email{salvador.ariasbecerra@helsinki.fi} (\href{https://orcid.org/0000-0002-3717-435X}{ORCID}) [contributor]
+  \item J. Salvador Arias \email{js.arias@conicet.gov.ar} (\href{https://orcid.org/0000-0002-3717-435X}{ORCID}) [contributor]
 }
 
 }
