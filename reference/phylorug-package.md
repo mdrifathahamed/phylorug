@@ -57,5 +57,5 @@ Authors:
 
 Other contributors:
 
-- J. Salvador Arias <salvador.ariasbecerra@helsinki.fi>
+- J. Salvador Arias <js.arias@conicet.gov.ar>
   ([ORCID](https://orcid.org/0000-0002-3717-435X)) \[contributor\]
