@@ -59,24 +59,28 @@
 </div>
 <!-- badges: start -->
 
-<p><strong>phylorug</strong> is an R package for comparing and visualizing clade recovery and support across multiple phylogenetic trees. It takes a set of trees from different inference pipelines, datasets, or statistical models, but inferred from the same set of taxa. It draws a compact coloured grid, a <strong>rug</strong> at each internal node of a reference tree, showing which clades are stable across trees and which are not. Nodes recovered by all trees appear as solid dots; nodes that differ get a <strong>rug</strong> visualizing presence/absence and support strength of that specific clade.</p>
+<p><strong>phylorug</strong> is an R package for comparing and visualizing clade recovery and support across multiple phylogenetic trees. It takes a set of trees from different inference pipelines, datasets, or statistical models, all representing the same focal group of organisms. It draws a compact coloured grid, a <strong>rug plot</strong>, at each internal node of a reference tree, showing which clades are stable across trees and which are not. Nodes recovered by all trees appear as solid dots; contested nodes get a full grid visualizing presence/absence and support strength of that specific clade.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Phylogenetic trees with hundreds or even thousands of taxa has become common nowadays, and as sequencing technologies become cheaper and datasets grow, trees will only get larger. Additionally, modern phylogenomic studies routinely produce multiple species trees for the same underlying hypothesis. Researchers combine different data types (morphology, UCEs, transcriptomes, whole genomes), apply different analytical strategies (concatenation with varying partitioning schemes, coalescent methods, site-heterogeneous models), use different alignment approaches, and employ different inference software (IQ-TREE, ASTRAL, MrBayes, RAxML). Each combination yields a tree with its own support values in its own format, such as ultrafast bootstrap, SH-aLRT, posterior probability, and local posterior probability etc, and the central question becomes: which nodes hold up across methods, and how strongly?</p>
-<p>The rug on tree node concept for comparing clade recovery across analytical conditions was introduced by Wheeler (1995) and popularized as “Navajo rugs” by Giribet (2003). Software to automate these plots, Cladescan (Sanders 2010) and YBYRÁ (Machado 2015), both of which are no longer maintained, were designed for parsimony parameter sensitivity rather than modern multi-method phylogenomic comparison. Additionally, no existing tool maps clade recovery or heterogeneous support values from multiple inference pipelines onto a single tree within R.</p>
-<p><strong>phylorug</strong> maps clade recovery and support values from any number of independently inferred phylogenetic trees onto a single reference topology as a rug plot. It operates in two modes:</p>
+<p>Phylogenomic studies routinely apply multiple analytical approaches to infer relationships within a focal group of organisms. Different inference methods, datasets, and models yield trees that may differ in topology and report clade support using different metrics and formats. Assessing the robustness of phylogenetic results therefore requires comparing clade recovery and support across analyses, typically relative to a selected backbone tree.</p>
+<p>A convenient way to visualize such comparisons is a phylogenetic <strong>rug plot</strong>, in which each node of the backbone tree is associated with a series of cells representing different analyses. Each cell indicates whether a clade was recovered and, where applicable, its level of support. Rug plots give an intuitive overview of clade stability across alternative phylogenetic analyses, but compiling them manually is tedious and time-consuming. Despite the extensive use of R in the phylogenetics community, no dedicated R package exists for generating such plots.</p>
+<p><strong>phylorug</strong> fills this gap. It operates in two modes:</p>
 </div>
 <div class="section level2">
 <h2 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
 </h2>
-<p><img src="reference/figures/README-presence.png" alt="Presence mode">Black/white cells showing whether each tree recovers a given clade. A direct conceptual descendant of Wheeler’s (1995) space plots, extended beyond parameter sensitivity analysis to compare any set of independently inferred trees.</p>
+<figure><img src="reference/figures/README-presence.png" alt="Presence mode"><figcaption aria-hidden="true">
+Presence mode
+</figcaption></figure><p>Black/white cells showing whether each analysis recovered a given clade or not. Stable nodes appear as black dots; contested nodes show a grid.</p>
 </div>
 <div class="section level2">
-<h2 id="support-mode">Support Mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
+<h2 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
 </h2>
-<p><img src="reference/figures/README-support.png" alt="Support mode">Black, grey, yellow, white, and red cells showing how strongly each analysis supports a given clade. Each support value is binned on its own metric’s scale. Different formats are never rescaled or cross-compared numerically. Default thresholds are provided, but users are recommended to set their own.</p>
-<p>The entire workflow runs in R, from reading raw tree files to publication-ready figures, just a few lines added to an existing phylogenetic script. The package was developed around a dung beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and tested with simulated trees of over 700 taxa across 15 analyses. Three real-world datasets are bundled with the package so users can try the pipeline on real data before applying it to their own.</p>
+<figure><img src="reference/figures/README-support.png" alt="Support mode"><figcaption aria-hidden="true">
+Support mode
+</figcaption></figure><p>Cells are shaded by how strongly each analysis supports a given clade. Each support value is binned against its own metric’s thresholds, so UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default thresholds are provided, but users are encouraged to set their own.</p>
+<p>The entire workflow runs in R, from reading raw tree files to publication-ready figures. The package was developed around a dung beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and includes three bundled datasets so users can try the pipeline on real data before applying it to their own.</p>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
@@ -89,32 +93,33 @@
 <div class="section level3">
 <h3 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(phylorug)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Load example trees from the package data</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">data</span>(sample_trees)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Select backbone and comparison trees</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>backbone <span class="ot">&lt;-</span> sample_trees[[<span class="st">"70p_uce"</span>]]</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>others   <span class="ot">&lt;-</span> sample_trees[<span class="fu">names</span>(sample_trees) <span class="sc">!=</span> <span class="st">"70p_uce"</span>]</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Validate  all trees share same set of taxa (recommended but optional)</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">check_taxa</span>(backbone, others)</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Build the node presence matrix</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># support_type only matters for support mode — skip it if you just want </span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># presence/absence</span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>npm <span class="ot">&lt;-</span> <span class="fu">node_presence_matrix</span>(backbone, others, <span class="at">support_type =</span> <span class="fu">c</span>(</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="ot">=</span> <span class="st">"lpp"</span>,</span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>                <span class="st">"70p_ghost"</span>                    <span class="ot">=</span> <span class="st">"ufboot"</span>,</span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>                <span class="st">"70p_partition_entropy"</span>        <span class="ot">=</span> <span class="st">"ufboot"</span>)</span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm)</span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co"># Support mode: How strongly?</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="fu">plot_phylorug</span>(backbone, npm, <span class="at">mode =</span> <span class="st">"support"</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load example trees from the package data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select backbone and comparison trees</span></span>
+<span><span class="va">backbone</span> <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[[</span><span class="st">"70p_uce"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">others</span>   <span class="op">&lt;-</span> <span class="va">sample_trees</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sample_trees</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"70p_uce"</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Validate  all trees share same set of taxa (recommended but optional)</span></span>
+<span><span class="fu"><a href="reference/check_taxa.html">check_taxa</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Build the node presence matrix</span></span>
+<span><span class="co"># support_type only matters for support mode — skip it if you just want </span></span>
+<span><span class="co"># presence/absence</span></span>
+<span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
+<span>                <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
+<span>                <span class="st">"70p_partition_entropy"</span>        <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Presence mode: Which analyses recover each clade?</span></span>
+<span><span class="fu"><a href="reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Support mode: How strongly?</span></span>
+<span><span class="fu"><a href="reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, mode <span class="op">=</span> <span class="st">"support"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="core-functions">Core functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>
@@ -132,7 +137,7 @@
 <ul>
 <li><p><code><a href="reference/check_taxa.html">check_taxa()</a></code> Validates that the backbone and comparison trees share an identical set of taxa, reporting any missing or extraneous tips. Use this diagnostic function between <code><a href="reference/read_trees.html">read_trees()</a></code> and <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code> to pinpoint exact tip mismatches before the pipeline halts.</p></li>
 <li><p><code><a href="reference/translate_tips.html">translate_tips()</a></code> Rename tip labels between naming conventions using a lookup table (e.g. specimen codes to species names).</p></li>
-<li><p><code><a href="reference/prune_to_shared.html">prune_to_shared()</a></code> drops taxa that are not present in all trees, keeping only the shared set.Useful when comparison trees lack some taxa found in the backbone.</p></li>
+<li><p><code><a href="reference/prune_to_shared.html">prune_to_shared()</a></code> drops taxa that are not present in all trees, keeping only the shared set. Useful when comparison trees lack some taxa found in the backbone.</p></li>
 <li><p><code><a href="reference/add_tree.html">add_tree()</a></code> Appends new comparison trees directly to an existing node presence matrix (the object generated by <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code>) without requiring a complete recalculation of the pipeline.</p></li>
 </ul>
 <p>You can learn more about each step in <code><a href="articles/phylorug.html">vignette("phylorug")</a></code>.</p>
@@ -169,7 +174,7 @@
 </h3>
 <p>If you use <strong>phylorug</strong> in a publication, please cite:</p>
 <blockquote>
-<p>Ahamed, M.R., Tarasov, S., and Arias, J.S. (2026). phylorug: Visualize Clade Recovery and Support Across Phylogenetic Trees. R package version 0.1.0. <a href="https://github.com/mdrifathahamed/phylorug" class="external-link uri">https://github.com/mdrifathahamed/phylorug</a></p>
+<p>Ahamed, M.R., Arias, J.S., and Tarasov, S. (2026). phylorug: Visualize Clade Recovery and Support Across Phylogenetic Trees. R package version 0.1.0. <a href="https://github.com/mdrifathahamed/phylorug" class="external-link uri">https://github.com/mdrifathahamed/phylorug</a></p>
 </blockquote>
 </div>
 <div class="section level3">

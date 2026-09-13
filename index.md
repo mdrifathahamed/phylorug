@@ -3,66 +3,60 @@
 **phylorug** is an R package for comparing and visualizing clade
 recovery and support across multiple phylogenetic trees. It takes a set
 of trees from different inference pipelines, datasets, or statistical
-models, but inferred from the same set of taxa. It draws a compact
-coloured grid, a **rug** at each internal node of a reference tree,
-showing which clades are stable across trees and which are not. Nodes
-recovered by all trees appear as solid dots; nodes that differ get a
-**rug** visualizing presence/absence and support strength of that
-specific clade.
+models, all representing the same focal group of organisms. It draws a
+compact coloured grid, a **rug plot**, at each internal node of a
+reference tree, showing which clades are stable across trees and which
+are not. Nodes recovered by all trees appear as solid dots; contested
+nodes get a full grid visualizing presence/absence and support strength
+of that specific clade.
 
 ## Overview
 
-Phylogenetic trees with hundreds or even thousands of taxa has become
-common nowadays, and as sequencing technologies become cheaper and
-datasets grow, trees will only get larger. Additionally, modern
-phylogenomic studies routinely produce multiple species trees for the
-same underlying hypothesis. Researchers combine different data types
-(morphology, UCEs, transcriptomes, whole genomes), apply different
-analytical strategies (concatenation with varying partitioning schemes,
-coalescent methods, site-heterogeneous models), use different alignment
-approaches, and employ different inference software (IQ-TREE, ASTRAL,
-MrBayes, RAxML). Each combination yields a tree with its own support
-values in its own format, such as ultrafast bootstrap, SH-aLRT,
-posterior probability, and local posterior probability etc, and the
-central question becomes: which nodes hold up across methods, and how
-strongly?
+Phylogenomic studies routinely apply multiple analytical approaches to
+infer relationships within a focal group of organisms. Different
+inference methods, datasets, and models yield trees that may differ in
+topology and report clade support using different metrics and formats.
+Assessing the robustness of phylogenetic results therefore requires
+comparing clade recovery and support across analyses, typically relative
+to a selected backbone tree.
 
-The rug on tree node concept for comparing clade recovery across
-analytical conditions was introduced by Wheeler (1995) and popularized
-as “Navajo rugs” by Giribet (2003). Software to automate these plots,
-Cladescan (Sanders 2010) and YBYRÁ (Machado 2015), both of which are no
-longer maintained, were designed for parsimony parameter sensitivity
-rather than modern multi-method phylogenomic comparison. Additionally,
-no existing tool maps clade recovery or heterogeneous support values
-from multiple inference pipelines onto a single tree within R.
+A convenient way to visualize such comparisons is a phylogenetic **rug
+plot**, in which each node of the backbone tree is associated with a
+series of cells representing different analyses. Each cell indicates
+whether a clade was recovered and, where applicable, its level of
+support. Rug plots give an intuitive overview of clade stability across
+alternative phylogenetic analyses, but compiling them manually is
+tedious and time-consuming. Despite the extensive use of R in the
+phylogenetics community, no dedicated R package exists for generating
+such plots.
 
-**phylorug** maps clade recovery and support values from any number of
-independently inferred phylogenetic trees onto a single reference
-topology as a rug plot. It operates in two modes:
+**phylorug** fills this gap. It operates in two modes:
 
 ## Presence mode
 
-![Presence mode](reference/figures/README-presence.png)Black/white cells
-showing whether each tree recovers a given clade. A direct conceptual
-descendant of Wheeler’s (1995) space plots, extended beyond parameter
-sensitivity analysis to compare any set of independently inferred trees.
+![Presence mode](reference/figures/README-presence.png)
 
-## Support Mode
+Presence mode
 
-![Support mode](reference/figures/README-support.png)Black, grey,
-yellow, white, and red cells showing how strongly each analysis supports
-a given clade. Each support value is binned on its own metric’s scale.
-Different formats are never rescaled or cross-compared numerically.
-Default thresholds are provided, but users are recommended to set their
-own.
+Black/white cells showing whether each analysis recovered a given clade
+or not. Stable nodes appear as black dots; contested nodes show a grid.
+
+## Support mode
+
+![Support mode](reference/figures/README-support.png)
+
+Support mode
+
+Cells are shaded by how strongly each analysis supports a given clade.
+Each support value is binned against its own metric’s thresholds, so
+UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default
+thresholds are provided, but users are encouraged to set their own.
 
 The entire workflow runs in R, from reading raw tree files to
-publication-ready figures, just a few lines added to an existing
-phylogenetic script. The package was developed around a dung beetle
-phylogenomic dataset (Montanaro, Lopes et al. 2026) and tested with
-simulated trees of over 700 taxa across 15 analyses. Three real-world
-datasets are bundled with the package so users can try the pipeline on
-real data before applying it to their own.
+publication-ready figures. The package was developed around a dung
+beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and includes
+three bundled datasets so users can try the pipeline on real data before
+applying it to their own.
 
 ### Installation
 
@@ -79,6 +73,7 @@ library(phylorug)
 ### Quick example
 
 ``` r
+
 library(phylorug)
 
 # Load example trees from the package data
@@ -98,13 +93,13 @@ npm <- node_presence_matrix(backbone, others, support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
                 "70p_ASTRAL_uce"               = "lpp",
                 "70p_ghost"                    = "ufboot",
-                "70p_partition_entropy"        = "ufboot")
+                "70p_partition_entropy"        = "ufboot"))
 
 # Presence mode: Which analyses recover each clade?
 plot_phylorug(backbone, npm)
 
 # Support mode: How strongly?
-plot_phylorug(backbone, npm, mode = "support"))
+plot_phylorug(backbone, npm, mode = "support")
 ```
 
 ### Core functions
@@ -140,7 +135,8 @@ helpers are available when your data needs them:
 
 - [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
   drops taxa that are not present in all trees, keeping only the shared
-  set.Useful when comparison trees lack some taxa found in the backbone.
+  set. Useful when comparison trees lack some taxa found in the
+  backbone.
 
 - [`add_tree()`](https://mdrifathahamed.github.io/phylorug/reference/add_tree.md)
   Appends new comparison trees directly to an existing node presence
@@ -188,7 +184,7 @@ If you find a bug or have a feature request, please open an issue on
 
 If you use **phylorug** in a publication, please cite:
 
-> Ahamed, M.R., Tarasov, S., and Arias, J.S. (2026). phylorug: Visualize
+> Ahamed, M.R., Arias, J.S., and Tarasov, S. (2026). phylorug: Visualize
 > Clade Recovery and Support Across Phylogenetic Trees. R package
 > version 0.1.0. <https://github.com/mdrifathahamed/phylorug>
 
