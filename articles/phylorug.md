@@ -2,22 +2,23 @@
 
 ## What problem does phylorug solve?
 
-Phylogenomic studies routinely produce multiple trees from the same
-taxa. Different data types (UCEs, transcriptomes, whole genomes),
-different inference methods (IQ-TREE, ASTRAL, MrBayes), and different
-models (site-homogeneous, site-heterogeneous, coalescent) each yield a
-tree with its own topology and support values in its own format
-(Steenwyk et al., 2023).
+Phylogenomic studies routinely apply multiple analytical approaches to
+infer relationships within a focal group of organisms. Different
+inference methods (IQ-TREE, ASTRAL, MrBayes), different data types
+(UCEs, transcriptomes, whole genomes), and different models
+(site-homogeneous, site-heterogeneous, coalescent) each yield a tree
+that may differ in topology and report clade support using different
+metrics and formats (Steenwyk et al., 2023).
 
 The question this creates at every node is simple: **does this clade
-appear in all my analyses, and how strongly does each one support it?**
+appear in all analyses, and how strongly does each one support it?**
 
 Answering that by opening tree files side by side is tedious and
 error-prone, especially as taxon counts and the number of analyses grow.
-Existing tools measure overall topological distance between two trees,
-or quantify gene-tree conflict within a single pipeline, but neither
-shows you, which clades hold up across analytical choices and which do
-not.
+Additionally, existing tools only measure overall topological distance
+between two trees, or quantify gene-tree conflict within a single
+pipeline, but neither shows you which clades hold up across analytical
+choices and which do not.
 
 **phylorug** fills this gap. It draws a compact coloured grid, a **rug
 plot** at every internal node of a reference tree. Each cell represents
@@ -61,9 +62,7 @@ alone.
 black dot if every analysis recovers the clade, or a grid showing which
 analyses recover it and which do not, this is nodal stability. In
 `support` mode, the same grid shades each cell by how strongly that
-analysis supports the clade, so a node that is unanimously recovered but
-weakly supported looks different from one that is unanimously recovered
-and strongly supported — this is nodal support layered on top of
+analysis supports the clade — this is nodal support layered on top of
 stability. Setting `rug_on_identical = TRUE` extends the grid to
 unanimous nodes, making per-analysis support variation visible even at
 the most stable clades.
@@ -131,19 +130,17 @@ can be used to get identical taxa set.
 
 ### Build the node presence matrix
 
-Now this is the core computing function of `phylorug`, the next question
-is which clades from the backbone show up in which comparison trees, and
-how strongly each one is supported.
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-answers this by walking every internal node of the backbone and checking
-each comparison tree for that same clade.
+is the core function of the pipeline. It walks every internal node of
+the backbone, checks whether each comparison tree recovered that clade,
+and records its support value.
 
 It returns a named list: a **presence matrix** (1 = clade recovered, 0 =
 absent), plus one or more **support matrices** holding the support
 values pulled from each tree’s node labels. By default it reads the
 first value in each label. If your trees carry compound labels like
 `100/98` (SH-aLRT/UFBoot2 from IQ-TREE, for example), `support_col`
-picks which one to use `support_col = 1` for the first,
+picks which one to use: `support_col = 1` for the first,
 `support_col = 2` for the second, or `support_col = c(1, 2)` to pull
 both at once and makes two **support matrices**.
 
@@ -185,11 +182,12 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2), support_typ
 ```
 
 The result is a named list. `npm$presence` is a matrix of 1s and 0s.
-`npm$support_1` and `npm$support_2` hold the raw support values, with
-`NA` where the clade was not recovered. These matrices are what
+`npm$support_1` and `npm$support_2` hold the raw support values. The
+list also carries `support_type` as an attribute, and all of these are
+what
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
-uses to draw the rug, presence determines whether a cell is filled or
-empty, support determines its shade.
+uses to draw the rug: presence determines whether a cell is filled or
+empty; support determines its shade.
 
 ### Plot the rug
 
@@ -274,12 +272,13 @@ At each node you will see one of these patterns:
   instead.
 
 In support mode, filled cells are shaded by how strongly each analysis
-supports the clade. The colour scheme uses a greyscale gradient for
-recovered clades plus two special colours for absent and unparseable
-cases. The thresholds shown below are the package defaults. Different
-fields and journals apply different cutoffs, so we recommend defining
-your own via the `thresholds` argument (see the Customisation section
-below):
+supports the clade. The colour scheme uses a greyscale gradient from
+black (very high) through greys (high, moderate) to white (not
+recovered), plus yellow for low support and red where the clade was
+recovered but no support value could be parsed.The thresholds shown
+below are the package defaults. Different fields and journals apply
+different cutoffs, so we recommend defining your own via the
+`thresholds` argument (see the Customisation section below):
 
 - **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP
   \>=0.95).
@@ -290,9 +289,10 @@ below):
 - **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for
   LPP). Present but weakly endorsed.
 - **White**: clade not recovered by that analysis.
-- **Red**: clade recovered but no support value could be read. This
-  typically means the tree file had no node labels, or the label was not
-  a parseable number.
+- **Red**: clade recovered but no support value could be parsed from the
+  node label. This can happen when the tree file carries no node labels,
+  the label is not numeric, or the original analysis did not report
+  support at that node.
 
 ## Fine-tuning the figure
 
@@ -452,7 +452,9 @@ position to an analysis name.
 ### support-mode
 
 Here we use `show_support = TRUE` to overlay the backbone’s own node
-labels in red for cross-referencing and `cell_scale = 0.35` to shrink
+labels in red for cross-referencing, with `show_support_idx = 1` to
+display only the first support metric instead of the full compound label
+(e.g. showing `100` rather than `100/100`). `cell_scale = 0.3` shrinks
 the rug cells slightly for a denser tree. All-white rugs are hidden by
 default, so only contested and stable nodes remain visible.
 
@@ -461,10 +463,11 @@ default, so only contested and stable nodes remain visible.
 plot_phylorug(backbone, npm,
               mode               = "support",
               show_support       = TRUE,
-              support_label_cex  = 0.25,
+              show_support_idx   = 1,
+              support_label_cex  = 0.35,
               support_label_col  = "red",
-              cell_scale         = 0.35,
-              rug_position       = "inside",
+              cell_scale         = 0.3,
+              rug_position       = "outside",
               rug_on_identical   = FALSE)
 ```
 
@@ -792,14 +795,6 @@ plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 
 ![](phylorug_files/figure-html/grid-demo-1.png)
 
-``` r
-
-#rug with squired grid
-plot_phylorug(backbone, npm, n_rows = 2, n_cols = 2)
-```
-
-![](phylorug_files/figure-html/unnamed-chunk-2-1.png)
-
 ### Tree appearance
 
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
@@ -837,7 +832,7 @@ plot_phylorug(backbone, npm,
               include_backbone = "ufboot")
 ```
 
-![](phylorug_files/figure-html/unnamed-chunk-3-1.png)
+![](phylorug_files/figure-html/unnamed-chunk-2-1.png)
 
 ### Custom thresholds
 
@@ -869,9 +864,10 @@ define each clade:
 
 plot_phylorug(
   backbone, npm,
+  mode = "support",
   nodes = list(
-    c("Gyronotus_pumilus_STL10003", "Coptorhina_klugii__STL10039"),
-    c("Nesosisyphus_pygmaeus__STL3", "Sisyphus_muricatus__STL5")
+    c("Gyronotus_pumilus_STL10003", "Scarabaeus_westwoodi_STL10034"),
+    c("Nanos_dubitatus_STL5001", "Catharsius_sp._STL10033")
   )
 )
 ```
@@ -975,13 +971,6 @@ that single file to phylorug. Passing raw tied optima into support mode
 would display arbitrary node labels as though they were support values,
 producing an artifactual rug.
 
-**Wrap bare `multiPhylo` in a list.** If you construct comparison trees
-manually, each element of the list passed to
-[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
-must be a single `phylo` or a `multiPhylo` (a pool from one search). A
-bare `multiPhylo` at the top level is interpreted as one analysis with
-multiple tied-optimal trees, not as separate analyses.
-
 **Use
 [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
 when taxa differ.** If a comparison tree is missing some backbone taxa,
@@ -995,25 +984,28 @@ to reduce all trees to their common taxa.
 
 ## References
 
-- Fu, Y. et al. (2025). Phylogenomic insights into the higher level
-  relationships within Culicomorpha (Diptera). *Insect Systematics and
-  Diversity*, 9(6), ixaf056.
+- Fu, Y., Du, S., Fang, X., Xu, Z. & Wang, X. (2025). Phylogenomic
+  insights into the higher level relationships within Culicomorpha
+  (Diptera) revealed by whole-genome sequencing. *Insect Systematics and
+  Diversity*, 9(6), ixaf056. <https://doi.org/10.1093/isd/ixaf056>
 - Giribet, G. (2003). Stability in phylogenetic formulations and its
   relationship to nodal support. *Systematic Biology*, 52(4), 554–564.
+  <https://doi.org/10.1080/10635150390223730>
+- Machado, D.J. (2015). YBYRÁ facilitates comparison of large
+  phylogenetic trees. *BMC Bioinformatics*, 16, 204.
+  <https://doi.org/10.1186/s12859-015-0642-9>
 - Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
   Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone,
-  R.L., Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
+  R.L., Daniel, G.M. & Tarasov, S. (2026). Phylogenomics resolves a
   200-year-old puzzle: a revised tribal classification of Afro-Eurasian
   dung beetles (Coleoptera: Scarabaeinae). *bioRxiv*.
   <https://doi.org/10.64898/2026.07.22.740134>
-- Machado, D. J. (2015). YBYRÁ facilitates comparison of large
-  phylogenetic trees. *BMC Bioinformatics*, 16, 204.
-- Sanders, J. G. (2010). Program note: Cladescan, a program for
-  automated phylogenetic sensitivity analysis. *Cladistics*, 26(1),
-  114–116.
-- Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. & Rokas, A. (2023).
+- Sanders, J.G. (2010). Program note: Cladescan, a program for automated
+  phylogenetic sensitivity analysis. *Cladistics*, 26(1), 114–116.
+  <https://doi.org/10.1111/j.1096-0031.2009.00280.x>
+- Steenwyk, J.L., Li, Y., Zhou, X., Shen, X.X. & Rokas, A. (2023).
   Incongruence in the phylogenomics era. *Nature Reviews Genetics*,
-  24(12), 834–850.
-- Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity, and
+  24(12), 834–850. <https://doi.org/10.1038/s41576-023-00620-x>
+- Wheeler, W.C. (1995). Sequence alignment, parameter sensitivity, and
   the phylogenetic analysis of molecular data. *Systematic Biology*,
-  44(3), 321–331.
+  44(3), 321–331. <https://doi.org/10.2307/2413595>

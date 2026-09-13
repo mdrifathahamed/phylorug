@@ -66,21 +66,22 @@
 <div class="section level2">
 <h2 id="what-problem-does-phylorug-solve">What problem does phylorug solve?<a class="anchor" aria-label="anchor" href="#what-problem-does-phylorug-solve"></a>
 </h2>
-<p>Phylogenomic studies routinely produce multiple trees from the same
-taxa. Different data types (UCEs, transcriptomes, whole genomes),
-different inference methods (IQ-TREE, ASTRAL, MrBayes), and different
-models (site-homogeneous, site-heterogeneous, coalescent) each yield a
-tree with its own topology and support values in its own format
-(Steenwyk et al., 2023).</p>
+<p>Phylogenomic studies routinely apply multiple analytical approaches
+to infer relationships within a focal group of organisms. Different
+inference methods (IQ-TREE, ASTRAL, MrBayes), different data types
+(UCEs, transcriptomes, whole genomes), and different models
+(site-homogeneous, site-heterogeneous, coalescent) each yield a tree
+that may differ in topology and report clade support using different
+metrics and formats (Steenwyk et al., 2023).</p>
 <p>The question this creates at every node is simple: <strong>does this
-clade appear in all my analyses, and how strongly does each one support
+clade appear in all analyses, and how strongly does each one support
 it?</strong></p>
 <p>Answering that by opening tree files side by side is tedious and
 error-prone, especially as taxon counts and the number of analyses grow.
-Existing tools measure overall topological distance between two trees,
-or quantify gene-tree conflict within a single pipeline, but neither
-shows you, which clades hold up across analytical choices and which do
-not.</p>
+Additionally, existing tools only measure overall topological distance
+between two trees, or quantify gene-tree conflict within a single
+pipeline, but neither shows you which clades hold up across analytical
+choices and which do not.</p>
 <p><strong>phylorug</strong> fills this gap. It draws a compact coloured
 grid, a <strong>rug plot</strong> at every internal node of a reference
 tree. Each cell represents one analysis; its colour shows whether that
@@ -126,10 +127,8 @@ robustness than either alone.</p>
 mode, each node gets a black dot if every analysis recovers the clade,
 or a grid showing which analyses recover it and which do not, this is
 nodal stability. In <code>support</code> mode, the same grid shades each
-cell by how strongly that analysis supports the clade, so a node that is
-unanimously recovered but weakly supported looks different from one that
-is unanimously recovered and strongly supported — this is nodal support
-layered on top of stability. Setting
+cell by how strongly that analysis supports the clade — this is nodal
+support layered on top of stability. Setting
 <code>rug_on_identical = TRUE</code> extends the grid to unanimous
 nodes, making per-analysis support variation visible even at the most
 stable clades.</p>
@@ -189,19 +188,17 @@ to get identical taxa set.</p>
 <div class="section level3">
 <h3 id="build-the-node-presence-matrix">Build the node presence matrix<a class="anchor" aria-label="anchor" href="#build-the-node-presence-matrix"></a>
 </h3>
-<p>Now this is the core computing function of <code>phylorug</code>, the
-next question is which clades from the backbone show up in which
-comparison trees, and how strongly each one is supported.
-<code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> answers this by walking every
-internal node of the backbone and checking each comparison tree for that
-same clade.</p>
+<p><code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> is the core function of the
+pipeline. It walks every internal node of the backbone, checks whether
+each comparison tree recovered that clade, and records its support
+value.</p>
 <p>It returns a named list: a <strong>presence matrix</strong> (1 =
 clade recovered, 0 = absent), plus one or more <strong>support
 matrices</strong> holding the support values pulled from each tree’s
 node labels. By default it reads the first value in each label. If your
 trees carry compound labels like <code>100/98</code> (SH-aLRT/UFBoot2
 from IQ-TREE, for example), <code>support_col</code> picks which one to
-use <code>support_col = 1</code> for the first,
+use: <code>support_col = 1</code> for the first,
 <code>support_col = 2</code> for the second, or
 <code>support_col = c(1, 2)</code> to pull both at once and makes two
 <strong>support matrices</strong>.</p>
@@ -233,10 +230,10 @@ the right thresholds for its own metric:</p>
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
 <p>The result is a named list. <code>npm$presence</code> is a matrix of
 1s and 0s. <code>npm$support_1</code> and <code>npm$support_2</code>
-hold the raw support values, with <code>NA</code> where the clade was
-not recovered. These matrices are what <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> uses
-to draw the rug, presence determines whether a cell is filled or empty,
-support determines its shade.</p>
+hold the raw support values. The list also carries
+<code>support_type</code> as an attribute, and all of these are what
+<code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> uses to draw the rug: presence determines
+whether a cell is filled or empty; support determines its shade.</p>
 </div>
 <div class="section level3">
 <h3 id="plot-the-rug">Plot the rug<a class="anchor" aria-label="anchor" href="#plot-the-rug"></a>
@@ -315,11 +312,13 @@ these nodes instead.</li>
 </ul>
 <p>In support mode, filled cells are shaded by how strongly each
 analysis supports the clade. The colour scheme uses a greyscale gradient
-for recovered clades plus two special colours for absent and unparseable
-cases. The thresholds shown below are the package defaults. Different
-fields and journals apply different cutoffs, so we recommend defining
-your own via the <code>thresholds</code> argument (see the Customisation
-section below):</p>
+from black (very high) through greys (high, moderate) to white (not
+recovered), plus yellow for low support and red where the clade was
+recovered but no support value could be parsed.The thresholds shown
+below are the package defaults. Different fields and journals apply
+different cutoffs, so we recommend defining your own via the
+<code>thresholds</code> argument (see the Customisation section
+below):</p>
 <ul>
 <li>
 <strong>Black</strong>: very high support (UFBoot2 &gt;= 95, SH-aLRT
@@ -337,8 +336,9 @@ below 0.50 for LPP). Present but weakly endorsed.</li>
 <strong>White</strong>: clade not recovered by that analysis.</li>
 <li>
 <strong>Red</strong>: clade recovered but no support value could be
-read. This typically means the tree file had no node labels, or the
-label was not a parseable number.</li>
+parsed from the node label. This can happen when the tree file carries
+no node labels, the label is not numeric, or the original analysis did
+not report support at that node.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -484,20 +484,23 @@ position to an analysis name.</p>
 <h3 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
 </h3>
 <p>Here we use <code>show_support = TRUE</code> to overlay the
-backbone’s own node labels in red for cross-referencing and
-<code>cell_scale = 0.35</code> to shrink the rug cells slightly for a
-denser tree. All-white rugs are hidden by default, so only contested and
-stable nodes remain visible.</p>
+backbone’s own node labels in red for cross-referencing, with
+<code>show_support_idx = 1</code> to display only the first support
+metric instead of the full compound label (e.g. showing <code>100</code>
+rather than <code>100/100</code>). <code>cell_scale = 0.3</code> shrinks
+the rug cells slightly for a denser tree. All-white rugs are hidden by
+default, so only contested and stable nodes remain visible.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>              show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>              support_label_cex  <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>              show_support_idx   <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>              support_label_cex  <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>              support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>              cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
-<span>              rug_position       <span class="op">=</span> <span class="st">"inside"</span>,</span>
+<span>              cell_scale         <span class="op">=</span> <span class="fl">0.3</span>,</span>
+<span>              rug_position       <span class="op">=</span> <span class="st">"outside"</span>,</span>
 <span>              rug_on_identical   <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
+<p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level3">
 <h3 id="what-the-rug-reveals">What the rug reveals<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
@@ -794,17 +797,13 @@ precise than metric-specific binning:</p>
 <code class="sourceCode R"><span><span class="co">#rug with flatend grid</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">1</span>, n_cols <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/grid-demo-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#rug with squired grid</span></span>
-<span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">2</span>, n_cols <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="tree-appearance">Tree appearance<a class="anchor" aria-label="anchor" href="#tree-appearance"></a>
 </h3>
 <p><code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> passes additional arguments through
 <code>...</code> to <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code>. Common options:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, cex <span class="op">=</span> <span class="fl">0.6</span>, font <span class="op">=</span> <span class="fl">3</span>, edge.width <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/tree-appearance-1.png" class="r-plt" alt="" width="672"></p>
 </div>
@@ -814,23 +813,23 @@ precise than metric-specific binning:</p>
 <p>By default, the backbone does not occupy a cell in the rug (it
 trivially recovers every clade, since it defines the topology). Set
 <code>include_backbone = TRUE</code> to add it as cell 1:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, include_backbone <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/include-bb-1.png" class="r-plt" alt="" width="672"></p>
 <p>In support mode, pass the backbone’s support metric directly to
 <code>include_backbone</code> so it gets binned against the correct
 thresholds:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode             <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>              include_backbone <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="phylorug_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
 </h3>
 <p>Override the default support bins with your own cutoffs:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  ufboot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">98</span>, high <span class="op">=</span> <span class="fl">90</span>, moderate <span class="op">=</span> <span class="fl">70</span><span class="op">)</span>,</span>
 <span>  lpp    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">0.99</span>, high <span class="op">=</span> <span class="fl">0.90</span>, moderate <span class="op">=</span> <span class="fl">0.70</span><span class="op">)</span></span>
@@ -849,25 +848,26 @@ thresholds:</p>
 <p>Sometimes you only want to look at a few clades, not the whole tree.
 <code>nodes</code> restricts the rug to just those, using the tip labels
 that define each clade:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
 <span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
+<span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  nodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gyronotus_pumilus_STL10003"</span>, <span class="st">"Coptorhina_klugii__STL10039"</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nesosisyphus_pygmaeus__STL3"</span>, <span class="st">"Sisyphus_muricatus__STL5"</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gyronotus_pumilus_STL10003"</span>, <span class="st">"Scarabaeus_westwoodi_STL10034"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nanos_dubitatus_STL5001"</span>, <span class="st">"Catharsius_sp._STL10033"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/nodes-by-taxa-1.png" class="r-plt" alt="" width="672"></p>
 <p>Only these two clades get a dot or rug, every other node is left
 bare. If you already know the internal node ID, pass it directly as a
 numeric vector instead:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, nodes <span class="op">=</span> <span class="fl">18</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/nodes-by-id-1.png" class="r-plt" alt="" width="672"></p>
 <p>But how do you find the right node ID in the first place? To find the
 nodes where analyses disagree,filter the presence matrix for rows with
 at least one 0, then look up the tips at each one:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disagree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span><span class="op">)</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">row</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
@@ -943,12 +943,6 @@ consensus, per Simmons and Freudenstein 2011), save the summarized tree,
 and pass that single file to phylorug. Passing raw tied optima into
 support mode would display arbitrary node labels as though they were
 support values, producing an artifactual rug.</p>
-<p><strong>Wrap bare <code>multiPhylo</code> in a list.</strong> If you
-construct comparison trees manually, each element of the list passed to
-<code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> must be a single <code>phylo</code>
-or a <code>multiPhylo</code> (a pool from one search). A bare
-<code>multiPhylo</code> at the top level is interpreted as one analysis
-with multiple tied-optimal trees, not as separate analyses.</p>
 <p><strong>Use <code><a href="../reference/prune_to_shared.html">prune_to_shared()</a></code> when taxa differ.</strong>
 If a comparison tree is missing some backbone taxa,
 <code><a href="../reference/node_presence_matrix.html">node_presence_matrix()</a></code> will refuse to proceed (a clade
@@ -961,29 +955,36 @@ taxa.</p>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
-<li>Fu, Y. et al. (2025). Phylogenomic insights into the higher level
-relationships within Culicomorpha (Diptera). <em>Insect Systematics and
-Diversity</em>, 9(6), ixaf056.</li>
+<li>Fu, Y., Du, S., Fang, X., Xu, Z. &amp; Wang, X. (2025). Phylogenomic
+insights into the higher level relationships within Culicomorpha
+(Diptera) revealed by whole-genome sequencing. <em>Insect Systematics
+and Diversity</em>, 9(6), ixaf056. <a href="https://doi.org/10.1093/isd/ixaf056" class="external-link uri">https://doi.org/10.1093/isd/ixaf056</a>
+</li>
 <li>Giribet, G. (2003). Stability in phylogenetic formulations and its
 relationship to nodal support. <em>Systematic Biology</em>, 52(4),
-554–564.</li>
+554–564. <a href="https://doi.org/10.1080/10635150390223730" class="external-link uri">https://doi.org/10.1080/10635150390223730</a>
+</li>
+<li>Machado, D.J. (2015). YBYRÁ facilitates comparison of large
+phylogenetic trees. <em>BMC Bioinformatics</em>, 16, 204. <a href="https://doi.org/10.1186/s12859-015-0642-9" class="external-link uri">https://doi.org/10.1186/s12859-015-0642-9</a>
+</li>
 <li>Montanaro, G., Lopes, F., Gunter, N.L., Scholtz, C., Davis, A.L.,
 Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
-Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
+Daniel, G.M. &amp; Tarasov, S. (2026). Phylogenomics resolves a
 200-year-old puzzle: a revised tribal classification of Afro-Eurasian
 dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a>
 </li>
-<li>Machado, D. J. (2015). YBYRÁ facilitates comparison of large
-phylogenetic trees. <em>BMC Bioinformatics</em>, 16, 204.</li>
-<li>Sanders, J. G. (2010). Program note: Cladescan, a program for
+<li>Sanders, J.G. (2010). Program note: Cladescan, a program for
 automated phylogenetic sensitivity analysis. <em>Cladistics</em>, 26(1),
-114–116.</li>
-<li>Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. &amp; Rokas, A.
-(2023). Incongruence in the phylogenomics era. <em>Nature Reviews
-Genetics</em>, 24(12), 834–850.</li>
-<li>Wheeler, W. C. (1995). Sequence alignment, parameter sensitivity,
-and the phylogenetic analysis of molecular data. <em>Systematic
-Biology</em>, 44(3), 321–331.</li>
+114–116. <a href="https://doi.org/10.1111/j.1096-0031.2009.00280.x" class="external-link uri">https://doi.org/10.1111/j.1096-0031.2009.00280.x</a>
+</li>
+<li>Steenwyk, J.L., Li, Y., Zhou, X., Shen, X.X. &amp; Rokas, A. (2023).
+Incongruence in the phylogenomics era. <em>Nature Reviews Genetics</em>,
+24(12), 834–850. <a href="https://doi.org/10.1038/s41576-023-00620-x" class="external-link uri">https://doi.org/10.1038/s41576-023-00620-x</a>
+</li>
+<li>Wheeler, W.C. (1995). Sequence alignment, parameter sensitivity, and
+the phylogenetic analysis of molecular data. <em>Systematic
+Biology</em>, 44(3), 321–331. <a href="https://doi.org/10.2307/2413595" class="external-link uri">https://doi.org/10.2307/2413595</a>
+</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
