@@ -27,10 +27,10 @@ trims everything else from the backbone and from every comparison tree.
 }
 \details{
 A clade cannot be compared across trees that were not run on the same
-taxon. Where a comparison tree is missing a backbone taxon, every
+taxa. Where a comparison tree is missing a backbone taxon, every
 backbone clade containing that taxon becomes unevaluable in that tree, and
 \code{\link[=node_presence_matrix]{node_presence_matrix()}} refuses to proceed. Trimming to the shared taxa
-resolves this by making every tree consist the same taxon.
+resolves this by making every tree contain the same taxa.
 
 The cost is that the questions become narrower. Any clade containing a
 dropped taxon no longer exists on the backbone and cannot be reported, even

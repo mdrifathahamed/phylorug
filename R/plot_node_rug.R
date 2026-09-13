@@ -14,11 +14,11 @@
 #'     and white for absent. Grey cells appear only when `pool_threshold = 0`
 #'     was used in [node_presence_matrix()], indicating partial recovery
 #'     across a pool of equally optimal trees.
-#'   \item Tier 2, support: both `support` and `support_type` are supplied.
-#'     Recovered cells are shaded by binned support strength, from black (very
-#'     high) through greys to yellow (low). A cell is white when the tree does
-#'     not recover the clade at all, and red when the tree recovers the clade
-#'     but carries no support value for it (an unscored node).
+#'   \item Tier 2, support: `support` is non-NULL. Recovered cells are
+#'     shaded by binned support strength, from black (very high) through
+#'     greys to yellow (low). A cell is white when the tree does not
+#'     recover the clade at all, and red when the tree recovers the clade
+#'     but carries no support value for it.
 #' }
 #'
 #' Users do not call this directly; [plot_phylorug()] calls it after drawing the
@@ -48,14 +48,15 @@
 #' @param x_offset,y_offset Numeric. Shift the whole grid away from the node, as
 #'   a fraction of the tree's width and height.
 #'
-#' @param rug_position One of `"outside"` or `"inside"`(default).
+#' @param rug_position One of `"outside"` or `"inside"` (default).
 #'
 #' @param last_pp Plot coordinates from [ape::plot.phylo()] giving the x/y
 #'   position of every node and tip, used to place each rug grid at its node.
 #'   [plot_phylorug()] always supplies this. If called directly with `NULL`,
 #'   the coordinates are fetched from the most recently drawn tree.
 #'
-#' @return Returns nothing; it draws the rug cells directly onto the tree.
+#' @return `invisible(NULL)`. Called internally by [plot_phylorug()] to
+#'   handle cell-level drawing and geometry at each node.
 #'
 #' @keywords internal
 plot_node_rug <- function(npm,
@@ -300,7 +301,7 @@ bin_fill <- function(bin) {
   )
 }
 
-#' Default value for NULL
+#' Infix operator: return `x` if non-NULL, otherwise `y`
 #'
 #' @noRd
 `%||%` <- function(x, y) if (is.null(x)) y else x

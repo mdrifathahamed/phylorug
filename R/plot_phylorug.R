@@ -1,7 +1,7 @@
-#' Draw a phylorug: a backbone tree with node rugs
+#' Draw a phylorug: a backbone tree with rug plots on  every internal nodes
 #'
 #' [plot_phylorug()] overlays clade stability grids (rugs) on a backbone
-#' phylogeny, comparing how multiple analyses treat each internal node.
+#' phylogeny, compares how multiple analyses treat each internal node.
 #' In presence mode, cells are black (recovered) or white (absent). In
 #' support mode, cells are shaded by binned support strength. The function
 #' handles canvas sizing, legend placement, and font scaling automatically.
@@ -21,25 +21,25 @@
 #' @param width,height Numeric. Optional canvas dimensions in inches, applied
 #'  only when exporting to a `file`.If left as `NULL` (the default), the
 #'  package's internal engine dynamically calculates the optimal canvas
-#'  dimensions based on the tree size and legend layout. Providing values here
-#'  overrides the automatic scaling, which is useful for meeting strict journal
-#'  dimension requirements.
+#'  dimensions based on the tree size and legend layout.
 #'
 #' @param mode One of `"presence"` (default) or `"support"`.
 #'
 #' @param support_idx Integer (1, 2, or 3). Default is `1`. Specifies which
 #'  single support matrix from the `npm` list to visualize. For example, if you
-#'  generated the data using `support_col = c(1, 2)`, passing `2` here tells the
-#'  plotting engine to physically shade the grid cells using the second metric
-#'  (stored in your list as `support_2`).
+#'  generated the `npm` using `support_col = c(1, 2)`, passing `2` here tells
+#'  the plotting engine to physically shade the grid cells using the second
+#'  metric (stored in your list as `support_2`).
 #'
-#' @param thresholds Optional list overriding built-in bin thresholds. Keyed
+#' @param thresholds Optional list overriding built-in bin thresholds. Made
 #'   by metric name for named metrics, or `"universal"` when `support_type`
 #'   is not declared. For example:
 #'   `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
-#'   or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,`
-#'   `moderate = 0.50))`. If `NULL` (default), literature-based thresholds
-#'   are applied.
+#'   or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,
+#'   moderate = 0.50))`. If `NULL` (default) and `support_type` was declared
+#'   in [node_presence_matrix()], literature-based thresholds for each metric
+#'   are used. If neither `support_type` nor `thresholds` is provided,
+#'   universal thresholds (0.95 / 0.80 / 0.50) are applied to all trees.
 #'
 #' @param n_rows,n_cols Integer. Grid shape for the rug at each node. If
 #'   `NULL` (the default), a roughly square grid is chosen automatically.
@@ -51,25 +51,21 @@
 #'   the backbone is added as cell 1 and binned against that metric's
 #'   thresholds.
 #'
-#' @param nodes Optional. Restricts the plot to a subset of backbone internal
-#'   nodes. Accepts any one of:
+#' @param nodes Optional. Restricts the plot to specific backbone nodes.
+#'   Three ways to specify:
 #'   \itemize{
-#'     \item A **list of character vectors**, the recommended way to select
-#'       clades: each element gives >= 2 tip labels from `backbone$tip.label`,
-#'       and phylorug resolves each set to its most recent common ancestor
-#'       (MRCA) internally. For example
-#'       `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))` selects
-#'       two clades by the taxa that define them -- no node IDs required.
-#'     \item A numeric vector of node IDs matching `rownames(npm$presence)`
-#'       (ape's internal node numbering, `Ntip(backbone) + 1` upward).
-#'     \item A character vector of labels matching `backbone$node.label`.
+#'     \item **By taxa (recommended):** a list of character vectors, each
+#'       with >= 2 tip labels. phylorug finds the MRCA of each set.
+#'       Example: `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D"))`.
+#'     \item **By node ID (advanced):** a numeric vector of ape internal
+#'       node IDs, as shown in `rownames(npm$presence)`. To see which
+#'       taxa belong to a node, use
+#'       `ape::extract.clade(backbone, node_id)$tip.label`.
+#'     \item **By node label:** a character vector matching
+#'       `backbone$node.label`.
 #'   }
-#'   If `NULL` (the default), every internal node in `npm` is eligible for a
-#'   dot or rug, subject to `dot_identical` and `hide_unsupported`. When
-#'   supplied, only the selected nodes are considered at all: unselected
-#'   nodes get no dot, rug, or support label, regardless of those other
-#'   settings. An unresolvable node ID, label, or taxon name raises an error
-#'   naming the offending value(s).
+#'   If `NULL` (default), all internal nodes are plotted. When supplied,
+#'   only selected nodes get dots, rugs, or support labels.
 #'
 #' @param legend Logical. Draw the legend. Default TRUE.
 #'
@@ -80,6 +76,12 @@
 #'   labels (e.g. "80/95") to display when `show_support = TRUE`. Default
 #'   `NULL` displays the full compound label as-is. Set to `1` or `2` to
 #'   display only a single metric.
+#'
+#' @param support_label_cex Numeric or `NULL`. Size of the backbone support
+#'   labels. Default `NULL` auto-scales with tree size.
+#'
+#' @param support_label_col Colour of the backbone support labels. Default
+#'   `"red"`.
 #'
 #' @param cell_scale Numeric multiplier on cell height. Default 0.45.
 #'
@@ -97,16 +99,6 @@
 #' @param dot_col,dot_cex Colour and size of the identical-clade dot. Defaults
 #'  are `"black"` and NULL (auto-scales).
 #'
-#' @param ... Additional arguments passed to [ape::plot.phylo()], such as
-#'   `cex`, `edge.width`, `font`, or `label.offset`. These override the
-#'   automatic scaling when provided.
-#'
-#' @param support_label_cex Numeric or `NULL`. Size of the backbone support
-#'   labels. Default `NULL` auto-scales with tree size.
-#'
-#' @param support_label_col Colour of the backbone support labels. Default
-#'   `"red"`.
-#'
 #' @param rug_on_identical Logical. Default `FALSE`. When this and
 #'   `dot_identical` are both `TRUE`, unanimous nodes receive both the dot and
 #'   a support rug, making per-tree support strength visible even at universally
@@ -119,13 +111,16 @@
 #'   you want every internal node to carry a visible grid for annotation or
 #'   figure editing.
 #'
+#' @param ... Additional arguments passed to [ape::plot.phylo()], such as
+#'   `cex`, `edge.width`, `font`, or `label.offset`. These override the
+#'   automatic scaling when provided.
+#'
 #' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
-#'   directly to the active graphics device (not recommended).
+#'   directly to the active graphics device.
 #'
 #' @seealso [node_presence_matrix()] to build the input data,
 #'   [check_taxa()] to verify taxon sets, and
-#'   `plot_node_rug()` which handles the cell-level
-#'   drawing(not used by the user).
+#'   [add_tree()] to append trees to an existing matrix.
 #'
 #' @export
 #'
@@ -164,7 +159,7 @@
 #'               include_backbone = TRUE,
 #'               rug_position     = "outside")
 #' unlink(tmp3)
-#' #' # --- Restrict to specific nodes ---------------------------------------------
+#' # --- Restrict to specific nodes --------------------------------------------
 #' # By taxa (recommended): select a clade by the tips that define it.
 #' tmp4 <- tempfile(fileext = ".pdf")
 #' plot_phylorug(backbone, npm_st,
@@ -712,14 +707,14 @@ plot_phylorug <- function(backbone, npm,
 #'
 #' Height is set by per_tip. Width is computed from three real measurements:
 #'
-#' 1. TREE DEPTH - if branch lengths exist, the max root-to-tip distance
+#' 1. TREE DEPTH , if branch lengths exist, the max root-to-tip distance
 #'    determines how much horizontal room the phylogram needs. Deeper trees
 #'    get more space (log-scaled, so it doesn't explode). If no branch
 #'    lengths, falls back to a cladogram estimate from tip count.
 #'
-#' 2. LABEL WIDTH - longest tip label * character width at taxa_cex.
+#' 2. LABEL WIDTH , longest tip label * character width at taxa_cex.
 #'
-#' 3. LEGEND BAND - scales with n_tree and mode.
+#' 3. LEGEND BAND , scales with n_tree and mode.
 #'
 #' This prevents unnecessary stretching when branches are short, and ensures
 #' deep phylograms get enough room to show branch-length variation.

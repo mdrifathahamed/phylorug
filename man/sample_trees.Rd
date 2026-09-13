@@ -10,23 +10,23 @@ labels contain support values: SH-aLRT/UFBoot2 for IQ-TREE trees and local
 posterior probability for ASTRAL trees.
 }
 \source{
-Lopes, F., Gunter, N., Gillett, C. P. D. T., et al. (2024).
-From museum drawer to tree: Historical DNA phylogenomics clarifies the
-systematics of rare dung beetles (Coleoptera: Scarabaeinae) from museum
-collections. \emph{PLOS ONE}, 19(12), e0309596.
-\doi{10.1371/journal.pone.0309596}
+Montanaro, G., Lopes, F., Gunter, N.L., et al. (2026).
+Phylogenomics resolves a 200-year-old puzzle: a revised tribal
+classification of Afro-Eurasian dung beetles (Coleoptera:
+Scarabaeinae). \emph{bioRxiv}.
+\doi{10.64898/2026.07.22.740134}
 }
 \usage{
 sample_trees
 }
 \description{
 A named list (the same structure returned by \code{\link[=read_trees]{read_trees()}}) of five
-phylogenetic trees from a dung beetle phylogenomic study, Lopes et al.
-(2024), pruned to 15 taxa for compact demonstration of the \code{phylorug}
-workflow. The trees are already rooted, outgroup-removed, and tip labels
-translated from museum codes to species names. Users can select a backbone
-tree and comparison trees, then pass them directly to \code{\link[=check_taxa]{check_taxa()}},
-\code{\link[=node_presence_matrix]{node_presence_matrix()}}, and \code{\link[=plot_phylorug]{plot_phylorug()}}.
+phylogenetic trees from a dung beetle phylogenomic study, Montanaro,
+Lopes et al. (2026), pruned to 15 taxa for compact demonstration of
+the \code{phylorug} workflow. The trees are already rooted, outgroup-removed, and
+tip labels translated from museum codes to species names. Users can select a
+backbone tree and comparison trees, then pass them directly to
+\code{\link[=check_taxa]{check_taxa()}}, \code{\link[=node_presence_matrix]{node_presence_matrix()}} and \code{\link[=plot_phylorug]{plot_phylorug()}}.
 }
 \details{
 The five trees represent independent phylogenomic analyses of the same

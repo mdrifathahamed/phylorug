@@ -43,7 +43,7 @@ plotting coordinates.}
 \item{x_offset, y_offset}{Numeric. Shift the whole grid away from the node, as
 a fraction of the tree's width and height.}
 
-\item{rug_position}{One of \code{"outside"} or \code{"inside"}(default).}
+\item{rug_position}{One of \code{"outside"} or \code{"inside"} (default).}
 
 \item{last_pp}{Plot coordinates from \code{\link[ape:plot.phylo]{ape::plot.phylo()}} giving the x/y
 position of every node and tip, used to place each rug grid at its node.
@@ -51,7 +51,8 @@ position of every node and tip, used to place each rug grid at its node.
 the coordinates are fetched from the most recently drawn tree.}
 }
 \value{
-Returns nothing; it draws the rug cells directly onto the tree.
+\code{invisible(NULL)}. Called internally by \code{\link[=plot_phylorug]{plot_phylorug()}} to
+handle cell-level drawing and geometry at each node.
 }
 \description{
 For each internal node of the backbone tree, paints a small grid of
@@ -67,11 +68,11 @@ through its \code{mode} argument.)
 and white for absent. Grey cells appear only when \code{pool_threshold = 0}
 was used in \code{\link[=node_presence_matrix]{node_presence_matrix()}}, indicating partial recovery
 across a pool of equally optimal trees.
-\item Tier 2, support: both \code{support} and \code{support_type} are supplied.
-Recovered cells are shaded by binned support strength, from black (very
-high) through greys to yellow (low). A cell is white when the tree does
-not recover the clade at all, and red when the tree recovers the clade
-but carries no support value for it (an unscored node).
+\item Tier 2, support: \code{support} is non-NULL. Recovered cells are
+shaded by binned support strength, from black (very high) through
+greys to yellow (low). A cell is white when the tree does not
+recover the clade at all, and red when the tree recovers the clade
+but carries no support value for it.
 }
 
 Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the

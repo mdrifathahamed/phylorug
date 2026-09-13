@@ -2,7 +2,7 @@
 #'
 #' @description
 #' Adds a new comparison tree to an existing node presence matrix without
-#' rerunning whole pipeline from scratch. The function computes clade
+#' rerunning the whole pipeline from scratch. The function computes clade
 #' recovery(presence) and support for the new tree only and attaches the results
 #' as a new column in every matrix of the npm. All existing columns remain
 #' unchanged.

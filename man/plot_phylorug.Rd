@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_phylorug.R
 \name{plot_phylorug}
 \alias{plot_phylorug}
-\title{Draw a phylorug: a backbone tree with node rugs}
+\title{Draw a phylorug: a backbone tree with rug plots on  every internal nodes}
 \usage{
 plot_phylorug(
   backbone,
@@ -50,25 +50,24 @@ publication-ready figures, provide a file path here (must end in \code{.pdf},
 \item{width, height}{Numeric. Optional canvas dimensions in inches, applied
 only when exporting to a \code{file}.If left as \code{NULL} (the default), the
 package's internal engine dynamically calculates the optimal canvas
-dimensions based on the tree size and legend layout. Providing values here
-overrides the automatic scaling, which is useful for meeting strict journal
-dimension requirements.}
+dimensions based on the tree size and legend layout.}
 
 \item{mode}{One of \code{"presence"} (default) or \code{"support"}.}
 
 \item{support_idx}{Integer (1, 2, or 3). Default is \code{1}. Specifies which
 single support matrix from the \code{npm} list to visualize. For example, if you
-generated the data using \code{support_col = c(1, 2)}, passing \code{2} here tells the
-plotting engine to physically shade the grid cells using the second metric
-(stored in your list as \code{support_2}).}
+generated the \code{npm} using \code{support_col = c(1, 2)}, passing \code{2} here tells
+the plotting engine to physically shade the grid cells using the second
+metric (stored in your list as \code{support_2}).}
 
-\item{thresholds}{Optional list overriding built-in bin thresholds. Keyed
+\item{thresholds}{Optional list overriding built-in bin thresholds. Made
 by metric name for named metrics, or \code{"universal"} when \code{support_type}
 is not declared. For example:
 \code{thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))}
-or \verb{thresholds = list(universal = c(very_high = 0.90, high = 0.70,}
-\verb{moderate = 0.50))}. If \code{NULL} (default), literature-based thresholds
-are applied.}
+or \code{thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))}. If \code{NULL} (default) and \code{support_type} was declared
+in \code{\link[=node_presence_matrix]{node_presence_matrix()}}, literature-based thresholds for each metric
+are used. If neither \code{support_type} nor \code{thresholds} is provided,
+universal thresholds (0.95 / 0.80 / 0.50) are applied to all trees.}
 
 \item{n_rows, n_cols}{Integer. Grid shape for the rug at each node. If
 \code{NULL} (the default), a roughly square grid is chosen automatically.}
@@ -80,25 +79,21 @@ character string naming a support metric (\code{include_backbone = "ufboot"}),
 the backbone is added as cell 1 and binned against that metric's
 thresholds.}
 
-\item{nodes}{Optional. Restricts the plot to a subset of backbone internal
-nodes. Accepts any one of:
+\item{nodes}{Optional. Restricts the plot to specific backbone nodes.
+Three ways to specify:
 \itemize{
-\item A \strong{list of character vectors}, the recommended way to select
-clades: each element gives >= 2 tip labels from \code{backbone$tip.label},
-and phylorug resolves each set to its most recent common ancestor
-(MRCA) internally. For example
-\code{nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))} selects
-two clades by the taxa that define them -- no node IDs required.
-\item A numeric vector of node IDs matching \code{rownames(npm$presence)}
-(ape's internal node numbering, \code{Ntip(backbone) + 1} upward).
-\item A character vector of labels matching \code{backbone$node.label}.
+\item \strong{By taxa (recommended):} a list of character vectors, each
+with >= 2 tip labels. phylorug finds the MRCA of each set.
+Example: \code{nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D"))}.
+\item \strong{By node ID (advanced):} a numeric vector of ape internal
+node IDs, as shown in \code{rownames(npm$presence)}. To see which
+taxa belong to a node, use
+\code{ape::extract.clade(backbone, node_id)$tip.label}.
+\item \strong{By node label:} a character vector matching
+\code{backbone$node.label}.
 }
-If \code{NULL} (the default), every internal node in \code{npm} is eligible for a
-dot or rug, subject to \code{dot_identical} and \code{hide_unsupported}. When
-supplied, only the selected nodes are considered at all: unselected
-nodes get no dot, rug, or support label, regardless of those other
-settings. An unresolvable node ID, label, or taxon name raises an error
-naming the offending value(s).}
+If \code{NULL} (default), all internal nodes are plotted. When supplied,
+only selected nodes get dots, rugs, or support labels.}
 
 \item{legend}{Logical. Draw the legend. Default TRUE.}
 
@@ -150,11 +145,11 @@ automatic scaling when provided.}
 }
 \value{
 Invisibly, the file path if a file was written, or \code{NULL} if plotted
-directly to the active graphics device (not recommended).
+directly to the active graphics device.
 }
 \description{
 \code{\link[=plot_phylorug]{plot_phylorug()}} overlays clade stability grids (rugs) on a backbone
-phylogeny, comparing how multiple analyses treat each internal node.
+phylogeny, compares how multiple analyses treat each internal node.
 In presence mode, cells are black (recovered) or white (absent). In
 support mode, cells are shaded by binned support strength. The function
 handles canvas sizing, legend placement, and font scaling automatically.
@@ -194,7 +189,7 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
-#' # --- Restrict to specific nodes ---------------------------------------------
+# --- Restrict to specific nodes --------------------------------------------
 # By taxa (recommended): select a clade by the tips that define it.
 tmp4 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,
@@ -212,6 +207,5 @@ unlink(tmp5)
 \seealso{
 \code{\link[=node_presence_matrix]{node_presence_matrix()}} to build the input data,
 \code{\link[=check_taxa]{check_taxa()}} to verify taxon sets, and
-\code{plot_node_rug()} which handles the cell-level
-drawing(not used by the user).
+\code{\link[=add_tree]{add_tree()}} to append trees to an existing matrix.
 }
