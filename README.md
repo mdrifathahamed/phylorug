@@ -194,10 +194,10 @@ If you use **phylorug** in a publication, please cite:
 
 ### Acknowledgements
 
-This package was developed at the [Finnish Museum of Natural History
-(LUOMUS)](https://www.luomus.fi/en), University of Helsinki, as part of
-an MSc thesis in Ecology and Evolutionary Biology under the supervision
-of Sergei Tarasov and J. Salvador Arias.
+This package was developed at the \[Finnish Museum of Natural History
+(LUOMUS)\] (<https://www.helsinki.fi/en/luomus>), University of
+Helsinki, as part of an MSc thesis in Ecology and Evolutionary Biology
+under the supervision of Sergei Tarasov and J. Salvador Arias.
 
 The rug-plot concept traces to Wheeler (1995), was named “Navajo rugs”
 by Giribet (2003), and automated by Sanders (2010, Cladescan) and
