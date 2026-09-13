@@ -10,11 +10,11 @@ Tier 1, presence: support is NULL. Cells are black for present
 and white for absent. Grey cells appear only when pool_threshold = 0
 was used in node_presence_matrix(), indicating partial recovery
 across a pool of equally optimal trees.
-Tier 2, support: both support and support_type are supplied.
-Recovered cells are shaded by binned support strength, from black (very
-high) through greys to yellow (low). A cell is white when the tree does
-not recover the clade at all, and red when the tree recovers the clade
-but carries no support value for it (an unscored node).
+Tier 2, support: support is non-NULL. Recovered cells are
+shaded by binned support strength, from black (very high) through
+greys to yellow (low). A cell is white when the tree does not
+recover the clade at all, and red when the tree recovers the clade
+but carries no support value for it.
 
 
 Users do not call this directly; plot_phylorug() calls it after drawing the
@@ -29,11 +29,11 @@ Tier 1, presence: support is NULL. Cells are black for present
 and white for absent. Grey cells appear only when pool_threshold = 0
 was used in node_presence_matrix(), indicating partial recovery
 across a pool of equally optimal trees.
-Tier 2, support: both support and support_type are supplied.
-Recovered cells are shaded by binned support strength, from black (very
-high) through greys to yellow (low). A cell is white when the tree does
-not recover the clade at all, and red when the tree recovers the clade
-but carries no support value for it (an unscored node).
+Tier 2, support: support is non-NULL. Recovered cells are
+shaded by binned support strength, from black (very high) through
+greys to yellow (low). A cell is white when the tree does not
+recover the clade at all, and red when the tree recovers the clade
+but carries no support value for it.
 
 
 Users do not call this directly; plot_phylorug() calls it after drawing the
@@ -81,11 +81,11 @@ through its <code>mode</code> argument.)</p><ul><li><p>Tier 1, presence: <code>s
 and white for absent. Grey cells appear only when <code>pool_threshold = 0</code>
 was used in <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code>, indicating partial recovery
 across a pool of equally optimal trees.</p></li>
-<li><p>Tier 2, support: both <code>support</code> and <code>support_type</code> are supplied.
-Recovered cells are shaded by binned support strength, from black (very
-high) through greys to yellow (low). A cell is white when the tree does
-not recover the clade at all, and red when the tree recovers the clade
-but carries no support value for it (an unscored node).</p></li>
+<li><p>Tier 2, support: <code>support</code> is non-NULL. Recovered cells are
+shaded by binned support strength, from black (very high) through
+greys to yellow (low). A cell is white when the tree does not
+recover the clade at all, and red when the tree recovers the clade
+but carries no support value for it.</p></li>
 </ul><p>Users do not call this directly; <code><a href="plot_phylorug.html">plot_phylorug()</a></code> calls it after drawing the
 tree and working out the cell geometry.</p>
     </div>
@@ -150,7 +150,7 @@ a fraction of the tree's width and height.</p></dd>
 
 
 <dt id="arg-rug-position">rug_position<a class="anchor" aria-label="anchor" href="#arg-rug-position"></a></dt>
-<dd><p>One of <code>"outside"</code> or <code>"inside"</code>(default).</p></dd>
+<dd><p>One of <code>"outside"</code> or <code>"inside"</code> (default).</p></dd>
 
 
 <dt id="arg-last-pp">last_pp<a class="anchor" aria-label="anchor" href="#arg-last-pp"></a></dt>
@@ -162,7 +162,8 @@ the coordinates are fetched from the most recently drawn tree.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns nothing; it draws the rug cells directly onto the tree.</p>
+    <p><code>invisible(NULL)</code>. Called internally by <code><a href="plot_phylorug.html">plot_phylorug()</a></code> to
+handle cell-level drawing and geometry at each node.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

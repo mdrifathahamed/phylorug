@@ -36,12 +36,12 @@ attribute naming the taxa that were removed.
 ## Details
 
 A clade cannot be compared across trees that were not run on the same
-taxon. Where a comparison tree is missing a backbone taxon, every
+taxa. Where a comparison tree is missing a backbone taxon, every
 backbone clade containing that taxon becomes unevaluable in that tree,
 and
 [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
 refuses to proceed. Trimming to the shared taxa resolves this by making
-every tree consist the same taxon.
+every tree contain the same taxa.
 
 The cost is that the questions become narrower. Any clade containing a
 dropped taxon no longer exists on the backbone and cannot be reported,

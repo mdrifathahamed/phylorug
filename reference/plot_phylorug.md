@@ -1,7 +1,7 @@
-# Draw a phylorug: a backbone tree with node rugs
+# Draw a phylorug: a backbone tree with rug plots on every internal nodes
 
 `plot_phylorug()` overlays clade stability grids (rugs) on a backbone
-phylogeny, comparing how multiple analyses treat each internal node. In
+phylogeny, compares how multiple analyses treat each internal node. In
 presence mode, cells are black (recovered) or white (absent). In support
 mode, cells are shaded by binned support strength. The function handles
 canvas sizing, legend placement, and font scaling automatically.
@@ -67,9 +67,7 @@ plot_phylorug(
   Numeric. Optional canvas dimensions in inches, applied only when
   exporting to a `file`.If left as `NULL` (the default), the package's
   internal engine dynamically calculates the optimal canvas dimensions
-  based on the tree size and legend layout. Providing values here
-  overrides the automatic scaling, which is useful for meeting strict
-  journal dimension requirements.
+  based on the tree size and legend layout.
 
 - mode:
 
@@ -79,19 +77,23 @@ plot_phylorug(
 
   Integer (1, 2, or 3). Default is `1`. Specifies which single support
   matrix from the `npm` list to visualize. For example, if you generated
-  the data using `support_col = c(1, 2)`, passing `2` here tells the
+  the `npm` using `support_col = c(1, 2)`, passing `2` here tells the
   plotting engine to physically shade the grid cells using the second
   metric (stored in your list as `support_2`).
 
 - thresholds:
 
-  Optional list overriding built-in bin thresholds. Keyed by metric name
+  Optional list overriding built-in bin thresholds. Made by metric name
   for named metrics, or `"universal"` when `support_type` is not
   declared. For example:
   `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
-  or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,`
-  `moderate = 0.50))`. If `NULL` (default), literature-based thresholds
-  are applied.
+  or
+  `thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))`.
+  If `NULL` (default) and `support_type` was declared in
+  [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md),
+  literature-based thresholds for each metric are used. If neither
+  `support_type` nor `thresholds` is provided, universal thresholds
+  (0.95 / 0.80 / 0.50) are applied to all trees.
 
 - n_rows, n_cols:
 
@@ -109,27 +111,22 @@ plot_phylorug(
 
 - nodes:
 
-  Optional. Restricts the plot to a subset of backbone internal nodes.
-  Accepts any one of:
+  Optional. Restricts the plot to specific backbone nodes. Three ways to
+  specify:
 
-  - A **list of character vectors**, the recommended way to select
-    clades: each element gives \>= 2 tip labels from
-    `backbone$tip.label`, and phylorug resolves each set to its most
-    recent common ancestor (MRCA) internally. For example
-    `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D", "sp_E"))` selects
-    two clades by the taxa that define them – no node IDs required.
+  - **By taxa (recommended):** a list of character vectors, each with
+    \>= 2 tip labels. phylorug finds the MRCA of each set. Example:
+    `nodes = list(c("sp_A", "sp_B"), c("sp_C", "sp_D"))`.
 
-  - A numeric vector of node IDs matching `rownames(npm$presence)`
-    (ape's internal node numbering, `Ntip(backbone) + 1` upward).
+  - **By node ID (advanced):** a numeric vector of ape internal node
+    IDs, as shown in `rownames(npm$presence)`. To see which taxa belong
+    to a node, use `ape::extract.clade(backbone, node_id)$tip.label`.
 
-  - A character vector of labels matching `backbone$node.label`.
+  - **By node label:** a character vector matching
+    `backbone$node.label`.
 
-  If `NULL` (the default), every internal node in `npm` is eligible for
-  a dot or rug, subject to `dot_identical` and `hide_unsupported`. When
-  supplied, only the selected nodes are considered at all: unselected
-  nodes get no dot, rug, or support label, regardless of those other
-  settings. An unresolvable node ID, label, or taxon name raises an
-  error naming the offending value(s).
+  If `NULL` (default), all internal nodes are plotted. When supplied,
+  only selected nodes get dots, rugs, or support labels.
 
 - legend:
 
@@ -208,7 +205,7 @@ plot_phylorug(
 ## Value
 
 Invisibly, the file path if a file was written, or `NULL` if plotted
-directly to the active graphics device (not recommended).
+directly to the active graphics device.
 
 ## See also
 
@@ -216,8 +213,8 @@ directly to the active graphics device (not recommended).
 to build the input data,
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md)
 to verify taxon sets, and
-[`plot_node_rug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_node_rug.md)
-which handles the cell-level drawing(not used by the user).
+[`add_tree()`](https://mdrifathahamed.github.io/phylorug/reference/add_tree.md)
+to append trees to an existing matrix.
 
 ## Examples
 
@@ -256,7 +253,7 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
-#' # --- Restrict to specific nodes ---------------------------------------------
+# --- Restrict to specific nodes --------------------------------------------
 # By taxa (recommended): select a clade by the tips that define it.
 tmp4 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,

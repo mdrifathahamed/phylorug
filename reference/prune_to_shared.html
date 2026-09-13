@@ -72,10 +72,10 @@ attribute naming the taxa that were removed.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>A clade cannot be compared across trees that were not run on the same
-taxon. Where a comparison tree is missing a backbone taxon, every
+taxa. Where a comparison tree is missing a backbone taxon, every
 backbone clade containing that taxon becomes unevaluable in that tree, and
 <code><a href="node_presence_matrix.html">node_presence_matrix()</a></code> refuses to proceed. Trimming to the shared taxa
-resolves this by making every tree consist the same taxon.</p>
+resolves this by making every tree contain the same taxa.</p>
 <p>The cost is that the questions become narrower. Any clade containing a
 dropped taxon no longer exists on the backbone and cannot be reported, even
 where most comparison trees recovered it. Check the report from

@@ -16,11 +16,11 @@ selects the tier for the user through its `mode` argument.)
   [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md),
   indicating partial recovery across a pool of equally optimal trees.
 
-- Tier 2, support: both `support` and `support_type` are supplied.
-  Recovered cells are shaded by binned support strength, from black
-  (very high) through greys to yellow (low). A cell is white when the
-  tree does not recover the clade at all, and red when the tree recovers
-  the clade but carries no support value for it (an unscored node).
+- Tier 2, support: `support` is non-NULL. Recovered cells are shaded by
+  binned support strength, from black (very high) through greys to
+  yellow (low). A cell is white when the tree does not recover the clade
+  at all, and red when the tree recovers the clade but carries no
+  support value for it.
 
 Users do not call this directly;
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
@@ -88,7 +88,7 @@ plot_node_rug(
 
 - rug_position:
 
-  One of `"outside"` or `"inside"`(default).
+  One of `"outside"` or `"inside"` (default).
 
 - last_pp:
 
@@ -102,4 +102,6 @@ plot_node_rug(
 
 ## Value
 
-Returns nothing; it draws the rug cells directly onto the tree.
+`invisible(NULL)`. Called internally by
+[`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+to handle cell-level drawing and geometry at each node.

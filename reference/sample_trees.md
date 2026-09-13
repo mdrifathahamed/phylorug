@@ -2,13 +2,14 @@
 
 A named list (the same structure returned by
 [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md))
-of five phylogenetic trees from a dung beetle phylogenomic study, Lopes
-et al. (2024), pruned to 15 taxa for compact demonstration of the
-`phylorug` workflow. The trees are already rooted, outgroup-removed, and
-tip labels translated from museum codes to species names. Users can
-select a backbone tree and comparison trees, then pass them directly to
+of five phylogenetic trees from a dung beetle phylogenomic study,
+Montanaro, Lopes et al. (2026), pruned to 15 taxa for compact
+demonstration of the `phylorug` workflow. The trees are already rooted,
+outgroup-removed, and tip labels translated from museum codes to species
+names. Users can select a backbone tree and comparison trees, then pass
+them directly to
 [`check_taxa()`](https://mdrifathahamed.github.io/phylorug/reference/check_taxa.md),
-[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md),
+[`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md)
 and
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md).
 
@@ -26,11 +27,10 @@ local posterior probability for ASTRAL trees.
 
 ## Source
 
-Lopes, F., Gunter, N., Gillett, C. P. D. T., et al. (2024). From museum
-drawer to tree: Historical DNA phylogenomics clarifies the systematics
-of rare dung beetles (Coleoptera: Scarabaeinae) from museum collections.
-*PLOS ONE*, 19(12), e0309596.
-[doi:10.1371/journal.pone.0309596](https://doi.org/10.1371/journal.pone.0309596)
+Montanaro, G., Lopes, F., Gunter, N.L., et al. (2026). Phylogenomics
+resolves a 200-year-old puzzle: a revised tribal classification of
+Afro-Eurasian dung beetles (Coleoptera: Scarabaeinae). *bioRxiv*.
+[doi:10.64898/2026.07.22.740134](https://doi.org/10.64898/2026.07.22.740134)
 
 ## Details
 
