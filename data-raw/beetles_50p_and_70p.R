@@ -3,7 +3,7 @@
 # Prunes the full beetle trees to the 43 taxa of Onthophagina sensu
 # lato for use in the phylorug package vignettes and paper figures.
 #
-# The full 316-taxon tree from Montanaro, Lopes et al. (2026) is too
+# The full 316-taxon tree from Montanaro et al. (2026) is too
 # large for a package vignette, so we prune it to a smaller subset
 # for demonstration purposes. We chose the 43 taxa of Onthophagina
 # sensu lato so that the subset contains a complete subtribe rather

@@ -2,10 +2,9 @@
 #
 # Creates data/sample_trees.rda
 #
-# A 15-taxon subset of the Tarasov Lab 70% occupancy beetle phylogenomic
-# dataset (Scarabaeinae), pruned from the full 289-taxon ingroup to serve
-# as a quick demonstration of the phylorug pipeline in the README and
-# vignette.
+# A 15-taxon subset of 70% occupancy beetle phylogenomic dataset (Scarabaeinae),
+# pruned from the full 289-taxon ingroup to serve as a quick demonstration of
+# the phylorug pipeline in the README and vignette.
 #
 # This script uses tree files already bundled in inst/extdata/beetles_70p/
 # and the lookup table in inst/extdata/beetles_50p/biogeo.csv, so anyone
@@ -13,10 +12,10 @@
 # files.
 #
 # Source
-#   Lopes et al. (2024) From museum drawer to tree: Historical DNA
-#   phylogenomics clarifies the systematics of rare dung beetles
-#   (Coleoptera: Scarabaeinae) from museum collections. PLOS ONE 19(12):
-#   e0309596. https://doi.org/10.1371/journal.pone.0309596
+#   Montanaro, G., Lopes, F., Gunter, N.L., et al. (2026).
+#   Phylogenomics resolves a 200-year-old puzzle: a revised tribal
+#   classification of Afro-Eurasian dung beetles (Coleoptera:
+#   Scarabaeinae). bioRxiv. https://doi.org/10.64898/2026.07.22.740134
 #
 # Five analyses of the same taxon set:
 #   70p_uce                      IQ-TREE ML, UCE loci (backbone)
