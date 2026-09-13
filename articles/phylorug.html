@@ -66,53 +66,26 @@
 <div class="section level2">
 <h2 id="what-problem-does-phylorug-solve">What problem does phylorug solve?<a class="anchor" aria-label="anchor" href="#what-problem-does-phylorug-solve"></a>
 </h2>
-<p>Modern phylogenomic studies routinely produce multiple trees from the
-same set of taxa. Different data types (UCEs, transcriptomes, whole
-genomes), different analytical strategies (concatenation, coalescent
-methods, site-heterogeneous models), and different inference software
-(IQ-TREE, ASTRAL, MrBayes) each yield a tree with slightly different
-topology and its own support values in its own format. At the same time,
-no single tree inference method is proven to be the all-rounder.</p>
-<p>Incomplete lineage sorting, long-branch attraction, model
-misspecification, and compositional heterogeneity each affect different
-methods differently (Steenwyk et al., 2023). Accordingly, exploring
-multiple strategies , on different data types and different inference
-pipelines is the way researchers detect nodes that may be artifacts of a
-particular analytical choice versus nodes that hold up regardless of
-method.</p>
-<p>The question at every node is:</p>
-<p>Does this clade appear in all analyses, and how strongly does each
-one support it?</p>
-<p>Answering that by flipping between tree files is tedious,
-error-prone, and is very time-consuming with bigger trees.
-<strong>phylorug</strong> solves it by drawing a compact coloured grid a
-<strong>rug plot</strong> at every internal node of a reference
-tree(backbone). Each cell represents one tree, its colour shows whether
-that tree recovered the clade and how strongly it supported it.</p>
-</div>
-<div class="section level2">
-<h2 id="nodal-support-versus-nodal-stability">Nodal support versus nodal stability<a class="anchor" aria-label="anchor" href="#nodal-support-versus-nodal-stability"></a>
-</h2>
-<p>Giribet (2003) drew a distinction that motivates the two modes of
-phylorug. <strong>Nodal support</strong> measures how confident a single
-analysis is in a clade such as bootstrap, posterior probability, or LPP.
-<strong>Nodal stability</strong> measures whether that clade is
-consistently recovered across different analytical strategies, data
-types, and inference methods, extending Wheeler’s (1995) parameter-space
-sensitivity analysis framework. These can decouple: a clade may receive
-100% bootstrap under one model yet collapse under all others, or carry
-only 30–50% support everywhere yet appear in every tree.</p>
-<p>phylorug shows both. In <code>presence</code> mode, each node gets a
-black dot if every analysis recovers the clade (stable), or a rug
-showing which analyses recover it and which do not.</p>
-<p><code>support</code> mode builds on it, keeps the same
-presence/absence information but adds how strongly each analysis
-supports the clade, shading each cell by its support value instead of
-just marking it filled or empty. Stable nodes still get a black dot by
-default. Setting <code>rug_on_identical = TRUE</code> extends the rug to
-these nodes too. It is useful in support mode, since it shows whether a
-clade recovered by every analysis is actually supported equally strongly
-by all of them.</p>
+<p>Phylogenomic studies routinely produce multiple trees from the same
+taxa. Different data types (UCEs, transcriptomes, whole genomes),
+different inference methods (IQ-TREE, ASTRAL, MrBayes), and different
+models (site-homogeneous, site-heterogeneous, coalescent) each yield a
+tree with its own topology and support values in its own format
+(Steenwyk et al., 2023).</p>
+<p>The question this creates at every node is simple: <strong>does this
+clade appear in all my analyses, and how strongly does each one support
+it?</strong></p>
+<p>Answering that by opening tree files side by side is tedious and
+error-prone, especially as taxon counts and the number of analyses grow.
+Existing tools measure overall topological distance between two trees,
+or quantify gene-tree conflict within a single pipeline, but neither
+shows you, which clades hold up across analytical choices and which do
+not.</p>
+<p><strong>phylorug</strong> fills this gap. It draws a compact coloured
+grid, a <strong>rug plot</strong> at every internal node of a reference
+tree. Each cell represents one analysis; its colour shows whether that
+analysis recovered the clade and, in support mode, how strongly it
+supported it.</p>
 <div class="section level3">
 <h3 id="brief-history">Brief history<a class="anchor" aria-label="anchor" href="#brief-history"></a>
 </h3>
@@ -120,24 +93,46 @@ by all of them.</p>
 clade recovery across gap and transversion–transition cost ratios in
 parsimony analysis. Giribet (2003) named these plots “Navajo rugs” and
 showed that nodal support and nodal stability can tell different
-stories.</p>
-<p>Sanders (2010) automated parameter-space sensitivity analysis with
-Cladescan (Perl), and Machado (2015) extended the approach with YBYRÁ
-(Python). Both tools produce individual SVG plots per node that must be
-manually placed onto the tree in a vector editor. Cladescan is no longer
-available online, and YBYRÁ has been archived by its developer and is no
-longer maintained. More importantly, both were designed around
-sensitivity analysis within a single analytical framework, varying
-parameters and cost schemes, rather than comparing trees from
+stories. Sanders (2010) automated parameter-space sensitivity analysis
+with Cladescan (Perl), and Machado (2015) extended the approach with
+YBYRÁ (Python). Both produce individual SVG plots per node that must be
+manually placed onto the tree in a vector editor, and neither is
+actively maintained today. More importantly, both were designed around
+sensitivity analysis within a single analytical framework — varying
+parameters and cost schemes — rather than comparing trees from
 fundamentally different inference pipelines that report support in
-incompatible formats (e.g.,UFBoot2, SH-aLRT, posterior probability,
-ASTRAL LPP).</p>
-<p>phylorug extends this lineage into R. It reads trees from any
-pipeline, bins support values against thresholds built for their own
+incompatible formats (e.g., UFBoot2, SH-aLRT, posterior probability,
+ASTRAL LPP). phylorug extends this lineage into R: it reads trees from
+any pipeline, bins support values against thresholds built for their own
 metric instead of rescaling everything onto one numeric scale, and draws
-the rug directly on the reference tree, no manual placement, no outside
+the rug directly on the reference tree — no manual placement, no outside
 software.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="nodal-support-versus-nodal-stability">Nodal support versus nodal stability<a class="anchor" aria-label="anchor" href="#nodal-support-versus-nodal-stability"></a>
+</h2>
+<p>Giribet (2003) drew a distinction worth understanding before using
+phylorug. <strong>Nodal support</strong> measures how confident a single
+analysis is in a clade such as bootstrap, posterior probability, or
+local posterior probability. <strong>Nodal stability</strong> measures
+whether that clade is consistently recovered across different analytical
+strategies, data types, and inference methods. The two can decouple: a
+clade may receive 100% bootstrap under one model yet collapse under all
+others, or carry only moderate support everywhere yet appear in every
+tree. Reporting both gives a more complete picture of a clade’s
+robustness than either alone.</p>
+<p><em>phylorug</em> captures this directly. In <code>presence</code>
+mode, each node gets a black dot if every analysis recovers the clade,
+or a grid showing which analyses recover it and which do not, this is
+nodal stability. In <code>support</code> mode, the same grid shades each
+cell by how strongly that analysis supports the clade, so a node that is
+unanimously recovered but weakly supported looks different from one that
+is unanimously recovered and strongly supported — this is nodal support
+layered on top of stability. Setting
+<code>rug_on_identical = TRUE</code> extends the grid to unanimous
+nodes, making per-analysis support variation visible even at the most
+stable clades.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -978,15 +973,11 @@ Daniel, G.M., and Tarasov, S. (2026). Phylogenomics resolves a
 200-year-old puzzle: a revised tribal classification of Afro-Eurasian
 dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a>
 </li>
-<li>Machado, D. J. (2015). YBYRÁ fossile: a command line system for
-total evidence dating and sensitivity analysis. <em>BMC
-Bioinformatics</em>, 16,
-<ol start="40" style="list-style-type: decimal"><li>
-</li></ol>
-</li>
-<li>Sanders, K. L. (2010). Cladescan: exhaustive phylogenetic searches
-of consensus support in large data sets. <em>Cladistics</em>, 26(6),
-598–613.</li>
+<li>Machado, D. J. (2015). YBYRÁ facilitates comparison of large
+phylogenetic trees. <em>BMC Bioinformatics</em>, 16, 204.</li>
+<li>Sanders, J. G. (2010). Program note: Cladescan, a program for
+automated phylogenetic sensitivity analysis. <em>Cladistics</em>, 26(1),
+114–116.</li>
 <li>Steenwyk, J. L., Li, Y., Zhou, X., Shen, X. X. &amp; Rokas, A.
 (2023). Incongruence in the phylogenomics era. <em>Nature Reviews
 Genetics</em>, 24(12), 834–850.</li>
