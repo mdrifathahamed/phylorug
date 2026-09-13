@@ -75,7 +75,7 @@ topology and its own support values in its own format. At the same time,
 no single tree inference method is proven to be the all-rounder.</p>
 <p>Incomplete lineage sorting, long-branch attraction, model
 misspecification, and compositional heterogeneity each affect different
-methods differently (Fleming et al. 2023). Accordingly, exploring
+methods differently (Steenwyk et al., 2023). Accordingly, exploring
 multiple strategies , on different data types and different inference
 pipelines is the way researchers detect nodes that may be artifacts of a
 particular analytical choice versus nodes that hold up regardless of
@@ -505,42 +505,40 @@ stable nodes remain visible.</p>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
-<h3 id="what-the-rug-reveals">What the rug reveals?<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
+<h3 id="what-the-rug-reveals">What the rug reveals<a class="anchor" aria-label="anchor" href="#what-the-rug-reveals"></a>
 </h3>
-<p>The <strong>rugs</strong> immediately separates stable from contested
-regions of the <em>Culicomorpha</em> tree. Most family-level clades
-carry black dots, meaning those clades are recovered by unanimously all
-analyses. <em>Culicidae</em> (mosquitoes), <em>Chironomidae</em>
-(non-biting midges), <em>Ceratopogonidae</em> (biting midges), and the
-<em>Simuliidae</em> + <em>Thaumaleidae</em> clade all show complete
-agreement across every inference method and dataset. Fu et al. (2025)
-reported the same, full support for these clades regardless of model or
-matrix.</p>
-<p>The interesting nodes are the contested ones. The central question in
-<em>Culicomorpha</em> phylogenetics is where <em>Ceratopogonidae</em>
-and <em>Chironomidae</em> sit relative to the rest of the infraorder. Fu
-et al. (2025) tested some hypotheses. Their preferred topology (H1)
-places <em>Chironomidae</em> + <em>Ceratopogonidae</em> together as
-sister to all remaining families. The alternative (H2) breaks this
-pairing and places <em>Ceratopogonidae</em> elsewhere, nested closer to
-the other families. On the rug, the node defining the
-<em>Chironomidae</em> + <em>Ceratopogonidae</em> clade shows a mixed
-grid. The two ASTRAL cells (cells 1 and 4 in the position legend) are
-white at this node, meaning the coalescent-based analyses did not
-recover this grouping. The IQ-TREE concatenation cells are mostly black,
-meaning the concatenation analyses did recover it. This is a textbook
-example of gene-tree/species-tree conflict made visible on a single
-figure: concatenation says these two families group together, coalescent
-methods say they do not.</p>
-<p>Within <em>Chironomidae</em>, the subfamily-level relationships are
-largely stable, with black dots on most internal nodes. A few nodes near
-<em>Potthastia</em> and <em>Paraheptagyia</em> show mixed grids with red
-cells. Red means the analysis recovered the clade but carried no
-computable support value. These nodes sit on short internal branches
-where rapid diversification left little phylogenetic signal, making
-resolution sensitive to model choice. Fu et al. (2025) noted similar
-instability around the placement of <em>Telmatogetoninae</em> within
-<em>Diamesinae</em> depending on the analytical model used.</p>
+<p>The rug immediately separates stable from contested regions of the
+<em>Culicomorpha</em> tree. Most nodes carry black dots, meaning every
+comparison analysis recovered the clade unanimously. All family-level
+groupings such as <em>Culicidae</em>, <em>Chironomidae</em>,
+<em>Ceratopogonidae</em>, and the <em>Simuliidae</em> +
+<em>Thaumaleidae</em> clade, show complete agreement across every
+inference method and dataset.</p>
+<p>The main exception is the node uniting <em>Chironomidae</em> and
+<em>Ceratopogonidae</em> as sister groups, the most contentious
+relationship in culicomorph systematics. Eight of nine comparison
+analyses recover this clade with strong support, but the
+site-homogeneous partitioned analysis of the kpi-trimmed matrix
+(Matrix1-kpi_partitioning) fails to recover it entirely. This is
+consistent with the finding of Fu et al. (2025) that site-homogeneous
+models are more prone to missing this relationship, and the pattern is
+immediately visible in the rug without consulting multiple tree
+files.</p>
+<p>Two additional areas show disagreement. Near the base of
+<em>Chironomidae</em>, the rug grids at nodes near <em>Podonomus</em>
+and <em>Parochlus</em> show mixed shading, indicating that the internal
+arrangement of basal chironomid lineages varies across methods. Near the
+tips, the node at <em>Nilodorum</em> + <em>Dicrotendipes</em> (backbone
+support 75.0) shows grey shading, moderate support in the backbone that
+is not unanimously endorsed by all comparison analyses.</p>
+<p>A few cells appear red at nodes within <em>Chironomidae</em>. Red
+means the analysis recovered the clade but no support value could be
+parsed from the node label. In this dataset, the original tree files do
+not carry support values at those nodes, so phylorug correctly marks
+them as not computed.</p>
+<p>In contrast, the placement of <em>Dixidae</em> relative to the core
+<em>Culicoidea</em> clade is stable across all methods, a finding that
+would require checking each tree individually without phylorug.</p>
 <p>This is the core value of <code>phylorug</code>: patterns that
 required opening 10 separate tree files side by side in the original
 study are condensed onto a single figure. A reader can immediately see
@@ -705,48 +703,55 @@ dataset. Presence mode shows which analyses recovered each clade;
 support mode goes further by showing how strongly each analysis backs
 each node.</p>
 <p>Most nodes within Onthophagina are unanimously recovered (black dots)
-across all four comparison analyses, consistent with the source study’s
-figure. The added value of support mode becomes visible at the nodes
-where genera intergrade. The node uniting the genus <em>Caccobius</em>
-(including <em>Cleptocaccobius</em>) with a clade of
-<em>Onthophagus</em> species (backbone support 43.7/64 SH-aLRT/UFBoot2)
-is the most weakly supported node in the entire subtribe, only the
-backbone (70p_uce) recovered this grouping. In phylorug’s support mode,
-the grey and yellow shading reveals that the analyses that do recover
-the clade support it weakly, confirming that the placement of
-<em>Caccobius</em> relative to <em>Onthophagus</em> is genuinely
-uncertain at this level.</p>
-<p>A similar pattern appears on node up, where the genus
-<em>Eusaproceius</em> is united with a clade of <em>Onthophagus</em>
-(<em>O. giraffa</em>, <em>O. pilosus</em>, <em>O. bicavifrons</em>,
-<em>O. quadrimaculatus</em>; backbone support 59.8): the rug shows
-moderate-to-low support shading in the analyses that recover the clade,
-while others fail to recover it entirely, a mix that a binary presence
-grid cannot distinguish from a strongly supported clade that one
-analysis simply missed.</p>
-<p>At the base of Onthophagina, the early-branching genera
-<em>Kurtops</em>, <em>Hamonthophagus</em>, <em>Digitonthophagus</em>,
-and <em>Phalops</em> (together with <em>Onthophagus probus</em>) form a
-grade that is unanimously recovered across all analyses despite the
-backbone’s own compound support values of 63.8/73 (SH-aLRT/UFBoot2) and
-99.9/97 at these nodes. By default, <code>show_support = TRUE</code>
-displays the full compound label; we used
-<code>show_support_idx = 1</code> in the figure above to show only the
-first metric and reduce clutter. Users can set
-<code>show_support_idx = 2</code> to display the second metric
-instead.</p>
-<p>This distinction between low support within a single analysis and
-genuine disagreement across analyses is precisely what support mode is
-designed to reveal.</p>
-<p>The black dots at unanimous nodes are compact summaries — they tell
+across all four comparison analyses. The added value of support mode
+becomes visible at nodes where not all analyses recover the clade.</p>
+<p>The node uniting the genus <em>Caccobius</em> (including
+<em>Cleptocaccobius</em>) with a clade of <em>Onthophagus</em> species
+(backbone support 43.7/64 SH-aLRT/UFBoot2) is the most weakly supported
+node in the entire subtribe. No dot or rug appears at this node, meaning
+none of the comparison analyses recovered this clade. This confirms that
+the placement of <em>Caccobius</em> relative to <em>Onthophagus</em> is
+genuinely uncertain.</p>
+<p>Weak support and partial recovery are also visible deeper within the
+<em>Onthophagus</em> radiation. The node uniting <em>O. giraffa</em> +
+<em>O. pilosus</em> with <em>O. bicavifrons</em> + <em>O.
+quadrimaculatus</em> (backbone support 59.8/66) shows moderate-to-low
+support shading in the analyses that recover the clade, while others
+fail to recover it entirely. Within this group the sister pair <em>O.
+quadrimaculatus</em> + <em>O. bicavifrons</em> is recovered with strong
+support only by the backbone and the partitioned IQ-TREE analysis; the
+GHOST analysis supports it weakly, while both ASTRAL trees fail to
+recover the clade entirely. This is a clear
+coalescent-versus-concatenation disagreement that support mode makes
+visible. In presence mode alone, this node would look the same as any
+other partially recovered clade.</p>
+<p>The Phalops group (<em>Kurtops</em>, <em>Hamonthophagus</em>,
+<em>Digitonthophagus</em>, <em>Phalops</em>, and <em>O. probus</em>) at
+the base of Onthophagina is recovered as a clade by all five analyses.
+However, the relationships inside the group tell a different story. The
+rug at the node uniting <em>Hamonthophagus</em> with
+<em>Digitonthophagus</em> + <em>Phalops</em> + <em>O. probus</em>
+(backbone support 63.8/73) shows mixed shading, meaning some analyses
+support this placement only weakly. One step deeper, the node grouping
+<em>Digitonthophagus</em>, <em>Phalops</em>, and <em>O. probus</em>
+(backbone support 99.9/97) also shows disagreement, high backbone
+support does not guarantee agreement across methods. Even the
+<em>Digitonthophagus</em> + <em>Phalops</em> pair (backbone support
+100/100) is not recovered by the ASTRAL partitioned analysis. The
+Phalops group itself is stable, but the relationships among its members
+depend on the method.</p>
+<p>These three cases: complete absence, partial weak recovery, and
+unanimous recovery with uncertain relationships within the group -
+capture different levels of conflict that support mode makes
+visible.</p>
+<p>The black dots at unanimous nodes are compact summaries, they tell
 you the clade was recovered everywhere, but not how strongly. To inspect
 the support values across analyses even at unanimous nodes, set
-<code>rug_on_identical = TRUE</code> in the <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code>
-call above. This expands every node into its full grid, revealing that
-nearly all unanimous dots are also uniformly strongly supported. Only
-the two weakly supported nodes described above show mixed shading. Once
-satisfied, switch back to <code>rug_on_identical = FALSE</code> (the
-default) for a cleaner figure.</p>
+<code>rug_on_identical = TRUE</code>. This expands every node into its
+full grid, revealing whether unanimous recovery is backed by uniformly
+strong support or conceals variation. Once satisfied, switch back to
+<code>rug_on_identical = FALSE</code> (the default) for a cleaner
+figure.</p>
 </div>
 </div>
 <div class="section level2">
