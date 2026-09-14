@@ -65,11 +65,10 @@
 #'     \item{presence}{Clade presence: `1` where recovered, `0` where absent.
 #'      For pools, the value depends on `pool_threshold` (see above).}
 #'
-#'     \item{support_1, support_2, ...}{One matrix per value in `support_col`.
-#'      Raw support values where the clade was recovered, `NA` where absent
-#'      or where the clade was recovered but no support value could be parsed
-#'      from the node label. Named in the order requested, so
-#'      `support_col = c(1, 2)` produces `support_1` and `support_2`.}
+#'     \item{support matrices}{One matrix per value in `support_col`
+#'      (named `support_1`, `support_2`, etc.). Raw support values where
+#'      the clade was recovered, `NA` where absent or where the clade was
+#'      recovered but no support value could be parsed from the node label.}
 #'   }
 #'
 #' @seealso [check_taxa()] to diagnose taxon mismatches before building

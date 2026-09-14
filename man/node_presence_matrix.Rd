@@ -49,11 +49,10 @@ per comparison tree:
 \item{presence}{Clade presence: \code{1} where recovered, \code{0} where absent.
 For pools, the value depends on \code{pool_threshold} (see above).}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{\\item\{support_1, support_2, ...\}\{One matrix per value in `support_col`.
- Raw support values where the clade was recovered, `NA` where absent
- or where the clade was recovered but no support value could be parsed
- from the node label. Named in the order requested, so
- `support_col = c(1, 2)` produces `support_1` and `support_2`.\}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{\\item\{support matrices\}\{One matrix per value in `support_col`
+ (named `support_1`, `support_2`, etc.). Raw support values where
+ the clade was recovered, `NA` where absent or where the clade was
+ recovered but no support value could be parsed from the node label.\}
 }\if{html}{\out{</div>}}
 
 }
