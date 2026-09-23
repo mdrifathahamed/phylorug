@@ -64,7 +64,7 @@ handles canvas sizing, legend placement, and font scaling automatically.</p>
 <span>  include_backbone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nodes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_support <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  show_support <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_support_idx <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cell_scale <span class="op">=</span> <span class="fl">0.45</span>,</span>
 <span>  x_offset <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -167,15 +167,28 @@ only selected nodes get dots, rugs, or support labels.</p></dd>
 
 
 <dt id="arg-show-support">show_support<a class="anchor" aria-label="anchor" href="#arg-show-support"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, backbone node support labels are
-drawn beside each node. Default <code>FALSE</code>.</p></dd>
+<dd><p>Logical. If <code>TRUE</code> (default), backbone node support
+labels are drawn beside each node, and the legend includes a red line
+naming what those numbers are.</p></dd>
 
 
 <dt id="arg-show-support-idx">show_support_idx<a class="anchor" aria-label="anchor" href="#arg-show-support-idx"></a></dt>
-<dd><p>Integer or NULL. Which value from compound node
-labels (e.g. "80/95") to display when <code>show_support = TRUE</code>. Default
-<code>NULL</code> displays the full compound label as-is. Set to <code>1</code> or <code>2</code> to
-display only a single metric.</p></dd>
+<dd><p>Optional. Controls what appears in the label on the
+tree AND what the legend calls it. Accepts several shapes:</p><ul><li><p><code>NULL</code> (default): the raw <code>node.label</code> is drawn on the tree and
+the legend says <code>&lt;value&gt; (backbone support)</code> without naming metrics.</p></li>
+<li><p>An integer (<code>1</code> or <code>2</code>): only that slot of a compound label
+(e.g. "80/95") is drawn, and the legend shows just that number.</p></li>
+<li><p>A named integer, e.g. <code>c("1" = "sh_alrt")</code>: same slot behaviour,
+and the legend adds the metric name (e.g. "SH-aLRT").</p></li>
+<li><p>Two named integers, e.g. <code>c("1" = "sh_alrt", "2" = "ufboot")</code>:
+the full compound is drawn and the legend names both metrics.</p></li>
+<li><p>A plain string, e.g. <code>"UFBoot2"</code>: legal only when the tree has
+single-value labels (no <code>/</code>). On compound labels, this is ambiguous
+(which slot?) and the function falls back to the raw-label behaviour
+with a message explaining the shape it accepts.</p></li>
+</ul><p>Recognised metric keys for named-integer form: <code>"ufboot"</code>, <code>"sh_alrt"</code>,
+<code>"lpp"</code>, <code>"posterior"</code>, <code>"jackknife"</code>, <code>"bootstrap"</code>, <code>"bremer_ratio"</code>,
+<code>"transfer_boot"</code>. Any other key is shown verbatim in the legend.</p></dd>
 
 
 <dt id="arg-cell-scale">cell_scale<a class="anchor" aria-label="anchor" href="#arg-cell-scale"></a></dt>

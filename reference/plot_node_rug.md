@@ -40,6 +40,7 @@ plot_node_rug(
   x_offset = 0,
   y_offset = 0,
   rug_position = c("inside", "outside"),
+  border_lwd = 0.2,
   last_pp = NULL
 )
 ```
@@ -89,6 +90,16 @@ plot_node_rug(
 - rug_position:
 
   One of `"outside"` or `"inside"` (default).
+
+- border_lwd:
+
+  Line width of the neutral grey border drawn around every cell. Default
+  `0.2`.
+  [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
+  overrides this with a value scaled to the actual rendered size of the
+  cell (via `par("pin")` / `par("usr")`), so the border stays visible on
+  tiny cells and doesn't overpower big ones. The default matters only
+  for direct calls to `plot_node_rug()`, e.g. in tests.
 
 - last_pp:
 

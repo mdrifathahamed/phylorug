@@ -104,7 +104,7 @@ plot_phylorug(backbone, npm, mode = "support")
 
 ### Core functions
 
-**phylorug** provides six functions that cover the full workflow from
+**phylorug** provides seven functions that cover the full workflow from
 raw tree files to publication-ready figures:
 
 - [`read_trees()`](https://mdrifathahamed.github.io/phylorug/reference/read_trees.md)

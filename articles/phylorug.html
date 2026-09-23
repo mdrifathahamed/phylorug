@@ -242,9 +242,11 @@ whether a cell is filled or empty; support determines its shade.</p>
 draws the rug on the backbone. In its simplest form, all arguments are
 defaults: <code>mode = "presence"</code>,
 <code>dot_identical = TRUE</code> (unanimous nodes get a black dot),
-<code>legend = TRUE</code>, and <code>rug_position = "inside"</code>.
-The internal scaling engine sizes the canvas, fonts, and cell dimensions
-automatically based on tree size.</p>
+<code>legend = TRUE</code>, <code>show_support = TRUE</code> (the
+backbone’s own support values are shown alongside the rug), and
+<code>rug_position = "inside"</code>. The internal scaling engine sizes
+the canvas, fonts, and cell dimensions automatically based on tree
+size.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/quick-presence-1.png" class="r-plt" alt="" width="1950"></p>

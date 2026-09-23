@@ -195,9 +195,10 @@ With the node presence matrix ready,
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
 draws the rug on the backbone. In its simplest form, all arguments are
 defaults: `mode = "presence"`, `dot_identical = TRUE` (unanimous nodes
-get a black dot), `legend = TRUE`, and `rug_position = "inside"`. The
-internal scaling engine sizes the canvas, fonts, and cell dimensions
-automatically based on tree size.
+get a black dot), `legend = TRUE`, `show_support = TRUE` (the backbone’s
+own support values are shown alongside the rug), and
+`rug_position = "inside"`. The internal scaling engine sizes the canvas,
+fonts, and cell dimensions automatically based on tree size.
 
 ``` r
 

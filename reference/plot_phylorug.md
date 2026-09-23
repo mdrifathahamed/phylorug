@@ -23,7 +23,7 @@ plot_phylorug(
   include_backbone = FALSE,
   nodes = NULL,
   legend = TRUE,
-  show_support = FALSE,
+  show_support = TRUE,
   show_support_idx = NULL,
   cell_scale = 0.45,
   x_offset = 0,
@@ -134,15 +134,36 @@ plot_phylorug(
 
 - show_support:
 
-  Logical. If `TRUE`, backbone node support labels are drawn beside each
-  node. Default `FALSE`.
+  Logical. If `TRUE` (default), backbone node support labels are drawn
+  beside each node, and the legend includes a red line naming what those
+  numbers are.
 
 - show_support_idx:
 
-  Integer or NULL. Which value from compound node labels (e.g. "80/95")
-  to display when `show_support = TRUE`. Default `NULL` displays the
-  full compound label as-is. Set to `1` or `2` to display only a single
-  metric.
+  Optional. Controls what appears in the label on the tree AND what the
+  legend calls it. Accepts several shapes:
+
+  - `NULL` (default): the raw `node.label` is drawn on the tree and the
+    legend says `<value> (backbone support)` without naming metrics.
+
+  - An integer (`1` or `2`): only that slot of a compound label (e.g.
+    "80/95") is drawn, and the legend shows just that number.
+
+  - A named integer, e.g. `c("1" = "sh_alrt")`: same slot behaviour, and
+    the legend adds the metric name (e.g. "SH-aLRT").
+
+  - Two named integers, e.g. `c("1" = "sh_alrt", "2" = "ufboot")`: the
+    full compound is drawn and the legend names both metrics.
+
+  - A plain string, e.g. `"UFBoot2"`: legal only when the tree has
+    single-value labels (no `/`). On compound labels, this is ambiguous
+    (which slot?) and the function falls back to the raw-label behaviour
+    with a message explaining the shape it accepts.
+
+  Recognised metric keys for named-integer form: `"ufboot"`,
+  `"sh_alrt"`, `"lpp"`, `"posterior"`, `"jackknife"`, `"bootstrap"`,
+  `"bremer_ratio"`, `"transfer_boot"`. Any other key is shown verbatim
+  in the legend.
 
 - cell_scale:
 
