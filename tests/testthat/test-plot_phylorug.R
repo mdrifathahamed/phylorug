@@ -745,3 +745,176 @@ test_that("nodes combined with hide_unsupported and dot_identical", {
                   hide_unsupported = TRUE, dot_identical = TRUE)
   ))
 })
+# =============================================================================
+# show_support_idx: polymorphic dispatch (Section 7 of plot_phylorug())
+# =============================================================================
+
+make_backbone_compound <- function() {
+  # Compound labels ("x/y"), mirroring real IQ-TREE-style node labels
+  # (e.g. your beetle/Culicomorpha trees use "100/100", "59.8/66").
+  ape::read.tree(text = "(((A,B)95/90,C)80/70,(D,E)100/100);")
+}
+
+test_that("show_support_idx = NULL draws the raw compound label, no metric name", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm())
+  ))
+})
+
+test_that("show_support_idx as a bare number picks one slot, no metric name", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(), show_support_idx = 1)
+  ))
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(), show_support_idx = 2)
+  ))
+})
+
+test_that("bare slot beyond the label's own slot count keeps the full label", {
+  # make_backbone_with_labels() has single-value labels (no "/"), so slot 2
+  # doesn't exist -- the dispatch should fall back to the whole label rather
+  # than erroring.
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_with_labels(), make_npm(),
+                  show_support_idx = 2)
+  ))
+})
+
+test_that("one named slot draws that slot and names the metric, no message", {
+  expect_no_message(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c("1" = "sh_alrt"))
+  ))
+})
+
+test_that("two named slots draw the full label and name both metrics", {
+  expect_no_message(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c("1" = "sh_alrt", "2" = "ufboot"))
+  ))
+})
+
+test_that("two named slots in reversed order give the same result", {
+  # Proves the metric-name join is sorted by slot number, not input order.
+  expect_no_message(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c("2" = "ufboot", "1" = "sh_alrt"))
+  ))
+})
+
+test_that("unknown metric keys are shown verbatim, not an error", {
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c("1" = "my_custom_metric"))
+  ))
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c("1" = "sh_alrt", "2" = "my_metric"))
+  ))
+})
+
+test_that("named vector with non-numeric names falls back with a message", {
+  expect_message(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = c(a = "ufboot"))
+  ), "must be slot numbers")
+})
+
+test_that("plain string on compound labels falls back with a message", {
+  expect_message(on_null_device(
+    plot_phylorug(make_backbone_compound(), make_npm(),
+                  show_support_idx = "ufboot")
+  ), "isn't recognised for compound labels")
+})
+
+test_that("plain string on single-value labels names the metric silently", {
+  expect_no_message(on_null_device(
+    plot_phylorug(make_backbone_with_labels(), make_npm(),
+                  show_support_idx = "ufboot")
+  ))
+  expect_no_message(on_null_device(
+    plot_phylorug(make_backbone_with_labels(), make_npm(),
+                  show_support_idx = "MyCustomMetric")
+  ))
+})
+
+
+# =============================================================================
+# draw_threshold_legend(): unrecognised support_type key (crash fix)
+# =============================================================================
+
+test_that("threshold legend shows an unrecognised support_type verbatim", {
+  npm <- make_npm()
+  attr(npm, "support_type") <- c(iqtree = "custom_metric", astral = "lpp")
+  expect_no_error(on_null_device(
+    plot_phylorug(make_backbone(), npm, mode = "support", support_idx = 1)
+  ))
+})
+
+test_that("draw_threshold_legend directly: unrecognised type key doesn't error", {
+  on_null_device({
+    plot.new()
+    plot.window(xlim = c(0, 10), ylim = c(0, 10))
+    expect_no_error(
+      draw_threshold_legend(
+        x0 = 1, y0 = 9, sq_h = 0.3, sq_w = 0.3, text_cex = 0.4,
+        universal = FALSE,
+        support_type = c(t1 = "not_a_real_metric", t2 = "lpp")
+      )
+    )
+  })
+})
+
+
+# =============================================================================
+# draw_position_legend(): dot row + backbone-support row (direct unit tests)
+# =============================================================================
+
+test_that("draw_position_legend adds a dot row and a backbone row, in order", {
+  result <- on_null_device({
+    plot.new()
+    plot.window(xlim = c(0, 10), ylim = c(0, 10))
+    draw_position_legend(
+      analyses = c("a", "b"),
+      n_cols = 2, cell_w = 0.5, cell_h = 0.5,
+      x0 = 1, y0 = 9, text_cex = 0.5,
+      show_dot = TRUE, dot_col = "black",
+      backbone_support_line = "SH-aLRT / UFBoot2  (backbone support)",
+      backbone_value_str = "63.8/73",
+      support_label_col = "red"
+    )
+  })
+  # 2 analyses + dot row + backbone row = 4 rows of 0.5 below y0 = 9
+  expect_equal(result, 7)
+})
+
+test_that("draw_position_legend backbone row falls back to 'NA' with no value", {
+  expect_no_error(on_null_device({
+    plot.new()
+    plot.window(xlim = c(0, 10), ylim = c(0, 10))
+    draw_position_legend(
+      analyses = c("a", "b"),
+      n_cols = 2, cell_w = 0.5, cell_h = 0.5,
+      x0 = 1, y0 = 9, text_cex = 0.5,
+      show_dot = FALSE, dot_col = "black",
+      backbone_support_line = "(backbone support)",
+      backbone_value_str = NULL,
+      support_label_col = "red"
+    )
+  }))
+})
+
+test_that("draw_position_legend with neither dot nor backbone row unchanged", {
+  result <- on_null_device({
+    plot.new()
+    plot.window(xlim = c(0, 10), ylim = c(0, 10))
+    draw_position_legend(
+      analyses = c("a", "b", "c"),
+      n_cols = 2, cell_w = 0.5, cell_h = 0.5,
+      x0 = 1, y0 = 9, text_cex = 0.5,
+      show_dot = FALSE, dot_col = "black",
+      support_label_col = "red"
+    )
+  })
+  expect_equal(result, 9 - 3 * 0.5)
+})

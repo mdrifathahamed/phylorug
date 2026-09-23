@@ -69,13 +69,29 @@
 #'
 #' @param legend Logical. Draw the legend. Default TRUE.
 #'
-#' @param show_support Logical. If `TRUE`, backbone node support labels are
-#'   drawn beside each node. Default `FALSE`.
+#' @param show_support Logical. If `TRUE` (default), backbone node support
+#'   labels are drawn beside each node, and the legend includes a red line
+#'   naming what those numbers are.
 #'
-#' @param show_support_idx Integer or NULL. Which value from compound node
-#'   labels (e.g. "80/95") to display when `show_support = TRUE`. Default
-#'   `NULL` displays the full compound label as-is. Set to `1` or `2` to
-#'   display only a single metric.
+#' @param show_support_idx Optional. Controls what appears in the label on the
+#'   tree AND what the legend calls it. Accepts several shapes:
+#'   \itemize{
+#'     \item `NULL` (default): the raw `node.label` is drawn on the tree and
+#'       the legend says `<value> (backbone support)` without naming metrics.
+#'     \item An integer (`1` or `2`): only that slot of a compound label
+#'       (e.g. "80/95") is drawn, and the legend shows just that number.
+#'     \item A named integer, e.g. `c("1" = "sh_alrt")`: same slot behaviour,
+#'       and the legend adds the metric name (e.g. "SH-aLRT").
+#'     \item Two named integers, e.g. `c("1" = "sh_alrt", "2" = "ufboot")`:
+#'       the full compound is drawn and the legend names both metrics.
+#'     \item A plain string, e.g. `"UFBoot2"`: legal only when the tree has
+#'       single-value labels (no `/`). On compound labels, this is ambiguous
+#'       (which slot?) and the function falls back to the raw-label behaviour
+#'       with a message explaining the shape it accepts.
+#'   }
+#'   Recognised metric keys for named-integer form: `"ufboot"`, `"sh_alrt"`,
+#'   `"lpp"`, `"posterior"`, `"jackknife"`, `"bootstrap"`, `"bremer_ratio"`,
+#'   `"transfer_boot"`. Any other key is shown verbatim in the legend.
 #'
 #' @param support_label_cex Numeric or `NULL`. Size of the backbone support
 #'   labels. Default `NULL` auto-scales with tree size.
@@ -185,7 +201,7 @@ plot_phylorug <- function(backbone, npm,
                           include_backbone = FALSE,
                           nodes            = NULL,
                           legend           = TRUE,
-                          show_support     = FALSE,
+                          show_support     = TRUE,
                           show_support_idx = NULL,
                           cell_scale       = 0.45,
                           x_offset         = 0,
@@ -522,9 +538,11 @@ plot_phylorug <- function(backbone, npm,
 
     pos_line_h <- 0.2 * est_pos_cex
     th_line_h  <- 0.2 * est_th_cex
-    pos_leg_h  <- n_tree * pos_line_h
-    th_leg_h   <- th_leg_h   <- 6 * th_line_h
-    top_leg_h  <- max(pos_leg_h, th_leg_h)
+    # Both legends are drawn to one shared height: 7 threshold rows
+    # (header + 4 bins + 2 notes) of th_sq_in each. Section 10 uses the same
+    # formula, so the band reserved here is exactly the band drawn there.
+    # (size_factor in Section 10 is currently always 1, so it is omitted here.)
+    top_leg_h  <- 7 * w_ref * r_th_sq
     gap_inches <- 4 * max(pos_line_h, th_line_h)
 
     avail   <- max(1, plot_h - top_leg_h - gap_inches)
@@ -545,30 +563,138 @@ plot_phylorug <- function(backbone, npm,
   cell_w <- cell_h * (diff(last_pp$x.lim) / pin[1]) /
     (diff(last_pp$y.lim) / pin[2])
 
+  # Border line width for rug cells, scaled to how big each cell actually is
+  # on the physical canvas. cell_h is in user coordinates; convert to inches
+  # via the plot's inches-per-user-unit ratio, then take a small fraction of
+  # that. Clamped so a huge tree (tiny cells) never drops to invisible and a
+  # tiny tree (huge cells) never overpowers the fill colour.
+  usr           <- graphics::par("usr")
+  cell_h_inches <- cell_h * pin[2] / (usr[4] - usr[3])
+  border_lwd    <- min(0.6, max(0.15, cell_h_inches * 4))
+
   # --- 7. Node support labels ------------------------------------------------
+  # Two outputs from this block:
+  #   1. labels drawn on the tree (via ape::nodelabels()),
+  #   2. `backbone_support_line` -- red-text row for the legend (Section 10).
+  # `show_support_idx` is polymorphic; see @param docs for the shapes. The
+  # dispatch resolves to two internal values used below:
+  #   - metric_name_str: NULL, or the string(s) to show in the legend
+  #     (e.g. "SH-aLRT", "SH-aLRT / UFBoot2"), or "" for "no name known"
+  #   - slot: NULL (use whole label) or integer (which slash-separated slot)
+  backbone_support_line <- NULL
+  backbone_value_str    <- NULL
+
   if (show_support && !is.null(backbone$node.label)) {
     labs <- backbone$node.label
-    if (!is.null(show_support_idx)) {
+
+    # Pretty-name lookup for recognised metric keys (mirrors draw_threshold_legend)
+    pretty_name <- c(ufboot = "UFBoot2", sh_alrt = "SH-aLRT", lpp = "LPP",
+                     posterior = "Posterior", jackknife = "Jackknife",
+                     bootstrap = "Bootstrap", bremer_ratio = "Bremer",
+                     transfer_boot = "Transfer boot")
+
+    # Does this tree carry compound labels? Sample non-NA/non-empty labels only.
+    non_empty <- labs[!is.na(labs) & nzchar(labs)]
+    is_compound <- any(grepl("/", non_empty, fixed = TRUE))
+
+    slot            <- NULL
+    metric_name_str <- NULL
+
+    # Pretty display name for a metric key; unknown keys are shown as given
+    # rather than erroring (pretty_name[[k]] on a missing key would error,
+    # so this uses %in% first).
+    display_name <- function(k) {
+      if (k %in% names(pretty_name)) pretty_name[[k]] else k
+    }
+
+    if (is.null(show_support_idx)) {
+      # Default: raw label on tree, no metric name in legend.
+
+    } else if (is.numeric(show_support_idx) &&
+               length(show_support_idx) == 1L) {
+      # Bare number (1 or 2): slot pointer only, no metric name.
+      slot <- as.integer(show_support_idx)
+
+    } else if (is.character(show_support_idx) &&
+               !is.null(names(show_support_idx))) {
+      # Named vector, e.g. c("1" = "sh_alrt") or
+      # c("1" = "sh_alrt", "2" = "ufboot"): names are slot positions,
+      # values are metric keys. (Note: this is a named *character* vector,
+      # not numeric -- is.numeric() would never match it.)
+      slot_pos <- suppressWarnings(as.integer(names(show_support_idx)))
+      if (anyNA(slot_pos)) {
+        message(
+          "`show_support_idx` names must be slot numbers ",
+          "(e.g. c(\"1\" = \"ufboot\")), got: ",
+          paste(names(show_support_idx), collapse = ", "),
+          ". Falling back to raw labels without naming the metrics."
+        )
+      } else {
+        keys <- unname(show_support_idx)[order(slot_pos)]
+        metric_name_str <- paste(
+          vapply(keys, display_name, character(1), USE.NAMES = FALSE),
+          collapse = " / "
+        )
+        # One named slot: draw only that slot. Several: draw the full label.
+        if (length(slot_pos) == 1L) slot <- slot_pos
+      }
+
+    } else if (is.character(show_support_idx) &&
+               length(show_support_idx) == 1L) {
+      # Plain string. Legal only when labels are single-value (no "/").
+      if (is_compound) {
+        message(
+          "`show_support_idx` was passed as \"", show_support_idx,
+          "\", but the backbone's node labels are compound (contain '/'). ",
+          "This shape isn't recognised for compound labels -- falling back ",
+          "to raw labels without naming the metrics. To specify which slot ",
+          "is which metric, pass e.g. show_support_idx = ",
+          "c(\"1\" = \"ufboot\", \"2\" = \"sh_alrt\")."
+        )
+      } else {
+        metric_name_str <- display_name(show_support_idx)
+      }
+    }
+    # Slice by slot if requested.
+    if (!is.null(slot)) {
       labs <- vapply(labs, function(lbl) {
         if (is.na(lbl) || !nzchar(lbl)) return(lbl)
         parts <- strsplit(lbl, "/", fixed = TRUE)[[1L]]
-        if (length(parts) >= show_support_idx) parts[show_support_idx]
-        else lbl
+        if (length(parts) >= slot) parts[slot] else lbl
       }, character(1), USE.NAMES = FALSE)
     }
+
     show <- which(!is.na(labs) & nzchar(labs))
     if (!is.null(keep_ids)) {
       show <- show[(show + ntip) %in% keep_ids]
     }
     if (length(show) > 0) {
       node_ids <- show + ntip
-      if (length(show) > 0) {
-        num <- suppressWarnings(as.numeric(labs[show]))
-        txt <- ifelse(is.na(num), labs[show],
-                      format(round(num, 2), trim = TRUE))
-        ape::nodelabels(text = txt, node = node_ids, frame = "none",
-                        cex = support_cex, col = support_label_col,
-                        adj = c(1.1, 1.4))
+      num <- suppressWarnings(as.numeric(labs[show]))
+      txt <- ifelse(is.na(num), labs[show],
+                    format(round(num, 2), trim = TRUE))
+      ape::nodelabels(text = txt, node = node_ids, frame = "none",
+                      cex = support_cex, col = support_label_col,
+                      adj = c(1.1, 1.4))
+
+      # Pick a real numeric example from what was actually drawn on the tree.
+      # Accept "100", "63.8", "100/95" etc. -- anything that's digits, dots
+      # and slashes only. Skip anything like "Root" or "NodeA". If nothing
+      # numeric exists, keep the row (so the reader sees the metric name)
+      # but show "NA" in the value column.
+      is_numeric_label <- function(s) grepl("^[0-9./]+$", s)
+      numeric_hits     <- txt[vapply(txt, is_numeric_label, logical(1))]
+      backbone_value_str <- if (length(numeric_hits) > 0L) {
+        numeric_hits[1L]
+      } else {
+        "NA"
+      }
+      # The label column string. Metric name only appears when the user
+      # named one via show_support_idx (Section 7 dispatch above).
+      backbone_support_line <- if (is.null(metric_name_str)) {
+        "(backbone support)"
+      } else {
+        paste0(metric_name_str, "  (backbone support)")
       }
     }
   }
@@ -618,6 +744,7 @@ plot_phylorug <- function(backbone, npm,
       x_offset     = x_offset,
       y_offset     = y_offset,
       rug_position = rug_position,
+      border_lwd   = border_lwd,
       last_pp      = last_pp
     )
   }
@@ -652,10 +779,24 @@ plot_phylorug <- function(backbone, npm,
     th_text_cex  <- th_text_cex  * text_factor
     # --- end adjustment ---
 
-    leg_cell_h <- graphics::yinch(leg_cell_in)
-    leg_cell_w <- graphics::xinch(leg_cell_in)
     th_sq_h    <- graphics::yinch(th_sq_in)
     th_sq_w    <- graphics::xinch(th_sq_in)
+
+    # --- Shared legend height (same formula as Section 4) ---
+    # Position legend = same total height as the threshold table. More rows
+    # means thinner rows, so the two legends always look balanced.
+    legend_h_in <- 7 * th_sq_in
+    n_pos_rows  <- length(tree_names) +
+      (if (dot_identical) 1L else 0L) +
+      (if (!is.null(backbone_support_line)) 1L else 0L)
+    row_in <- legend_h_in / n_pos_rows
+
+    # Text fills a position row the same way threshold text fills its row.
+    pos_text_cex <- min(pos_text_cex, th_text_cex * row_in / th_sq_in)
+
+    # One table row = one square unit (same physical length in x and y).
+    leg_cell_h <- graphics::yinch(row_in)
+    leg_cell_w <- graphics::xinch(row_in)
     # Truncate long names
     max_chars     <- 35L
     display_names <- ifelse(
@@ -665,13 +806,21 @@ plot_phylorug <- function(backbone, npm,
     )
 
     # --- Position legend (topleft) ---
+    # dot_identical governs both the tree dots (Section 8) and, here, whether
+    # the "recovered by all compared analyses" row appears in the legend.
+    # backbone_support_line is built in Section 7; NULL means no red row.
     draw_position_legend(
       display_names, n_cols,
-      cell_w   = leg_cell_w,
-      cell_h   = leg_cell_h,
-      x0       = x0_left,
-      y0       = y0_top,
-      text_cex = pos_text_cex
+      cell_w                = leg_cell_w,
+      cell_h                = leg_cell_h,
+      x0                    = x0_left,
+      y0                    = y0_top,
+      text_cex              = pos_text_cex,
+      show_dot              = dot_identical,
+      dot_col               = dot_col,
+      backbone_support_line = backbone_support_line,
+      backbone_value_str    = backbone_value_str,
+      support_label_col     = support_label_col
     )
 
     # --- Threshold legend (topright, support mode only) ---
@@ -689,12 +838,14 @@ plot_phylorug <- function(backbone, npm,
       x0_right <- usr[2] - margin_x - graphics::xinch(th_width_in)
 
       draw_threshold_legend(
-        x0        = x0_right,
-        y0        = y0_top,
-        sq_h      = th_sq_h,
-        sq_w      = th_sq_w,
-        text_cex  = th_text_cex,
-        universal = is.null(support_type)
+        x0           = x0_right,
+        y0           = y0_top,
+        sq_h         = th_sq_h,
+        sq_w         = th_sq_w,
+        text_cex     = th_text_cex,
+        universal    = is.null(support_type),
+        support_type = support_type,
+        thresholds   = thresholds
       )
     }
   }
@@ -798,64 +949,119 @@ choose_grid <- function(n_cells) {
   n_rows <- ceiling(n_cells / n_cols)
   list(n_rows = n_rows, n_cols = n_cols)
 }
-#' Draw the position legend (numbered analysis key)
+#' Draw the position legend (numbered grid + analysis table)
 #'
-#' Draws the top-left legend of [plot_phylorug()]: a small numbered grid showing
-#' which cell position maps to which analysis, followed by a key listing
-#' "1 - analysis_name", "2 - analysis_name", and so on. Called once per plot
-#' when `legend = TRUE`.
+#' Draws the top-left legend of [plot_phylorug()]: a numbered grid of square
+#' cells (matching the rug's own layout) and, to its right, a two-column table
+#' (value | label) listing each analysis, then an optional dot row and an
+#' optional backbone-support row. Called once per plot when `legend = TRUE`.
 #'
 #' @details
-#' Cells are laid out left-to-right, top-to-bottom. For cell `k`, `row_idx` and
-#' `col_idx` give its position, `xleft`/`xright` span one `cell_w` from `x0`,
-#' and `ytop`/`ybottom` drop one `cell_h` per row downward from `y0`
-#' (y decreases going down in user coordinates). Each cell is a white box with
-#' its number centred inside. The text key is drawn to the right of the grid,
-#' starting half a cell past the grid's right edge and top-aligned to `y0`.
+#' `cell_w`/`cell_h` are the size of one table row as a square unit (same
+#' physical length in x and y). The caller sizes it so the whole legend has
+#' the same total height as the threshold legend. The grid spans exactly the
+#' analysis rows, so grid row 1 starts level with analysis 1 and the dot and
+#' backbone rows always start below the grid. Cell borders form the container,
+#' the same visual language as `draw_threshold_legend()`.
 #'
-#' All coordinates are in user units; the caller ([plot_phylorug()]) converts
-#' inches to user units before passing `cell_w`, `cell_h`, `x0`, and `y0`.
-#'
-#' @param analyses Character vector of comparison-tree names (already truncated
-#'   to a maximum length by the caller).
-#' @param n_cols Integer. Columns in the mini-grid, from `choose_grid()`.
-#' @param cell_w,cell_h Numeric. Width and height of one legend cell, in user
+#' @param analyses Character vector of comparison-tree names.
+#' @param n_cols Integer. Columns in the numbered grid, from `choose_grid()`.
+#' @param cell_w,cell_h Numeric. One table row as a square unit, in user
 #'   coordinates.
-#' @param x0,y0 Numeric. Top-left anchor of the grid, in user coordinates.
-#' @param text_cex Numeric. Font size for the cell numbers and the key text.
+#' @param x0,y0 Numeric. Top-left anchor, in user coordinates.
+#' @param text_cex Numeric. Font size for all legend text.
+#' @param show_dot Logical. Draw the dot row.
+#' @param dot_col Colour of the identical-clade dot.
+#' @param backbone_support_line Character or NULL. Label for the backbone
+#'   row; NULL skips the row.
+#' @param backbone_value_str Character or NULL. Value shown in the left cell
+#'   of the backbone row; NULL shows "NA".
+#' @param support_label_col Colour of the backbone row text.
 #'
-#' @return Invisibly, the y-coordinate of the bottom of the grid, so the caller
-#'   can stack content below it if needed.
-#'
-#' @seealso [plot_phylorug()] (Section 10) for the caller, and
-#'   `draw_threshold_legend()` for the companion support-colour key.
+#' @return Invisibly, the y-coordinate below the last table row.
 #'
 #' @noRd
 draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
-                                 x0, y0, text_cex = 0.5) {
-  n_an   <- length(analyses)
-  n_rows <- ceiling(n_an / n_cols)
+                                 x0, y0, text_cex = 0.5,
+                                 show_dot = FALSE, dot_col,
+                                 backbone_support_line = NULL,
+                                 backbone_value_str = NULL,
+                                 support_label_col) {
+  n_an        <- length(analyses)
+  n_grid_rows <- ceiling(n_an / n_cols)
+  grid_lwd    <- 0.7
+  grid_border <- "grey40"
+  padx        <- cell_w * 0.4
 
+  # --- 1. Numbered grid: square cells spanning the analysis rows ---------
+  g_scale <- n_an / n_grid_rows
+  g_w     <- cell_w * g_scale
+  g_h     <- cell_h * g_scale
   for (k in seq_len(n_an)) {
     row_idx <- ceiling(k / n_cols)
     col_idx <- ((k - 1) %% n_cols) + 1
-    xleft   <- x0 + (col_idx - 1) * cell_w
-    xright  <- xleft + cell_w
-    ytop    <- y0 - (row_idx - 1) * cell_h
-    ybottom <- ytop - cell_h
-    graphics::rect(xleft, ybottom, xright, ytop,
-                   col = "white", border = "black", lwd = 0.5)
-    graphics::text((xleft + xright) / 2, (ytop + ybottom) / 2,
-                   labels = k, cex = text_cex)
+    xleft   <- x0 + (col_idx - 1) * g_w
+    ytop    <- y0 - (row_idx - 1) * g_h
+    graphics::rect(xleft, ytop - g_h, xleft + g_w, ytop,
+                   col = "white", border = grid_border, lwd = grid_lwd)
+    graphics::text(xleft + g_w / 2, ytop - g_h / 2,
+                   labels = k, cex = text_cex, family = "sans")
   }
 
-  grid_right <- x0 + n_cols * cell_w
-  key_x      <- grid_right + cell_w * 0.5
-  key_lines  <- paste0(seq_len(n_an), " - ", analyses)
-  graphics::text(key_x, y0,
-                 labels = paste(key_lines, collapse = "\n"),
-                 adj = c(0, 1), cex = text_cex, family = "sans")
-  invisible(y0 - n_rows * cell_h)
+  # --- 2. Table rows: analyses, then dot, then backbone -------------------
+  rows <- lapply(seq_len(n_an), function(k) {
+    list(value = as.character(k), label = analyses[k],
+         col = "black", is_dot = FALSE)
+  })
+  if (isTRUE(show_dot)) {
+    rows <- c(rows, list(list(value = "",
+                              label = "Recovered by all compared analyses",
+                              col = "black", is_dot = TRUE)))
+  }
+  if (!is.null(backbone_support_line)) {
+    rows <- c(rows, list(list(value = backbone_value_str %||% "NA",
+                              label = backbone_support_line,
+                              col = support_label_col, is_dot = FALSE)))
+  }
+
+  # --- 3. Column widths measured from actual content -----------------------
+  vals  <- vapply(rows, function(r) r$value, character(1))
+  labs  <- vapply(rows, function(r) r$label, character(1))
+  val_w <- max(cell_w * 1.5,
+               max(graphics::strwidth(vals, units = "user", cex = text_cex)) +
+                 2 * padx)
+  lab_w <- max(graphics::strwidth(labs, units = "user", cex = text_cex)) +
+    2 * padx
+
+  tbl_left  <- x0 + n_cols * g_w + cell_w   # one unit gap after the grid
+  tbl_mid   <- tbl_left + val_w
+  tbl_right <- tbl_mid + lab_w
+
+  # --- 4. Draw the table ---------------------------------------------------
+  for (i in seq_along(rows)) {
+    r    <- rows[[i]]
+    ytop <- y0 - (i - 1) * cell_h
+    ybot <- ytop - cell_h
+    ymid <- (ytop + ybot) / 2
+
+    graphics::rect(tbl_left, ybot, tbl_mid, ytop,
+                   col = NA, border = grid_border, lwd = grid_lwd)
+    graphics::rect(tbl_mid, ybot, tbl_right, ytop,
+                   col = NA, border = grid_border, lwd = grid_lwd)
+
+    if (r$is_dot) {
+      graphics::points((tbl_left + tbl_mid) / 2, ymid,
+                       pch = 16, col = dot_col, cex = text_cex * 1.2)
+    } else {
+      graphics::text((tbl_left + tbl_mid) / 2, ymid, labels = r$value,
+                     cex = text_cex, col = r$col, family = "sans")
+    }
+    graphics::text(tbl_mid + padx, ymid, labels = r$label,
+                   adj = c(0, 0.5), cex = text_cex, col = r$col,
+                   family = "sans")
+  }
+
+  invisible(y0 - length(rows) * cell_h)
 }
 #' Draw the support-threshold colour key
 #'
@@ -895,63 +1101,191 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 draw_threshold_legend <- function(x0, y0,
                                   sq_h, sq_w,
                                   text_cex = 0.5,
-                                  universal = FALSE) {
+                                  universal = FALSE,
+                                  support_type = NULL,
+                                  thresholds = NULL) {
   gap      <- sq_h * 0.4
   text_gap <- sq_w * 0.3
-  rows <- if (universal) {
-    list(
-      list(fill = "#000000", label = ">=0.95 (very high)"),
-      list(fill = "#5F5E5A", label = "0.80-0.94 (high)"),
-      list(fill = "#B4B2A9", label = "0.50-0.79 (moderate)"),
-      list(fill = "#E8C547", label = "<0.50 (low)"),
-      list(fill = "white",   label = "clade not recovered"),
-      list(fill = "#D64545", label = "not computed")
+  xright   <- x0 + sq_w
+
+  bin_words <- c("Very high", "High", "Moderate", "Low")
+  fills     <- c("#000000",   "#5F5E5A", "#B4B2A9", "#E8C547")
+  tiers     <- c("very_high", "high",    "moderate", "low")
+
+  # -- Build column headers and their four values ---------------------------
+  # Numbers come from whatever bin_support() is actually using: user-passed
+  # thresholds when present, otherwise default_thresholds(). This is the
+  # single-source-of-truth guarantee -- the legend cannot lie about colours.
+  #
+  # Column count follows what the user actually has:
+  #   - universal mode: one column, "Support", values as percentages
+  #   - non-universal:  one column per unique support type, in the user's own
+  #     order (unique() preserves first appearance), header = pretty metric name
+
+  pretty <- c(ufboot = "UFBoot2", sh_alrt = "SH-aLRT", lpp = "LPP",
+              posterior = "Posterior", jackknife = "Jackknife",
+              bootstrap = "Bootstrap", bremer_ratio = "Bremer",
+              transfer_boot = "Transfer boot")
+
+  # Format one metric's four cut-offs as display strings. Always shown as
+  # percentages when values are on the 0-100 scale (UFBoot2/SH-aLRT and any
+  # user "universal" threshold divided-by-100'd). LPP/posterior stay 0-1.
+  fmt_col <- function(type_key) {
+    th <- if (!is.null(thresholds) && !is.null(thresholds[[type_key]])) {
+      thresholds[[type_key]]
+    } else {
+      default_thresholds(type_key)
+    }
+    is_pct <- th[["very_high"]] > 1
+    if (universal && !is_pct) {
+      # universal mode always displays as percentages
+      th <- th * 100
+      is_pct <- TRUE
+    }
+    step <- if (is_pct) 1 else 0.01
+    fmt  <- if (is_pct) {
+      function(x) as.character(round(x))
+    } else {
+      function(x) sprintf("%.2f", x)
+    }
+    c(
+      paste0(">=", fmt(th[["very_high"]])),
+      paste0(fmt(th[["high"]]),     "-", fmt(th[["very_high"]] - step)),
+      paste0(fmt(th[["moderate"]]), "-", fmt(th[["high"]]      - step)),
+      paste0("<",  fmt(th[["moderate"]]))
     )
+  }
+
+  if (universal) {
+    col_headers <- "Support"
+    col_values  <- list(fmt_col("universal"))
   } else {
-    list(
-      list(
-        fill  = "#000000",
-        label = paste0(">=95 (UFBoot2) or >=80 (SH-aLRT) ", "or >=0.95 (LPP)")),
-      list(
-        fill  = "#5F5E5A",
-        label = paste0("80-94 (UFBoot2) or 70-79 (SH-aLRT) ",
-                       "or 0.90-0.94 (LPP)")),
-      list(
-        fill  = "#B4B2A9",
-        label = paste0("50-79 (UFBoot2) or 50-69 (SH-aLRT) ",
-                       "or 0.50-0.89 (LPP)")),
-      list(
-        fill  = "#E8C547",
-        label = paste0("<50 (UFBoot2/SH-aLRT) ", "or <0.50 (LPP)")),
-      list(
-        fill  = "white",
-        label = "clade not recovered"),
-      list(
-        fill  = "#D64545",
-        label = "not computed")
-    )
+    types_in_order <- unique(support_type)
+    types_in_order <- types_in_order[!is.na(types_in_order)]
+    if (length(types_in_order) == 0L) {
+      # Fallback: support_type was supplied but empty -- treat as universal.
+      col_headers <- "Support"
+      col_values  <- list(fmt_col("universal"))
+    } else {
+      col_headers <- vapply(types_in_order, function(t) {
+        if (t %in% names(pretty)) pretty[[t]] else t
+      }, character(1))
+      col_values <- lapply(types_in_order, fmt_col)
+    }
   }
-  for (i in seq_along(rows)) {
-    r       <- rows[[i]]
-    ytop    <- y0 - (i - 1) * (sq_h + gap)
-    ybottom <- ytop - sq_h
-    xright  <- x0 + sq_w
+  n_cols_th <- length(col_headers)
 
-    graphics::rect(
-      x0, ybottom, xright, ytop,
-      col    = r$fill,
-      border = "black",
-      lwd    = 0.5
-    )
-    graphics::text(
-      xright + text_gap,
-      (ytop + ybottom) / 2,
-      labels = r$label,
-      adj    = c(0, 0.5),
-      cex    = text_cex,
-      family = "sans"
-    )
+  # -- Column geometry ------------------------------------------------------
+  # Each column reserved wide enough for its widest content (header or any
+  # value in that column) plus a small padding. Bin word column measured
+  # against its own longest word. All measurements in user coords so table
+  # scales with the plot.
+  col1_x <- xright + text_gap
+  col1_w <- max(graphics::strwidth(bin_words, units = "user",
+                                   cex = text_cex)) * 1.25
+
+  metric_col_widths <- vapply(seq_len(n_cols_th), function(k) {
+    max(graphics::strwidth(
+      c(col_headers[k], col_values[[k]]),
+      units = "user", cex = text_cex
+    ))
+  }, numeric(1)) * 1.4
+
+  metric_col_x <- numeric(n_cols_th)
+  running_x    <- col1_x + col1_w
+  for (k in seq_len(n_cols_th)) {
+    metric_col_x[k] <- running_x
+    running_x <- running_x + metric_col_widths[k]
   }
 
-  invisible(y0 - length(rows) * (sq_h + gap))
+  # -- Draw the whole thing as a real table -------------------------------
+  # Every cell is its own graphics::rect() with grey borders, so the exported
+  # SVG contains a proper grid a user can select as cells in Inkscape or
+  # Illustrator rather than loose text floating over a background. Header row
+  # has no fill; bin rows carry the swatch colour in column 1; note rows
+  # (Option A) span all metric columns with one label and no interior
+  # verticals, honestly showing they are categorical states, not thresholds.
+
+  grid_lwd    <- 0.7
+  grid_border <- "grey40"
+  padx        <- text_gap                           # horizontal cell padding
+
+  header_h    <- sq_h + gap                         # header row height
+  swatch_w    <- xright - x0                        # width of swatch column
+  bin_col_r   <- col1_x + col1_w                    # right edge of "Bin" col
+  metric_edges <- c(metric_col_x,
+                    metric_col_x[n_cols_th] +
+                      metric_col_widths[n_cols_th])
+  table_right <- metric_edges[length(metric_edges)]
+
+  # ---- Header row cells (unfilled, bold text) --------------------------
+  y_top_h <- y0
+  y_bot_h <- y_top_h - sq_h
+  y_mid_h <- (y_top_h + y_bot_h) / 2
+  # swatch column header (empty rect, keeps grid alignment)
+  graphics::rect(x0, y_bot_h, xright, y_top_h,
+                 col = NA, border = grid_border, lwd = grid_lwd)
+  # bin word header
+  graphics::rect(xright, y_bot_h, bin_col_r, y_top_h,
+                 col = NA, border = grid_border, lwd = grid_lwd)
+  graphics::text(col1_x + padx, y_mid_h, "Bin", adj = c(0, 0.5),
+                 cex = text_cex, family = "sans", font = 2)
+  # metric headers
+  for (k in seq_len(n_cols_th)) {
+    left  <- metric_edges[k]
+    right <- metric_edges[k + 1L]
+    graphics::rect(left, y_bot_h, right, y_top_h,
+                   col = NA, border = grid_border, lwd = grid_lwd)
+    graphics::text(left + padx, y_mid_h, col_headers[k], adj = c(0, 0.5),
+                   cex = text_cex, family = "sans", font = 2)
+  }
+
+  # ---- Four bin rows (swatch + bin word + values) ----------------------
+  for (i in seq_along(tiers)) {
+    ytop <- y_bot_h - (i - 1) * sq_h
+    ybot <- ytop - sq_h
+    ymid <- (ytop + ybot) / 2
+
+    # swatch cell (this is the actual coloured square)
+    graphics::rect(x0, ybot, xright, ytop,
+                   col = fills[i], border = grid_border, lwd = grid_lwd)
+    # bin word cell
+    graphics::rect(xright, ybot, bin_col_r, ytop,
+                   col = NA, border = grid_border, lwd = grid_lwd)
+    graphics::text(col1_x + padx, ymid, bin_words[i], adj = c(0, 0.5),
+                   cex = text_cex, family = "sans")
+    # metric value cells
+    for (k in seq_len(n_cols_th)) {
+      left  <- metric_edges[k]
+      right <- metric_edges[k + 1L]
+      graphics::rect(left, ybot, right, ytop,
+                     col = NA, border = grid_border, lwd = grid_lwd)
+      graphics::text(left + padx, ymid, col_values[[k]][i], adj = c(0, 0.5),
+                     cex = text_cex, family = "sans")
+    }
+  }
+
+  # ---- Two note rows (Option A: swatch + one full-width label cell) ----
+  note_rows <- list(
+    list(fill = "white",   label = "Clade not recovered"),
+    list(fill = "#D64545", label = "Not computed")
+  )
+  notes_top <- y_bot_h - length(tiers) * sq_h
+  for (i in seq_along(note_rows)) {
+    r    <- note_rows[[i]]
+    ytop <- notes_top - (i - 1) * sq_h
+    ybot <- ytop - sq_h
+    ymid <- (ytop + ybot) / 2
+
+    # swatch cell (the coloured square, same as bin rows)
+    graphics::rect(x0, ybot, xright, ytop,
+                   col = r$fill, border = grid_border, lwd = grid_lwd)
+    # one wide cell spanning the entire rest of the row (no vertical dividers)
+    graphics::rect(xright, ybot, table_right, ytop,
+                   col = NA, border = grid_border, lwd = grid_lwd)
+    graphics::text(col1_x + padx, ymid, r$label, adj = c(0, 0.5),
+                   cex = text_cex, family = "sans")
+  }
+
+  invisible(notes_top - length(note_rows) * sq_h)
 }

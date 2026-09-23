@@ -15,6 +15,7 @@ plot_node_rug(
   x_offset = 0,
   y_offset = 0,
   rug_position = c("inside", "outside"),
+  border_lwd = 0.2,
   last_pp = NULL
 )
 }
@@ -44,6 +45,13 @@ plotting coordinates.}
 a fraction of the tree's width and height.}
 
 \item{rug_position}{One of \code{"outside"} or \code{"inside"} (default).}
+
+\item{border_lwd}{Line width of the neutral grey border drawn around every
+cell. Default \code{0.2}. \code{\link[=plot_phylorug]{plot_phylorug()}} overrides this with a value scaled
+to the actual rendered size of the cell (via \code{par("pin")} / \code{par("usr")}),
+so the border stays visible on tiny cells and doesn't overpower big ones.
+The default matters only for direct calls to \code{plot_node_rug()}, e.g. in
+tests.}
 
 \item{last_pp}{Plot coordinates from \code{\link[ape:plot.phylo]{ape::plot.phylo()}} giving the x/y
 position of every node and tip, used to place each rug grid at its node.

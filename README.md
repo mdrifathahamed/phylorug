@@ -118,7 +118,7 @@ plot_phylorug(backbone, npm, mode = "support")
 
 ### Core functions
 
-**phylorug** provides six functions that cover the full workflow from
+**phylorug** provides seven functions that cover the full workflow from
 raw tree files to publication-ready figures:
 
 - `read_trees()` reads all Newick and Nexus tree files from a directory.

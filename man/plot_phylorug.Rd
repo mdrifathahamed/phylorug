@@ -18,7 +18,7 @@ plot_phylorug(
   include_backbone = FALSE,
   nodes = NULL,
   legend = TRUE,
-  show_support = FALSE,
+  show_support = TRUE,
   show_support_idx = NULL,
   cell_scale = 0.45,
   x_offset = 0,
@@ -97,13 +97,29 @@ only selected nodes get dots, rugs, or support labels.}
 
 \item{legend}{Logical. Draw the legend. Default TRUE.}
 
-\item{show_support}{Logical. If \code{TRUE}, backbone node support labels are
-drawn beside each node. Default \code{FALSE}.}
+\item{show_support}{Logical. If \code{TRUE} (default), backbone node support
+labels are drawn beside each node, and the legend includes a red line
+naming what those numbers are.}
 
-\item{show_support_idx}{Integer or NULL. Which value from compound node
-labels (e.g. "80/95") to display when \code{show_support = TRUE}. Default
-\code{NULL} displays the full compound label as-is. Set to \code{1} or \code{2} to
-display only a single metric.}
+\item{show_support_idx}{Optional. Controls what appears in the label on the
+tree AND what the legend calls it. Accepts several shapes:
+\itemize{
+\item \code{NULL} (default): the raw \code{node.label} is drawn on the tree and
+the legend says \verb{<value> (backbone support)} without naming metrics.
+\item An integer (\code{1} or \code{2}): only that slot of a compound label
+(e.g. "80/95") is drawn, and the legend shows just that number.
+\item A named integer, e.g. \code{c("1" = "sh_alrt")}: same slot behaviour,
+and the legend adds the metric name (e.g. "SH-aLRT").
+\item Two named integers, e.g. \code{c("1" = "sh_alrt", "2" = "ufboot")}:
+the full compound is drawn and the legend names both metrics.
+\item A plain string, e.g. \code{"UFBoot2"}: legal only when the tree has
+single-value labels (no \code{/}). On compound labels, this is ambiguous
+(which slot?) and the function falls back to the raw-label behaviour
+with a message explaining the shape it accepts.
+}
+Recognised metric keys for named-integer form: \code{"ufboot"}, \code{"sh_alrt"},
+\code{"lpp"}, \code{"posterior"}, \code{"jackknife"}, \code{"bootstrap"}, \code{"bremer_ratio"},
+\code{"transfer_boot"}. Any other key is shown verbatim in the legend.}
 
 \item{cell_scale}{Numeric multiplier on cell height. Default 0.45.}
 

@@ -50,6 +50,13 @@
 #'
 #' @param rug_position One of `"outside"` or `"inside"` (default).
 #'
+#' @param border_lwd Line width of the neutral grey border drawn around every
+#'   cell. Default `0.2`. [plot_phylorug()] overrides this with a value scaled
+#'   to the actual rendered size of the cell (via `par("pin")` / `par("usr")`),
+#'   so the border stays visible on tiny cells and doesn't overpower big ones.
+#'   The default matters only for direct calls to `plot_node_rug()`, e.g. in
+#'   tests.
+#'
 #' @param last_pp Plot coordinates from [ape::plot.phylo()] giving the x/y
 #'   position of every node and tip, used to place each rug grid at its node.
 #'   [plot_phylorug()] always supplies this. If called directly with `NULL`,
@@ -69,6 +76,7 @@ plot_node_rug <- function(npm,
                           x_offset     = 0,
                           y_offset     = 0,
                           rug_position = c("inside", "outside"),
+                          border_lwd   = 0.2,
                           last_pp      = NULL) {
 
   if (!is.matrix(npm)) {
@@ -147,7 +155,7 @@ plot_node_rug <- function(npm,
         tier         = tier
       )
 
-      draw_cell(xleft, ybottom, xright, ytop, cell)
+      draw_cell(xleft, ybottom, xright, ytop, cell, lwd = border_lwd)
     }
   }
 
@@ -203,13 +211,18 @@ resolve_cell <- function(p, s, support_type, thresholds, tier) {
 
 #' Draw one resolved cell
 #'
+#' @param lwd Border line width. Defaults to 0.2 for safety on direct calls;
+#'   [plot_phylorug()] computes a value scaled to the actual rendered size of
+#'   the cell (so the border stays visible on tiny cells and doesn't overpower
+#'   big ones) and passes it through [plot_node_rug()].
+#'
 #' @noRd
-draw_cell <- function(xleft, ybottom, xright, ytop, cell) {
+draw_cell <- function(xleft, ybottom, xright, ytop, cell, lwd = 0.2) {
   graphics::rect(
     xleft, ybottom, xright, ytop,
     col    = cell$fill,
     border = cell$border,
-    lwd    = 0.2
+    lwd    = lwd
   )
   invisible(NULL)
 }
