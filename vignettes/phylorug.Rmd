@@ -193,7 +193,7 @@ scaling engine sizes the canvas, fonts, and cell dimensions
 automatically based on tree size.
 
 ```{r quick-presence,  fig.height=5.8, fig.width= 6.5, fig.dpi=300}
-plot_phylorug(backbone, npm)
+plot_phylorug(backbone, npm, show_support = FALSE)
 ```
 
 For publication-quality output, setting `file`, `width`, and `height` is
@@ -392,7 +392,7 @@ npm <- node_presence_matrix(backbone, others, support_type = support_type)
 ## plot the phylorug-presence
 
 ```{r plot-culico, fig.width = 8, fig.height = 10}
-plot_phylorug(backbone, npm)
+plot_phylorug(backbone, npm, show_support = FALSE)
 ```
 
 With 9 comparison trees, phylorug automatically arranges the rug grid (3
@@ -689,7 +689,7 @@ By default, phylorug chooses a roughly square grid. Override with `n_rows` and
 `n_cols`:
 
 ```{r grid-demo}
-#rug with flatend grid
+# rug with a flattened grid
 plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 ```
 
