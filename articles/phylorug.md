@@ -202,7 +202,7 @@ fonts, and cell dimensions automatically based on tree size.
 
 ``` r
 
-plot_phylorug(backbone, npm)
+plot_phylorug(backbone, npm, show_support = FALSE)
 ```
 
 ![](phylorug_files/figure-html/quick-presence-1.png)
@@ -441,7 +441,7 @@ npm <- node_presence_matrix(backbone, others, support_type = support_type)
 
 ``` r
 
-plot_phylorug(backbone, npm)
+plot_phylorug(backbone, npm, show_support = FALSE)
 ```
 
 ![](phylorug_files/figure-html/plot-culico-1.png)
@@ -790,7 +790,7 @@ By default, phylorug chooses a roughly square grid. Override with
 
 ``` r
 
-#rug with flatend grid
+# rug with a flattened grid
 plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 ```
 

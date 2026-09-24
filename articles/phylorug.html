@@ -248,7 +248,7 @@ backbone’s own support values are shown alongside the rug), and
 the canvas, fonts, and cell dimensions automatically based on tree
 size.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, show_support <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/quick-presence-1.png" class="r-plt" alt="" width="1950"></p>
 <p>For publication-quality output, setting <code>file</code>,
 <code>width</code>, and <code>height</code> is strongly recommended. All
@@ -476,7 +476,7 @@ comparisons:</p>
 <h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
 </h3>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, show_support <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
 <p>With 9 comparison trees, phylorug automatically arranges the rug grid
 (3 columns by 3 rows in this case). The position legend maps each cell
@@ -796,7 +796,7 @@ precise than metric-specific binning:</p>
 <p>By default, phylorug chooses a roughly square grid. Override with
 <code>n_rows</code> and <code>n_cols</code>:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#rug with flatend grid</span></span>
+<code class="sourceCode R"><span><span class="co"># rug with a flattened grid</span></span>
 <span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, n_rows <span class="op">=</span> <span class="fl">1</span>, n_cols <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/grid-demo-1.png" class="r-plt" alt="" width="672"></p>
 </div>
