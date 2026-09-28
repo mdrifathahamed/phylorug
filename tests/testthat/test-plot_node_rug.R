@@ -81,10 +81,10 @@ test_that("tier 2: present with support is shaded by bin", {
   expect_equal(cell$pattern, bin_fill(4L)$pattern)
 })
 
-test_that("tier 2: low support uses yellow fill", {
+test_that("tier 2: low support uses lightest grey fill", {
   # UFBoot 40 < 50 -> low -> bin 1
   cell <- resolve_cell(1, 40, "ufboot", NULL, 2L)
-  expect_equal(cell$fill, "#E8C547")
+  expect_equal(cell$fill, "#D6D4C9")
 })
 
 test_that("tier 2: pool proportion with support still uses binned fill", {
@@ -203,8 +203,8 @@ test_that("bin 2 (moderate) is light grey", {
   expect_equal(bin_fill(2L)$fill, "#B4B2A9")
 })
 
-test_that("bin 1 (low) is yellow", {
-  expect_equal(bin_fill(1L)$fill, "#E8C547")
+test_that("bin 1 (low) is lightest grey", {
+  expect_equal(bin_fill(1L)$fill, "#D6D4C9")
 })
 
 test_that("all bins use no pattern", {
@@ -499,4 +499,49 @@ test_that("%||% returns x when x is not NULL", {
 test_that("%||% returns y when x is NULL", {
   expect_equal(NULL %||% 10, 10)
   expect_equal(NULL %||% "fallback", "fallback")
+})
+# ---- validate_thresholds ----------------------------------------------------
+test_that("validate_thresholds passes on NULL", {
+  expect_invisible(validate_thresholds(NULL))
+})
+
+test_that("validate_thresholds passes on valid thresholds", {
+  expect_invisible(
+    validate_thresholds(list(ufboot = c(very_high = 95, high = 80, moderate = 50)))
+  )
+})
+
+test_that("validate_thresholds errors on missing tier names", {
+  expect_error(
+    validate_thresholds(list(ufboot = c(very_high = 95, high = 80))),
+    "missing.*moderate"
+  )
+})
+
+test_that("validate_thresholds errors on unnamed vector", {
+  expect_error(
+    validate_thresholds(list(ufboot = c(95, 80, 50))),
+    "no names"
+  )
+})
+
+# ---- bin_support: custom universal thresholds -------------------------------
+test_that("bin_support uses custom universal thresholds when support_type is NULL", {
+  custom <- list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.40))
+  expect_equal(bin_support(92, NULL, custom), 4L)
+  expect_equal(bin_support(75, NULL, custom), 3L)
+  expect_equal(bin_support(50, NULL, custom), 2L)
+  expect_equal(bin_support(30, NULL, custom), 1L)
+})
+
+test_that("bin_support uses custom universal when support_type is NA", {
+  custom <- list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.40))
+  expect_equal(bin_support(92, NA_character_, custom), 4L)
+})
+
+# ---- bin_fill: unrecognized bin falls back to black -------------------------
+test_that("bin_fill returns black for unrecognized bin number", {
+  result <- bin_fill(99L)
+  expect_equal(result$fill, "black")
+  expect_equal(result$pattern, "none")
 })

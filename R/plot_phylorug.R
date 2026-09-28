@@ -1,10 +1,20 @@
 #' Draw a phylorug: a backbone tree with rug plots on  every internal nodes
 #'
-#' [plot_phylorug()] overlays clade stability grids (rugs) on a backbone
-#' phylogeny, compares how multiple analyses treat each internal node.
-#' In presence mode, cells are black (recovered) or white (absent). In
-#' support mode, cells are shaded by binned support strength. The function
-#' handles canvas sizing, legend placement, and font scaling automatically.
+#' [plot_phylorug()] overlays rug plots on a backbone phylogeny, compares how
+#' multiple analyses treat each internal node. In presence mode, cells are black
+#' (recovered) or white (absent). In support mode, cells are shaded by binned
+#' support strength. The function handles canvas sizing, legend placement, and
+#' font scaling automatically.
+#'
+#' Each internal node is drawn as either a dot (compact summary) or a rug
+#' plot (full per-analysis grid). What a dot means depends on the mode. In
+#' presence mode, a dot means every comparison analysis recovered the clade;
+#' control this with `dot_identical`, setting it to `FALSE` to show rug
+#' plots on every node, even unanimous ones. In support mode, a dot means
+#' every comparison analysis recovered the clade and every one independently
+#' rates it very-high support, control this with `dot_on_very_high`, setting it
+#' to `FALSE` to show rug plots on every node regardless of support level. Dot
+#' appearance (`dot_col`, `dot_cex`) is shared across both modes.
 #'
 #' @param backbone A `phylo` object representing the backbone tree.
 #'
@@ -31,15 +41,22 @@
 #'  the plotting engine to physically shade the grid cells using the second
 #'  metric (stored in your list as `support_2`).
 #'
-#' @param thresholds Optional list overriding built-in bin thresholds. Made
-#'   by metric name for named metrics, or `"universal"` when `support_type`
-#'   is not declared. For example:
+#' @param thresholds Optional list overriding the built-in bin thresholds
+#'   used in support mode. Support values are binned into four levels: very
+#'   high, high, moderate, and low. Each entry supplies the lower bounds for
+#'   the top three levels as a named numeric vector with exactly three names:
+#'   `very_high`, `high`, and `moderate`. Any value below `moderate` is
+#'   automatically binned as low, so no fourth cutpoint is needed. Key each
+#'   entry by metric name when `support_type` was declared in
+#'   [node_presence_matrix()], or by `"universal"` when it was not. Examples:
 #'   `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
-#'   or `thresholds = list(universal = c(very_high = 0.90, high = 0.70,
-#'   moderate = 0.50))`. If `NULL` (default) and `support_type` was declared
-#'   in [node_presence_matrix()], literature-based thresholds for each metric
-#'   are used. If neither `support_type` nor `thresholds` is provided,
-#'   universal thresholds (0.95 / 0.80 / 0.50) are applied to all trees.
+#'   means UFBoot2 values >= 97 are very high, 85--96 are high, 50--84 are
+#'   moderate, and < 50 are low.
+#'   `thresholds = list(universal = c(very_high = 0.90, high = 0.70,
+#'   moderate = 0.50))` applies a single scale to all trees. If `NULL`
+#'   (default) and `support_type` was declared, default thresholds
+#'   for each metric are used. If neither `support_type` nor `thresholds` is
+#'   provided, universal thresholds (0.95 / 0.80 / 0.50) are applied.
 #'
 #' @param n_rows,n_cols Integer. Grid shape for the rug at each node. If
 #'   `NULL` (the default), a roughly square grid is chosen automatically.
@@ -67,11 +84,16 @@
 #'   If `NULL` (default), all internal nodes are plotted. When supplied,
 #'   only selected nodes get dots, rugs, or support labels.
 #'
-#' @param legend Logical. Draw the legend. Default TRUE.
+#' @param legend Logical. Default `TRUE`. Controls both legends: the
+#'   position legend (top-left, numbered grid mapping each cell to its
+#'   analysis) and, in support mode, the threshold legend (top-right,
+#'   colour key for the four support bins). Set to `FALSE` to suppress
+#'   both, for example when annotating the figure manually in Inkscape
+#'   or Illustrator.
 #'
 #' @param show_support Logical. If `TRUE` (default), backbone node support
-#'   labels are drawn beside each node, and the legend includes a red line
-#'   naming what those numbers are.
+#'   labels are drawn beside each node, and the postion legend includes a
+#'   colored line naming what those numbers are.
 #'
 #' @param show_support_idx Optional. Controls what appears in the label on the
 #'   tree AND what the legend calls it. Accepts several shapes:
@@ -108,17 +130,25 @@
 #'  tucks the grid into the crook above-left (toward the root), while
 #'  `"outside"` places the grid to the right of the node (toward the tips).
 #'
-#' @param dot_identical Logical. Default `TRUE`. If `TRUE`, draws a small dot on
-#'  backbone nodes where every comparison tree is identical in recovering the
-#'  clade.
+#' @param dot_identical Logical. Default `TRUE`. **Presence mode only.** draws
+#'  a small dot on backbone nodes where every comparison tree is identical in
+#'  recovering the clade. Has no effect in support mode; see `dot_on_very_high`
+#'  for the support-mode equivalent.
 #'
 #' @param dot_col,dot_cex Colour and size of the identical-clade dot. Defaults
-#'  are `"black"` and NULL (auto-scales).
+#'  are `"black"` and NULL (auto-scales). Shared by both `dot_identical`
+#'  (presence mode) and `dot_on_very_high` (support mode).
 #'
-#' @param rug_on_identical Logical. Default `FALSE`. When this and
-#'   `dot_identical` are both `TRUE`, unanimous nodes receive both the dot and
-#'   a support rug, making per-tree support strength visible even at universally
-#'   recovered clades.
+#' @param dot_on_very_high Logical. Default `TRUE`. **Support mode only.**
+#'   Controls what a dot means there. When `TRUE`, a dot is drawn only where
+#'   a clade is recovered by every comparison analysis AND every one of
+#'   those analyses independently rates it very-high support. Anything less (not
+#'   recovered everywhere, or recovered everywhere but not uniformly
+#'   very-high) is drawn as a rug instead. Set to `FALSE` to turn off dots
+#'   entirely in support mode: every node is then drawn as a rug, however
+#'   strong or weak its support, the most conservative and transparent
+#'   option. Has no effect in presence mode; see `dot_identical` for the
+#'   presence-mode equivalent.
 #'
 #' @param hide_unsupported Logical. Default `TRUE`. Nodes where no comparison
 #'   tree recovers the clade are left bare, the absence of both a dot and a
@@ -175,15 +205,18 @@
 #'               include_backbone = TRUE,
 #'               rug_position     = "outside")
 #' unlink(tmp3)
-#' # --- Restrict to specific nodes --------------------------------------------
-#' # By taxa (recommended): select a clade by the tips that define it.
+#' # --- Restrict to specific nodes -------------------------------------------
+#' # By taxa: name two or more tips whose MRCA is the node you want.
+#' # Useful when you know which species define a clade of interest.
 #' tmp4 <- tempfile(fileext = ".pdf")
 #' plot_phylorug(backbone, npm_st,
 #'               file  = tmp4,
-#'               nodes = list(backbone$tip.label[1:2]))
+#'               nodes = list(c("Sisyphus_schaefferi_STL44",
+#'                              "Sisyphus_muricatus__STL5")))
 #' unlink(tmp4)
 #'
-#' # By node ID, if you already know it (see rownames(npm_st$presence)):
+#' # By node ID: useful when exploring interactively after inspecting
+#' # rownames(npm_st$presence) or ape::nodelabels() output.
 #' tmp5 <- tempfile(fileext = ".pdf")
 #' plot_phylorug(backbone, npm_st,
 #'               file  = tmp5,
@@ -212,7 +245,7 @@ plot_phylorug <- function(backbone, npm,
                           dot_cex           = NULL,
                           support_label_cex = NULL,
                           support_label_col = "red",
-                          rug_on_identical = FALSE,
+                          dot_on_very_high = TRUE,
                           hide_unsupported = TRUE,
                           ...) {
   # --- 1. Validate -----------------------------------------------------------
@@ -223,7 +256,8 @@ plot_phylorug <- function(backbone, npm,
 
   mode         <- match.arg(mode)
   rug_position <- match.arg(rug_position)
-  # --- Resolve include_backbone ---
+  validate_thresholds(thresholds)
+  # --- Resolve include_backbone --
   bb_support_metric <- NULL
   if (is.character(include_backbone)) {
     bb_support_metric <- include_backbone
@@ -699,10 +733,52 @@ plot_phylorug <- function(backbone, npm,
     }
   }
 
+  # --- 7b. Dot vs rug classification ------------------------------------------
+  # Presence mode: dot_identical alone decides. TRUE -> dot on every
+  # unanimous node, rug elsewhere (unchanged from before). FALSE -> no dots
+  # anywhere, every node is a rug.
+  #
+  # Support mode: dot_on_very_high alone decides; dot_identical plays no
+  # part here. TRUE (default) -> dot only where a clade is unanimous AND
+  # every analysis independently bins as very-high (see the function's
+  # top-level @description); anything less is a rug. FALSE -> no dots
+  # anywhere, every node is a rug regardless of unanimity or support level.
+  #
+  # The two switches never interact: dot_identical has no effect in support
+  # mode, dot_on_very_high has no effect in presence mode.
+  if (mode == "support") {
+    if (isTRUE(dot_on_very_high)) {
+      # bin_support() is the exact same function plot_node_rug() uses to
+      # shade each cell, so "very high" here can never drift from what the
+      # rug itself would show for the same value.
+      very_high_everywhere <- vapply(seq_len(nrow(presence)), function(i) {
+        if (!unanimous[i]) return(FALSE)
+        vals  <- as.numeric(support[i, ])
+        types <- if (is.null(support_type)) {
+          rep(NA_character_, ncol(support))
+        } else {
+          support_type[colnames(support)]
+        }
+        bins <- mapply(bin_support, vals, types,
+                       MoreArgs = list(thresholds = thresholds))
+        all(!is.na(bins) & bins == 4L)
+      }, logical(1))
+
+      dot_rows <- very_high_everywhere
+      rug_rows <- !very_high_everywhere
+    } else {
+      dot_rows <- rep(FALSE, nrow(presence))
+      rug_rows <- rep(TRUE, nrow(presence))
+    }
+  } else {
+    dot_rows <- if (dot_identical) unanimous else rep(FALSE, nrow(presence))
+    rug_rows <- if (dot_identical) !unanimous else rep(TRUE, nrow(presence))
+  }
+
   # --- 8. Unanimous dots (Robust scaling for large trees) -------------------
-  if (dot_identical && any(unanimous)) {
-    # Match the rows of presence that are unanimous
-    uni_rows <- which(unanimous)
+  if (any(dot_rows)) {
+    # Match the rows of presence that qualify for a dot
+    uni_rows <- which(dot_rows)
 
     # Map directly via the row index to the plotted internal node coordinates
     node_ids <- as.integer(rownames(presence)[uni_rows])
@@ -722,11 +798,7 @@ plot_phylorug <- function(backbone, npm,
     }
   }
   # --- 9. Node rugs ----------------------------------------------------------
-  variable <- if (dot_identical && !rug_on_identical) {
-    !unanimous
-  } else {
-    rep(TRUE, nrow(presence))
-  }
+  variable <- rug_rows
 
   if (hide_unsupported) {
     variable <- variable & !unsupported
@@ -785,9 +857,12 @@ plot_phylorug <- function(backbone, npm,
     # --- Shared legend height (same formula as Section 4) ---
     # Position legend = same total height as the threshold table. More rows
     # means thinner rows, so the two legends always look balanced.
+    # any(dot_rows) is whichever switch is relevant for this mode
+    # (dot_identical for presence, dot_on_very_high for support -- see
+    # Section 7b), so the reserved height matches what actually gets drawn.
     legend_h_in <- 7 * th_sq_in
     n_pos_rows  <- length(tree_names) +
-      (if (dot_identical) 1L else 0L) +
+      (if (any(dot_rows)) 1L else 0L) +
       (if (!is.null(backbone_support_line)) 1L else 0L)
     row_in <- legend_h_in / n_pos_rows
 
@@ -806,9 +881,18 @@ plot_phylorug <- function(backbone, npm,
     )
 
     # --- Position legend (topleft) ---
-    # dot_identical governs both the tree dots (Section 8) and, here, whether
-    # the "recovered by all compared analyses" row appears in the legend.
+    # show_dot = any(dot_rows): Section 7b already folded in whichever
+    # switch matters for this mode, so a legend row only appears when a dot
+    # was actually drawn somewhere. dot_label states what a dot means under
+    # whichever rule is actually running, so the legend can never describe
+    # a rule that isn't the one in effect.
     # backbone_support_line is built in Section 7; NULL means no red row.
+    dot_label <- if (mode == "support") {
+      "Recovered with very high support by all compared analyses"
+    } else {
+      "Recovered by all compared analyses"
+    }
+
     draw_position_legend(
       display_names, n_cols,
       cell_w                = leg_cell_w,
@@ -816,11 +900,12 @@ plot_phylorug <- function(backbone, npm,
       x0                    = x0_left,
       y0                    = y0_top,
       text_cex              = pos_text_cex,
-      show_dot              = dot_identical,
+      show_dot              = any(dot_rows),
       dot_col               = dot_col,
       backbone_support_line = backbone_support_line,
       backbone_value_str    = backbone_value_str,
-      support_label_col     = support_label_col
+      support_label_col     = support_label_col,
+      dot_label             = dot_label
     )
 
     # --- Threshold legend (topright, support mode only) ---
@@ -977,6 +1062,10 @@ choose_grid <- function(n_cells) {
 #' @param backbone_value_str Character or NULL. Value shown in the left cell
 #'   of the backbone row; NULL shows "NA".
 #' @param support_label_col Colour of the backbone row text.
+#' @param dot_label Character. Text of the dot row. Default
+#'   `"Recovered by all compared analyses"`; the caller passes a stricter
+#'   sentence in support mode when `dot_on_very_high = TRUE`, since a dot
+#'   means something more specific there.
 #'
 #' @return Invisibly, the y-coordinate below the last table row.
 #'
@@ -986,7 +1075,8 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
                                  show_dot = FALSE, dot_col,
                                  backbone_support_line = NULL,
                                  backbone_value_str = NULL,
-                                 support_label_col) {
+                                 support_label_col,
+                                 dot_label = "Recovered by all compared analyses") {
   n_an        <- length(analyses)
   n_grid_rows <- ceiling(n_an / n_cols)
   grid_lwd    <- 0.7
@@ -1015,7 +1105,7 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
   })
   if (isTRUE(show_dot)) {
     rows <- c(rows, list(list(value = "",
-                              label = "Recovered by all compared analyses",
+                              label = dot_label,
                               col = "black", is_dot = TRUE)))
   }
   if (!is.null(backbone_support_line)) {
@@ -1075,8 +1165,9 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
 #' The colour scheme here must stay in sync with `resolve_cell()` in
 #' `plot_node_rug.R`. If a fill colour changes in one place it must change in
 #' the other, or the legend will misdescribe the cells. The current scheme is
-#' `#000000` very high, `#5F5E5A` high, `#B4B2A9` moderate, `#E8C547` low, white
-#'  not recovered, and `#D64545` not computed.
+#' `#000000` very high, `#5F5E5A` high, `#B4B2A9` moderate, `#D6D4C9` low
+#' (four greyscale steps, no yellow), white not recovered, and `#D64545` not
+#' computed.
 #'
 #' Rows stack downward from `y0`: row `i` sits `(i - 1) * (sq_h + gap)` below
 #' the top, where `gap` is 40 percent of a square's height. Each row is a filled
@@ -1109,7 +1200,7 @@ draw_threshold_legend <- function(x0, y0,
   xright   <- x0 + sq_w
 
   bin_words <- c("Very high", "High", "Moderate", "Low")
-  fills     <- c("#000000",   "#5F5E5A", "#B4B2A9", "#E8C547")
+  fills     <- c("#000000",   "#5F5E5A", "#B4B2A9", "#D6D4C9")
   tiers     <- c("very_high", "high",    "moderate", "low")
 
   # -- Build column headers and their four values ---------------------------
@@ -1157,14 +1248,14 @@ draw_threshold_legend <- function(x0, y0,
   }
 
   if (universal) {
-    col_headers <- "Support"
+    col_headers <- "Support (%)"
     col_values  <- list(fmt_col("universal"))
   } else {
     types_in_order <- unique(support_type)
     types_in_order <- types_in_order[!is.na(types_in_order)]
     if (length(types_in_order) == 0L) {
       # Fallback: support_type was supplied but empty -- treat as universal.
-      col_headers <- "Support"
+      col_headers <- "Support (%)"
       col_values  <- list(fmt_col("universal"))
     } else {
       col_headers <- vapply(types_in_order, function(t) {
@@ -1204,7 +1295,7 @@ draw_threshold_legend <- function(x0, y0,
   # Illustrator rather than loose text floating over a background. Header row
   # has no fill; bin rows carry the swatch colour in column 1; note rows
   # (Option A) span all metric columns with one label and no interior
-  # verticals, honestly showing they are categorical states, not thresholds.
+  # verticals, honestly showing they are categorical states, not thresholds..
 
   grid_lwd    <- 0.7
   grid_border <- "grey40"

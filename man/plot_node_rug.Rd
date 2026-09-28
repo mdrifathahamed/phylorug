@@ -77,10 +77,10 @@ and white for absent. Grey cells appear only when \code{pool_threshold = 0}
 was used in \code{\link[=node_presence_matrix]{node_presence_matrix()}}, indicating partial recovery
 across a pool of equally optimal trees.
 \item Tier 2, support: \code{support} is non-NULL. Recovered cells are
-shaded by binned support strength, from black (very high) through
-greys to yellow (low). A cell is white when the tree does not
-recover the clade at all, and red when the tree recovers the clade
-but carries no support value for it.
+shaded by binned support strength, black (very high) through three
+progressively lighter greys down to low. A cell is white when the
+tree does not recover the clade at all, and red when the tree
+recovers the clade but carries no support value for it.
 }
 
 Users do not call this directly; \code{\link[=plot_phylorug]{plot_phylorug()}} calls it after drawing the

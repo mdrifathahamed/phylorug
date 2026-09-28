@@ -347,16 +347,15 @@ test_that("custom dot_col and dot_cex work", {
 })
 
 
-# ---- rug_on_identical -------------------------------------------------------
-test_that("rug_on_identical = TRUE draws both dot and rug on unanimous nodes", {
+# ---- dot_identical -------------------------------------------------------
+test_that("dot_identical = TRUE draws dots on unanimous nodes ", {
   expect_no_error(
     on_null_device(
       plot_phylorug(make_backbone(), make_npm(),
-                    dot_identical = TRUE, rug_on_identical = TRUE)
+                    dot_identical = TRUE)
     )
   )
 })
-
 
 # ---- hide_unsupported -------------------------------------------------------
 test_that("hide_unsupported = TRUE skips unsupported nodes", {

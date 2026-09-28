@@ -15,10 +15,10 @@
 #'     was used in [node_presence_matrix()], indicating partial recovery
 #'     across a pool of equally optimal trees.
 #'   \item Tier 2, support: `support` is non-NULL. Recovered cells are
-#'     shaded by binned support strength, from black (very high) through
-#'     greys to yellow (low). A cell is white when the tree does not
-#'     recover the clade at all, and red when the tree recovers the clade
-#'     but carries no support value for it.
+#'     shaded by binned support strength, black (very high) through three
+#'     progressively lighter greys down to low. A cell is white when the
+#'     tree does not recover the clade at all, and red when the tree
+#'     recovers the clade but carries no support value for it.
 #' }
 #'
 #' Users do not call this directly; [plot_phylorug()] calls it after drawing the
@@ -293,11 +293,49 @@ default_thresholds <- function(support_type) {
   )
 }
 
+#' Check that every custom threshold set names all three required tiers
+#'
+#' Internal. `bin_support()`, `draw_threshold_legend()`'s `fmt_col()`, and the
+#' support-mode dot rule in `plot_phylorug()` all look up `th[["very_high"]]`
+#' directly. A threshold vector missing that name returns `NULL` from `[[`,
+#' which then fails deep inside whichever of those three runs first with an
+#' unhelpful "argument is of length zero". This runs once, early, so a bad
+#' custom threshold produces one clear message instead of three possible
+#' cryptic ones.
+#'
+#' @param thresholds The user's `thresholds` argument, or `NULL`.
+#'
+#' @noRd
+validate_thresholds <- function(thresholds) {
+  if (is.null(thresholds)) return(invisible(NULL))
+  required <- c("very_high", "high", "moderate")
+  keys <- names(thresholds)
+  for (i in seq_along(thresholds)) {
+    key     <- if (!is.null(keys) && nzchar(keys[i])) keys[i] else paste0("[[", i, "]]")# nolint: line_length_linter.
+    given   <- names(thresholds[[i]])
+    missing <- setdiff(required, given)
+    if (length(missing) > 0L) {
+      stop(
+        "`thresholds$", key, "` is missing ",
+        if (length(missing) == 1L) "a required tier: " else "required tiers: ",
+        paste(missing, collapse = ", "),
+        ". Custom thresholds must name all three tiers -- very_high, high, ",
+        "moderate -- e.g. c(very_high = 97, high = 85, moderate = 50). Got: ",
+        if (length(given) == 0L) "(no names)" else paste(given, collapse = ", "),# nolint: line_length_linter.
+        ".",
+        call. = FALSE
+      )
+    }
+  }
+  invisible(NULL)
+}
+
 #' Fill and pattern for an integer support bin
 #'
-#' Internal. Greyscale for the top three support tiers, yellow for the lowest.
-#' The not-recovered (white) and not-computed (red) states are handled in
-#' `resolve_cell()`, not here.
+#' Internal. Greyscale for all four support tiers -- very high through low --
+#' so the scale reads as one continuous progression. The not-recovered
+#' (white) and not-computed (red) states are handled in `resolve_cell()`,
+#' not here.
 #'
 #' @noRd
 bin_fill <- function(bin) {
@@ -309,7 +347,7 @@ bin_fill <- function(bin) {
     "4" = list(fill = "#000000", pattern = "none"),   # very high
     "3" = list(fill = "#5F5E5A", pattern = "none"),   # high
     "2" = list(fill = "#B4B2A9", pattern = "none"),   # moderate
-    "1" = list(fill = "#E8C547", pattern = "none"),   # low (<50)
+    "1" = list(fill = "#D6D4C9", pattern = "none"),   # low (<50) -- lightest grey, not yellow # nolint: line_length_linter.
     list(fill = "black", pattern = "none")
   )
 }

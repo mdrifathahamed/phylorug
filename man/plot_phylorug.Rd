@@ -29,7 +29,7 @@ plot_phylorug(
   dot_cex = NULL,
   support_label_cex = NULL,
   support_label_col = "red",
-  rug_on_identical = FALSE,
+  dot_on_very_high = TRUE,
   hide_unsupported = TRUE,
   ...
 )
@@ -60,14 +60,21 @@ generated the \code{npm} using \code{support_col = c(1, 2)}, passing \code{2} he
 the plotting engine to physically shade the grid cells using the second
 metric (stored in your list as \code{support_2}).}
 
-\item{thresholds}{Optional list overriding built-in bin thresholds. Made
-by metric name for named metrics, or \code{"universal"} when \code{support_type}
-is not declared. For example:
+\item{thresholds}{Optional list overriding the built-in bin thresholds
+used in support mode. Support values are binned into four levels: very
+high, high, moderate, and low. Each entry supplies the lower bounds for
+the top three levels as a named numeric vector with exactly three names:
+\code{very_high}, \code{high}, and \code{moderate}. Any value below \code{moderate} is
+automatically binned as low, so no fourth cutpoint is needed. Key each
+entry by metric name when \code{support_type} was declared in
+\code{\link[=node_presence_matrix]{node_presence_matrix()}}, or by \code{"universal"} when it was not. Examples:
 \code{thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))}
-or \code{thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))}. If \code{NULL} (default) and \code{support_type} was declared
-in \code{\link[=node_presence_matrix]{node_presence_matrix()}}, literature-based thresholds for each metric
-are used. If neither \code{support_type} nor \code{thresholds} is provided,
-universal thresholds (0.95 / 0.80 / 0.50) are applied to all trees.}
+means UFBoot2 values >= 97 are very high, 85--96 are high, 50--84 are
+moderate, and < 50 are low.
+\code{thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))} applies a single scale to all trees. If \code{NULL}
+(default) and \code{support_type} was declared, default thresholds
+for each metric are used. If neither \code{support_type} nor \code{thresholds} is
+provided, universal thresholds (0.95 / 0.80 / 0.50) are applied.}
 
 \item{n_rows, n_cols}{Integer. Grid shape for the rug at each node. If
 \code{NULL} (the default), a roughly square grid is chosen automatically.}
@@ -95,11 +102,16 @@ taxa belong to a node, use
 If \code{NULL} (default), all internal nodes are plotted. When supplied,
 only selected nodes get dots, rugs, or support labels.}
 
-\item{legend}{Logical. Draw the legend. Default TRUE.}
+\item{legend}{Logical. Default \code{TRUE}. Controls both legends: the
+position legend (top-left, numbered grid mapping each cell to its
+analysis) and, in support mode, the threshold legend (top-right,
+colour key for the four support bins). Set to \code{FALSE} to suppress
+both, for example when annotating the figure manually in Inkscape
+or Illustrator.}
 
 \item{show_support}{Logical. If \code{TRUE} (default), backbone node support
-labels are drawn beside each node, and the legend includes a red line
-naming what those numbers are.}
+labels are drawn beside each node, and the postion legend includes a
+colored line naming what those numbers are.}
 
 \item{show_support_idx}{Optional. Controls what appears in the label on the
 tree AND what the legend calls it. Accepts several shapes:
@@ -130,12 +142,14 @@ where the node rug grid is placed relative to the backbone node: \code{"inside"}
 tucks the grid into the crook above-left (toward the root), while
 \code{"outside"} places the grid to the right of the node (toward the tips).}
 
-\item{dot_identical}{Logical. Default \code{TRUE}. If \code{TRUE}, draws a small dot on
-backbone nodes where every comparison tree is identical in recovering the
-clade.}
+\item{dot_identical}{Logical. Default \code{TRUE}. \strong{Presence mode only.} draws
+a small dot on backbone nodes where every comparison tree is identical in
+recovering the clade. Has no effect in support mode; see \code{dot_on_very_high}
+for the support-mode equivalent.}
 
 \item{dot_col, dot_cex}{Colour and size of the identical-clade dot. Defaults
-are \code{"black"} and NULL (auto-scales).}
+are \code{"black"} and NULL (auto-scales). Shared by both \code{dot_identical}
+(presence mode) and \code{dot_on_very_high} (support mode).}
 
 \item{support_label_cex}{Numeric or \code{NULL}. Size of the backbone support
 labels. Default \code{NULL} auto-scales with tree size.}
@@ -143,10 +157,16 @@ labels. Default \code{NULL} auto-scales with tree size.}
 \item{support_label_col}{Colour of the backbone support labels. Default
 \code{"red"}.}
 
-\item{rug_on_identical}{Logical. Default \code{FALSE}. When this and
-\code{dot_identical} are both \code{TRUE}, unanimous nodes receive both the dot and
-a support rug, making per-tree support strength visible even at universally
-recovered clades.}
+\item{dot_on_very_high}{Logical. Default \code{TRUE}. \strong{Support mode only.}
+Controls what a dot means there. When \code{TRUE}, a dot is drawn only where
+a clade is recovered by every comparison analysis AND every one of
+those analyses independently rates it very-high support. Anything less (not
+recovered everywhere, or recovered everywhere but not uniformly
+very-high) is drawn as a rug instead. Set to \code{FALSE} to turn off dots
+entirely in support mode: every node is then drawn as a rug, however
+strong or weak its support, the most conservative and transparent
+option. Has no effect in presence mode; see \code{dot_identical} for the
+presence-mode equivalent.}
 
 \item{hide_unsupported}{Logical. Default \code{TRUE}. Nodes where no comparison
 tree recovers the clade are left bare, the absence of both a dot and a
@@ -164,11 +184,22 @@ Invisibly, the file path if a file was written, or \code{NULL} if plotted
 directly to the active graphics device.
 }
 \description{
-\code{\link[=plot_phylorug]{plot_phylorug()}} overlays clade stability grids (rugs) on a backbone
-phylogeny, compares how multiple analyses treat each internal node.
-In presence mode, cells are black (recovered) or white (absent). In
-support mode, cells are shaded by binned support strength. The function
-handles canvas sizing, legend placement, and font scaling automatically.
+\code{\link[=plot_phylorug]{plot_phylorug()}} overlays rug plots on a backbone phylogeny, compares how
+multiple analyses treat each internal node. In presence mode, cells are black
+(recovered) or white (absent). In support mode, cells are shaded by binned
+support strength. The function handles canvas sizing, legend placement, and
+font scaling automatically.
+}
+\details{
+Each internal node is drawn as either a dot (compact summary) or a rug
+plot (full per-analysis grid). What a dot means depends on the mode. In
+presence mode, a dot means every comparison analysis recovered the clade;
+control this with \code{dot_identical}, setting it to \code{FALSE} to show rug
+plots on every node, even unanimous ones. In support mode, a dot means
+every comparison analysis recovered the clade and every one independently
+rates it very-high support, control this with \code{dot_on_very_high}, setting it
+to \code{FALSE} to show rug plots on every node regardless of support level. Dot
+appearance (\code{dot_col}, \code{dot_cex}) is shared across both modes.
 }
 \examples{
 # Build the plotting input from real trees:
@@ -205,15 +236,18 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
-# --- Restrict to specific nodes --------------------------------------------
-# By taxa (recommended): select a clade by the tips that define it.
+# --- Restrict to specific nodes -------------------------------------------
+# By taxa: name two or more tips whose MRCA is the node you want.
+# Useful when you know which species define a clade of interest.
 tmp4 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,
               file  = tmp4,
-              nodes = list(backbone$tip.label[1:2]))
+              nodes = list(c("Sisyphus_schaefferi_STL44",
+                             "Sisyphus_muricatus__STL5")))
 unlink(tmp4)
 
-# By node ID, if you already know it (see rownames(npm_st$presence)):
+# By node ID: useful when exploring interactively after inspecting
+# rownames(npm_st$presence) or ape::nodelabels() output.
 tmp5 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,
               file  = tmp5,

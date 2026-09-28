@@ -20,9 +20,10 @@ of trees from different inference pipelines, datasets, or statistical
 models, all representing the same focal group of organisms. It draws a
 compact coloured grid, a **rug plot**, at each internal node of a
 reference tree, showing which clades are stable across trees and which
-are not. Nodes recovered by all trees appear as solid dots; contested
-nodes get a full grid visualizing presence/absence and support strength
-of that specific clade.
+are not. In presence mode, nodes recovered by all comparison trees
+appear as solid dots; in support mode, a dot means every comparison tree
+also rates the clade as very-high support. Contested or mixed-support
+nodes get a full grid showing each analysis individually.
 
 ## Overview
 
@@ -63,10 +64,23 @@ or not. Stable nodes appear as black dots; contested nodes show a grid.
 <figcaption aria-hidden="true">Support mode</figcaption>
 </figure>
 
-Cells are shaded by how strongly each analysis supports a given clade.
-Each support value is binned against its own metric’s thresholds, so
-UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default
-thresholds are provided, but users are encouraged to set their own.
+Cells are shaded in greyscale by how strongly each analysis supports a
+given clade, from black (very high) through progressively lighter greys
+to the lightest (low). White means the clade was not recovered; red
+means it was recovered but carries no support value. Each support value
+is binned against its own metric’s thresholds, UFBoot2 95 and LPP 0.95
+are never treated as equivalent. Default thresholds are provided, but
+users are encouraged to set their own.
+
+In support mode a dot is stricter than in presence mode: it appears only
+where every comparison analysis recovers the clade *and* rates it
+very-high support. A clade recovered everywhere but with weaker or
+missing support in even one analysis is drawn as a full grid instead, so
+a dot never hides uneven support. Set `dot_on_very_high = FALSE` to draw
+a grid at every node.
+
+*Figures show a 9-taxon subset of `sample_trees` (tip labels cleaned)
+for readability.*
 
 The entire workflow runs in R, from reading raw tree files to
 publication-ready figures. The package was developed around a dung
@@ -103,7 +117,7 @@ check_taxa(backbone, others)
 # Build the node presence matrix
 # support_type only matters for support mode — skip it if you just want 
 # presence/absence
-npm <- node_presence_matrix(backbone, others, support_type = c(
+npm <- node_presence_matrix(backbone, others, support_col = 1, support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
                 "70p_ASTRAL_uce"               = "lpp",
                 "70p_ghost"                    = "ufboot",
@@ -161,7 +175,9 @@ external dependencies are required.
 ### Additional features
 
 - Handles compound IQ-TREE labels (e.g. `SH-aLRT/UFBoot2`). User selects
-  which metric to use via `support_col`
+  which slot to extract via `support_col` in `node_presence_matrix()`,
+  and controls what appears on the tree via `show_support_idx` in
+  `plot_phylorug()`
 - Treats a bare `"multiPhylo"` as one analysis (a pool of tied-optimal
   trees). Cell shading reflects the proportion of pool trees recovering
   the clade, from white (none) through grey to black (all)
@@ -169,13 +185,18 @@ external dependencies are required.
   the tree
 - Backbone support values can be displayed alongside rug cells via
   `show_support`
-- Unanimous nodes are collapsed to dots by default;
-  `rug_on_identical = TRUE` forces full display rugs to reveal support
-  variation
+- Unanimous nodes are collapsed to dots by default. In presence mode,
+  `dot_identical = FALSE` shows rug plots on every node. In support
+  mode, `dot_on_very_high = FALSE` does the same, revealing support
+  variation even at unanimous nodes
 - *phylorug* draws rug plot visualizations directly on the nodes of a
   reference phylogenetic tree, and lets users choose which nodes to
   visualize.
 - Saves directly to PDF, PNG, or JPEG via the `file` argument.
+- Unanimous nodes are collapsed to dots by default. In presence mode,
+  `dot_identical = FALSE` shows rug plots on every node. In support
+  mode, `dot_on_very_high = FALSE` does the same, revealing support
+  variation even at unanimous nodes
 
 ### Getting help
 
