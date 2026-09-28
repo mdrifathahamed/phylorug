@@ -59,7 +59,7 @@
 </div>
 <!-- badges: start -->
 
-<p><strong>phylorug</strong> is an R package for comparing and visualizing clade recovery and support across multiple phylogenetic trees. It takes a set of trees from different inference pipelines, datasets, or statistical models, all representing the same focal group of organisms. It draws a compact coloured grid, a <strong>rug plot</strong>, at each internal node of a reference tree, showing which clades are stable across trees and which are not. Nodes recovered by all trees appear as solid dots; contested nodes get a full grid visualizing presence/absence and support strength of that specific clade.</p>
+<p><strong>phylorug</strong> is an R package for comparing and visualizing clade recovery and support across multiple phylogenetic trees. It takes a set of trees from different inference pipelines, datasets, or statistical models, all representing the same focal group of organisms. It draws a compact coloured grid, a <strong>rug plot</strong>, at each internal node of a reference tree, showing which clades are stable across trees and which are not. In presence mode, nodes recovered by all comparison trees appear as solid dots; in support mode, a dot means every comparison tree also rates the clade as very-high support. Contested or mixed-support nodes get a full grid showing each analysis individually.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -79,7 +79,9 @@ Presence mode
 </h2>
 <figure><img src="reference/figures/README-support.png" alt="Support mode"><figcaption aria-hidden="true">
 Support mode
-</figcaption></figure><p>Cells are shaded by how strongly each analysis supports a given clade. Each support value is binned against its own metric’s thresholds, so UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default thresholds are provided, but users are encouraged to set their own.</p>
+</figcaption></figure><p>Cells are shaded in greyscale by how strongly each analysis supports a given clade, from black (very high) through progressively lighter greys to the lightest (low). White means the clade was not recovered; red means it was recovered but carries no support value. Each support value is binned against its own metric’s thresholds, UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default thresholds are provided, but users are encouraged to set their own.</p>
+<p>In support mode a dot is stricter than in presence mode: it appears only where every comparison analysis recovers the clade <em>and</em> rates it very-high support. A clade recovered everywhere but with weaker or missing support in even one analysis is drawn as a full grid instead, so a dot never hides uneven support. Set <code>dot_on_very_high = FALSE</code> to draw a grid at every node.</p>
+<p><em>Figures show a 9-taxon subset of <code>sample_trees</code> (tip labels cleaned) for readability.</em></p>
 <p>The entire workflow runs in R, from reading raw tree files to publication-ready figures. The package was developed around a dung beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and includes three bundled datasets so users can try the pipeline on real data before applying it to their own.</p>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -109,7 +111,7 @@ Support mode
 <span><span class="co"># Build the node presence matrix</span></span>
 <span><span class="co"># support_type only matters for support mode — skip it if you just want </span></span>
 <span><span class="co"># presence/absence</span></span>
-<span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fl">1</span>, support_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>                <span class="st">"70p_ASTRAL_partition_entropy"</span> <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>                <span class="st">"70p_ASTRAL_uce"</span>               <span class="op">=</span> <span class="st">"lpp"</span>,</span>
 <span>                <span class="st">"70p_ghost"</span>                    <span class="op">=</span> <span class="st">"ufboot"</span>,</span>
@@ -151,16 +153,17 @@ Support mode
 <h3 id="additional-features">Additional features<a class="anchor" aria-label="anchor" href="#additional-features"></a>
 </h3>
 <ul>
-<li>Handles compound IQ-TREE labels (e.g. <code>SH-aLRT/UFBoot2</code>). User selects which metric to use via <code>support_col</code>
+<li>Handles compound IQ-TREE labels (e.g. <code>SH-aLRT/UFBoot2</code>). User selects which slot to extract via <code>support_col</code> in <code><a href="reference/node_presence_matrix.html">node_presence_matrix()</a></code>, and controls what appears on the tree via <code>show_support_idx</code> in <code><a href="reference/plot_phylorug.html">plot_phylorug()</a></code>
 </li>
 <li>Treats a bare <code>"multiPhylo"</code> as one analysis (a pool of tied-optimal trees). Cell shading reflects the proportion of pool trees recovering the clade, from white (none) through grey to black (all)</li>
 <li>Supports both <code>"inside"</code> and <code>"outside"</code> rug positioning relative to the tree</li>
 <li>Backbone support values can be displayed alongside rug cells via <code>show_support</code>
 </li>
-<li>Unanimous nodes are collapsed to dots by default; <code>rug_on_identical = TRUE</code> forces full display rugs to reveal support variation</li>
+<li>Unanimous nodes are collapsed to dots by default. In presence mode, <code>dot_identical = FALSE</code> shows rug plots on every node. In support mode, <code>dot_on_very_high = FALSE</code> does the same, revealing support variation even at unanimous nodes</li>
 <li>
 <em>phylorug</em> draws rug plot visualizations directly on the nodes of a reference phylogenetic tree, and lets users choose which nodes to visualize.</li>
 <li>Saves directly to PDF, PNG, or JPEG via the <code>file</code> argument.</li>
+<li>Unanimous nodes are collapsed to dots by default. In presence mode, <code>dot_identical = FALSE</code> shows rug plots on every node. In support mode, <code>dot_on_very_high = FALSE</code> does the same, revealing support variation even at unanimous nodes</li>
 </ul>
 </div>
 <div class="section level3">

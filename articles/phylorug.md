@@ -329,6 +329,10 @@ plot_phylorug(
   support_label_col = "red",
   support_label_cex = 0.4
 )
+#> Warning in plot.window(...): "rug_on_identical" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "rug_on_identical" is not a graphical
+#> parameter
+#> Warning in title(...): "rug_on_identical" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/support-refined-1.png)
@@ -470,6 +474,10 @@ plot_phylorug(backbone, npm,
               cell_scale         = 0.3,
               rug_position       = "outside",
               rug_on_identical   = FALSE)
+#> Warning in plot.window(...): "rug_on_identical" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "rug_on_identical" is not a graphical
+#> parameter
+#> Warning in title(...): "rug_on_identical" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/plot-culico-support-1.png)
@@ -677,6 +685,10 @@ plot_phylorug(
   rug_on_identical   = FALSE,
   cex                = 0.8
 )
+#> Warning in plot.window(...): "rug_on_identical" is not a graphical parameter
+#> Warning in plot.xy(xy, type, ...): "rug_on_identical" is not a graphical
+#> parameter
+#> Warning in title(...): "rug_on_identical" is not a graphical parameter
 ```
 
 ![](phylorug_files/figure-html/plot-support-beetles-70p-1.png)

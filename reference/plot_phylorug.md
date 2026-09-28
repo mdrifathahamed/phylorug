@@ -1,10 +1,10 @@
 # Draw a phylorug: a backbone tree with rug plots on every internal nodes
 
-`plot_phylorug()` overlays clade stability grids (rugs) on a backbone
-phylogeny, compares how multiple analyses treat each internal node. In
-presence mode, cells are black (recovered) or white (absent). In support
-mode, cells are shaded by binned support strength. The function handles
-canvas sizing, legend placement, and font scaling automatically.
+`plot_phylorug()` overlays rug plots on a backbone phylogeny, compares
+how multiple analyses treat each internal node. In presence mode, cells
+are black (recovered) or white (absent). In support mode, cells are
+shaded by binned support strength. The function handles canvas sizing,
+legend placement, and font scaling automatically.
 
 ## Usage
 
@@ -34,7 +34,7 @@ plot_phylorug(
   dot_cex = NULL,
   support_label_cex = NULL,
   support_label_col = "red",
-  rug_on_identical = FALSE,
+  dot_on_very_high = TRUE,
   hide_unsupported = TRUE,
   ...
 )
@@ -83,17 +83,23 @@ plot_phylorug(
 
 - thresholds:
 
-  Optional list overriding built-in bin thresholds. Made by metric name
-  for named metrics, or `"universal"` when `support_type` is not
-  declared. For example:
-  `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
-  or
-  `thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))`.
-  If `NULL` (default) and `support_type` was declared in
+  Optional list overriding the built-in bin thresholds used in support
+  mode. Support values are binned into four levels: very high, high,
+  moderate, and low. Each entry supplies the lower bounds for the top
+  three levels as a named numeric vector with exactly three names:
+  `very_high`, `high`, and `moderate`. Any value below `moderate` is
+  automatically binned as low, so no fourth cutpoint is needed. Key each
+  entry by metric name when `support_type` was declared in
   [`node_presence_matrix()`](https://mdrifathahamed.github.io/phylorug/reference/node_presence_matrix.md),
-  literature-based thresholds for each metric are used. If neither
-  `support_type` nor `thresholds` is provided, universal thresholds
-  (0.95 / 0.80 / 0.50) are applied to all trees.
+  or by `"universal"` when it was not. Examples:
+  `thresholds = list(ufboot = c(very_high = 97, high = 85, moderate = 50))`
+  means UFBoot2 values \>= 97 are very high, 85–96 are high, 50–84 are
+  moderate, and \< 50 are low.
+  `thresholds = list(universal = c(very_high = 0.90, high = 0.70, moderate = 0.50))`
+  applies a single scale to all trees. If `NULL` (default) and
+  `support_type` was declared, default thresholds for each metric are
+  used. If neither `support_type` nor `thresholds` is provided,
+  universal thresholds (0.95 / 0.80 / 0.50) are applied.
 
 - n_rows, n_cols:
 
@@ -130,13 +136,17 @@ plot_phylorug(
 
 - legend:
 
-  Logical. Draw the legend. Default TRUE.
+  Logical. Default `TRUE`. Controls both legends: the position legend
+  (top-left, numbered grid mapping each cell to its analysis) and, in
+  support mode, the threshold legend (top-right, colour key for the four
+  support bins). Set to `FALSE` to suppress both, for example when
+  annotating the figure manually in Inkscape or Illustrator.
 
 - show_support:
 
   Logical. If `TRUE` (default), backbone node support labels are drawn
-  beside each node, and the legend includes a red line naming what those
-  numbers are.
+  beside each node, and the postion legend includes a colored line
+  naming what those numbers are.
 
 - show_support_idx:
 
@@ -182,14 +192,16 @@ plot_phylorug(
 
 - dot_identical:
 
-  Logical. Default `TRUE`. If `TRUE`, draws a small dot on backbone
-  nodes where every comparison tree is identical in recovering the
-  clade.
+  Logical. Default `TRUE`. **Presence mode only.** draws a small dot on
+  backbone nodes where every comparison tree is identical in recovering
+  the clade. Has no effect in support mode; see `dot_on_very_high` for
+  the support-mode equivalent.
 
 - dot_col, dot_cex:
 
   Colour and size of the identical-clade dot. Defaults are `"black"` and
-  NULL (auto-scales).
+  NULL (auto-scales). Shared by both `dot_identical` (presence mode) and
+  `dot_on_very_high` (support mode).
 
 - support_label_cex:
 
@@ -200,12 +212,18 @@ plot_phylorug(
 
   Colour of the backbone support labels. Default `"red"`.
 
-- rug_on_identical:
+- dot_on_very_high:
 
-  Logical. Default `FALSE`. When this and `dot_identical` are both
-  `TRUE`, unanimous nodes receive both the dot and a support rug, making
-  per-tree support strength visible even at universally recovered
-  clades.
+  Logical. Default `TRUE`. **Support mode only.** Controls what a dot
+  means there. When `TRUE`, a dot is drawn only where a clade is
+  recovered by every comparison analysis AND every one of those analyses
+  independently rates it very-high support. Anything less (not recovered
+  everywhere, or recovered everywhere but not uniformly very-high) is
+  drawn as a rug instead. Set to `FALSE` to turn off dots entirely in
+  support mode: every node is then drawn as a rug, however strong or
+  weak its support, the most conservative and transparent option. Has no
+  effect in presence mode; see `dot_identical` for the presence-mode
+  equivalent.
 
 - hide_unsupported:
 
@@ -227,6 +245,19 @@ plot_phylorug(
 
 Invisibly, the file path if a file was written, or `NULL` if plotted
 directly to the active graphics device.
+
+## Details
+
+Each internal node is drawn as either a dot (compact summary) or a rug
+plot (full per-analysis grid). What a dot means depends on the mode. In
+presence mode, a dot means every comparison analysis recovered the
+clade; control this with `dot_identical`, setting it to `FALSE` to show
+rug plots on every node, even unanimous ones. In support mode, a dot
+means every comparison analysis recovered the clade and every one
+independently rates it very-high support, control this with
+`dot_on_very_high`, setting it to `FALSE` to show rug plots on every
+node regardless of support level. Dot appearance (`dot_col`, `dot_cex`)
+is shared across both modes.
 
 ## See also
 
@@ -274,15 +305,18 @@ plot_phylorug(backbone, npm_st,
               include_backbone = TRUE,
               rug_position     = "outside")
 unlink(tmp3)
-# --- Restrict to specific nodes --------------------------------------------
-# By taxa (recommended): select a clade by the tips that define it.
+# --- Restrict to specific nodes -------------------------------------------
+# By taxa: name two or more tips whose MRCA is the node you want.
+# Useful when you know which species define a clade of interest.
 tmp4 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,
               file  = tmp4,
-              nodes = list(backbone$tip.label[1:2]))
+              nodes = list(c("Sisyphus_schaefferi_STL44",
+                             "Sisyphus_muricatus__STL5")))
 unlink(tmp4)
 
-# By node ID, if you already know it (see rownames(npm_st$presence)):
+# By node ID: useful when exploring interactively after inspecting
+# rownames(npm_st$presence) or ape::nodelabels() output.
 tmp5 <- tempfile(fileext = ".pdf")
 plot_phylorug(backbone, npm_st,
               file  = tmp5,

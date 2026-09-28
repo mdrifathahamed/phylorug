@@ -17,10 +17,10 @@ selects the tier for the user through its `mode` argument.)
   indicating partial recovery across a pool of equally optimal trees.
 
 - Tier 2, support: `support` is non-NULL. Recovered cells are shaded by
-  binned support strength, from black (very high) through greys to
-  yellow (low). A cell is white when the tree does not recover the clade
-  at all, and red when the tree recovers the clade but carries no
-  support value for it.
+  binned support strength, black (very high) through three progressively
+  lighter greys down to low. A cell is white when the tree does not
+  recover the clade at all, and red when the tree recovers the clade but
+  carries no support value for it.
 
 Users do not call this directly;
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
