@@ -86,9 +86,11 @@ black dot if every analysis recovers the clade, or a grid showing which
 analyses recover it and which do not, this is nodal stability. In
 `support` mode, the same grid shades each cell by how strongly that
 analysis supports the clade — this is nodal support layered on top of
-stability. Setting `rug_on_identical = TRUE` extends the grid to
-unanimous nodes, making per-analysis support variation visible even at
-the most stable clades.
+stability. A dot in `support` mode is stricter than in `presence` mode: it marks
+a clade that every analysis recovers and rates as *very-high* support. A clade 
+recovered everywhere but not uniformly very-high in support value  is drawn as a
+full grid instead, which keeps nodal support and nodal stability visible as 
+separate facts.
 
 # Quick start
 
@@ -190,7 +192,8 @@ the backbone. In its simplest form, all arguments are defaults:
 dot), `legend = TRUE`, `show_support = TRUE` (the backbone's own support
 values are shown alongside the rug), and `rug_position = "inside"`. The internal
 scaling engine sizes the canvas, fonts, and cell dimensions
-automatically based on tree size.
+automatically based on tree size. Here `show_support = FALSE` keeps this first 
+figure to presence and absence only.
 
 ```{r quick-presence,  fig.height=5.8, fig.width= 6.5, fig.dpi=300}
 plot_phylorug(backbone, npm, show_support = FALSE)
@@ -233,6 +236,14 @@ plot_phylorug(
   mode         = "support")
 ```
 
+In support mode a dot carries more information than in presence mode. It
+marks a clade that every comparison analysis recovers *and* rates
+very-high support against its own metric's thresholds. A clade recovered
+by every analysis but weaker in even one, or with no usable support
+value, is drawn as a grid instead, so a dot never hides uneven support.
+Because the rule uses the same thresholds that shade the cells, changing
+`thresholds` also changes which nodes earn a dot (see Customisation).
+
 # Reading the rug plot
 
 The rug plot carries two legends. The **position legend** (top-left)
@@ -242,9 +253,14 @@ support mode only) shows what each shade means.
 
 At each node you will see one of these patterns:
 
-- **Black dot**: all analyses recover this clade unanimously
-  (`dot_identical = TRUE`, the default). No rug is drawn to reduce
-  clutter.
+- **Black dot**: in presence mode, all analyses recover this clade
+  unanimously (`dot_identical = TRUE`, the default). In support mode a
+  dot is stricter: all analyses recover the clade and every one rates
+  it *very-high* support (`dot_on_very_high = TRUE`, the default). No rug
+  is drawn at a dot, to reduce clutter.
+- **Grid with no white cells** (support mode only): every analysis
+  recovers the clade, but at least one does not rate it very-high, or
+  reports no usable support value.
 - **Mixed grid**: some cells filled with solid black, some white. These
   are the interesting nodes, the position legend tells you which
   analysis agrees and which disagrees.
@@ -255,12 +271,13 @@ At each node you will see one of these patterns:
   instead.
 
 In support mode, filled cells are shaded by how strongly each analysis
-supports the clade. The colour scheme uses a greyscale gradient from
-black (very high) through greys (high, moderate) to white (not
-recovered), plus yellow for low support and red where the clade was
-recovered but no support value could be parsed.The thresholds shown below are 
-the package defaults. Different fields and journals apply different cutoffs, so 
-we recommend defining your own via the `thresholds` argument (see the 
+supports the clade. The colour scheme is a four-step greyscale from
+black (very high) through dark grey (high) and light grey (moderate) to
+pale grey (low), so a lighter cell always means weaker support. White
+means the clade was not recovered, and red means it was recovered but
+no support value could be parsed. The thresholds shown below are the
+package defaults. Different fields and journals apply different cutoffs,
+so we recommend defining your own via the `thresholds` argument (see the
 Customisation section below):
 
 - **Black**: very high support (UFBoot2 \>= 95, SH-aLRT \>= 80, LPP
@@ -269,8 +286,9 @@ Customisation section below):
   0.90-0.94).
 - **Light grey**: moderate support (UFBoot2 50-79, SH-aLRT 50-69, LPP
   0.50-0.89).
-- **Yellow**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50 for
-  LPP). Present but weakly endorsed.
+- **Pale grey**: low support (below 50 for UFBoot2/SH-aLRT, below 0.50
+  for LPP). Present but weakly endorsed. It is lighter than the light
+  grey of the moderate bin but still visibly darker than white.
 - **White**: clade not recovered by that analysis.
 - **Red**: clade recovered but no support value could be parsed from
   the node label. This can happen when the tree file carries no node
@@ -279,14 +297,13 @@ Customisation section below):
 
 # Fine-tuning the figure
 
-The following example shows how optional arguments refine the plot.
-`rug_on_identical = TRUE` extends the rug to unanimous nodes, revealing
-per-tree support strength even at stable clades.
+Dots in support mode follow the very-high rule described above
+(`dot_on_very_high`; see Customisation to turn them off).
 `hide_unsupported = FALSE` would draw all-white rugs at nodes unique to
 the backbone; the default (`TRUE`) leaves them bare. `cell_scale`
 adjusts the size of each rug cell, `rug_position` controls whether rugs
 sit toward the root (`"inside"`) or toward the tips (`"outside"`).
-`dot_cex` scales the unanimous-node dot, and `show_support = TRUE` with
+`dot_cex` scales the dot, and `show_support = TRUE` with
 `support_label_cex` and `support_label_col` overlays the backbone's own
 support labels on the tree. `cex` and `font` are passed directly to the
 tree plotter. For publication output, add `file = "output.pdf"` along
@@ -302,7 +319,6 @@ plot_phylorug(
   mode              = "support",
   rug_position      = "inside",
   cell_scale        = 0.38,
-  rug_on_identical  = TRUE,
   cex               = 0.90,
   font              = 3,
   dot_cex           = 1.3,
@@ -416,17 +432,16 @@ plot_phylorug(backbone, npm,
               support_label_cex  = 0.35,
               support_label_col  = "red",
               cell_scale         = 0.3,
-              rug_position       = "outside",
-              rug_on_identical   = FALSE)
+              rug_position       = "outside")
 ```
 
 ## What the rug reveals
 
 The rug immediately separates stable from contested regions of the
 *Culicomorpha* tree. Most nodes carry black dots, meaning every
-comparison analysis recovered the clade unanimously. All family-level
-groupings such as *Culicidae*, *Chironomidae*, *Ceratopogonidae*, and
-the *Simuliidae* + *Thaumaleidae* clade, show complete agreement across
+comparison analysis recovered the clade and rated it very-high support.
+All family-level groupings such as *Culicidae*, *Chironomidae*, *Ceratopogonidae*, 
+and the *Simuliidae* + *Thaumaleidae* clade, show complete agreement across
 every inference method and dataset.
 
 The main exception is the node uniting *Chironomidae* and
@@ -582,7 +597,6 @@ plot_phylorug(
   support_label_col  = "red",
   support_label_cex  = 0.34,
   cell_scale         = 0.35,
-  rug_on_identical   = FALSE,
   cex                = 0.8
 )
 ```
@@ -595,9 +609,10 @@ we applied both presence mode and support mode to the same dataset.
 Presence mode shows which analyses recovered each clade; support mode
 goes further by showing how strongly each analysis backs each node.
 
-Most nodes within Onthophagina are unanimously recovered (black dots)
-across all four comparison analyses. The added value of support mode
-becomes visible at nodes where not all analyses recover the clade.
+Most nodes within Onthophagina carry black dots: all four comparison
+analyses recover the clade and rate it very-high support. The added
+value of support mode becomes visible at nodes where not all analyses
+recover the clade, or where they recover it with uneven support.
 
 The node uniting the genus *Caccobius* (including *Cleptocaccobius*)
 with a clade of *Onthophagus* species (backbone support 43.7/64
@@ -638,13 +653,11 @@ These three cases: complete absence, partial weak recovery, and
 unanimous recovery with uncertain relationships within the group -
 capture different levels of conflict that support mode makes visible.
 
-The black dots at unanimous nodes are compact summaries, they tell you
-the clade was recovered everywhere, but not how strongly. To inspect the
-support values across analyses even at unanimous nodes, set
-`rug_on_identical = TRUE`. This expands every node into its full grid,
-revealing whether unanimous recovery is backed by uniformly strong
-support or conceals variation. Once satisfied, switch back to
-`rug_on_identical = FALSE` (the default) for a cleaner figure.
+In support mode a black dot is a complete summary: the clade was
+recovered everywhere and every analysis has very-high support values. Nodes 
+recovered everywhere but support is not uniformly very high  are drawn as grids.
+To draw the grid at every node, including those that would otherwise get a dot, 
+set `dot_on_very_high = FALSE`.
 
 # Customisation
 
@@ -663,6 +676,18 @@ support_type <- c(
 )
 npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
                             support_type = support_type)
+```
+
+## Dots in support mode
+
+By default a dot marks only the nodes that every analysis recovers and
+rates very-high. To draw the full grid at every node instead, set
+`dot_on_very_high = FALSE`. This is the most conservative option, since
+no dot can stand in for detail. It affects support mode only; in
+presence mode, `dot_identical` controls dots.
+
+```{r dot-on-very-high}
+plot_phylorug(backbone, npm, mode = "support", dot_on_very_high = FALSE)
 ```
 
 ## Universal thresholds (no support_type)
@@ -737,6 +762,12 @@ plot_phylorug(
   thresholds = my_thresholds
 )
 ```
+
+Each entry must name all three tiers (`very_high`, `high`, `moderate`);
+anything else stops early with an error naming the missing tier. The
+`very_high` cutoff also decides which nodes earn a dot in support mode:
+lowering UFBoot2's from 95 to 90, for example, lets a node keep its dot
+when its only sub-threshold analysis scores 92.
 
 ## Selecting which nodes to visualize
 
@@ -814,6 +845,12 @@ missing some backbone taxa, `node_presence_matrix()` will refuse to
 proceed (a clade containing a missing taxon cannot be evaluated). Run
 `check_taxa()` first to see the discrepancies, then `prune_to_shared()`
 to reduce all trees to their common taxa.
+
+**A dot means different things in the two modes.** In presence mode it
+means "recovered by every analysis". In support mode it additionally
+means "rated very-high by every analysis". If you compare figures from
+the two modes, read the legend's dot row, which states the rule in
+effect.
 
 # References
 
