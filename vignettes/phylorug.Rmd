@@ -214,7 +214,7 @@ clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
 own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
 to LPP thresholds, while a tree carrying UFBoot2 values is binned
-against UFBoot2 thresholds independently. phylorug never cross-compares
+against UFBoot2 thresholds independently. *phylorug* never cross-compares
 values from different support metrics, because LPP 0.95 and UFBoot2 95
 do not measure the same thing despite looking numerically similar.
 
@@ -405,9 +405,9 @@ support_type <- c(
 npm <- node_presence_matrix(backbone, others, support_type = support_type)
 ```
 
-## plot the phylorug-presence
+## Presence mode
 
-```{r plot-culico, fig.width = 8, fig.height = 10}
+```{r plot-culico, fig.width = 8, fig.height = 10, fig.dpi=300}
 plot_phylorug(backbone, npm, show_support = FALSE)
 ```
 
@@ -455,8 +455,8 @@ the pattern is immediately visible in the rug without consulting
 multiple tree files.
 
 Two additional areas show disagreement. Near the base of *Chironomidae*,
-the rug plots at nodes near *Podonomus* and *Parochlus* show mixed
-shading, indicating that the internal arrangement of basal chironomid
+the rug plots at the node uniting *Podonomus* and *Parochlus steinenii* show
+mixed shading, indicating that the internal arrangement of basal chironomid
 lineages varies across methods. Near the tips, the node at *Nilodorum* +
 *Dicrotendipes* (backbone support 75.0) shows grey shading, moderate
 support in the backbone that is not unanimously endorsed by all
@@ -486,12 +486,11 @@ beetles_70p/, each with 5 independent analyses (45 tips including 2
 outgroups) built from UCE loci retained at different completeness
 thresholds (50% and 70%). The two datasets produce slightly different
 topologies, making them a good test case for exploring how data
-filtering affects clade recovery. For this vignette we use the 70p set
-to match the paper figure, but users are encouraged to try both. Unlike
-the *Culicomorpha* trees, these trees store specimen codes as tip labels
-(e.g., `"OntauST002"` rather than a species name), so this example adds
-one extra step: translating tip labels using a lookup table before
-building the rug.
+filtering affects clade recovery. For this vignette we use the 70p set, but 
+users are encouraged to try both. Unlike the *Culicomorpha* trees, these trees 
+store specimen codes as tip labels (e.g., `"OntauST002"` rather than a species 
+name), so this example adds one extra step: translating tip labels using a 
+lookup table before building the rug plots.
 
 ## Read the trees
 
@@ -519,7 +518,7 @@ trees <- lapply(trees, function(tr) {
 
 The trees still carry specimen codes at this point. A CSV file
 `biogeo.csv` included with the package maps each code to its species
-name. Lets load it and check the first few rows:
+name. Let's load it and check the first few rows:
 
 ```{r load the lookup table}
 biogeo_path <- system.file("extdata", "beetles_70p", "biogeo.csv",
@@ -528,7 +527,7 @@ biogeo <- read.csv(biogeo_path)
 head(biogeo)
 ```
 
-Now lets translate. The ordering rule from earlier applies here. First root and 
+Now let's translate. The ordering rule from earlier applies here. First root and 
 drop outgroups before translating, because `translate_tips()`
 replaces the original codes and `ape::root()` would no longer find "
 *NicorbUCE* " after translation.
@@ -578,10 +577,13 @@ plot_phylorug(backbone, npm)
 
 ## Support mode
 
-With 43 taxa, the canvas still fits a single page. `show_support = TRUE`
-with `support_label_col = "red"` overlays the backbone's own support
-values for cross-referencing against the rug shading, and
-`cell_scale = 0.35` keeps the rug cells from crowding each other .
+With 43 taxa, the canvas still fits a single page. The backbone tree
+carries compound IQ-TREE labels in the format SH-aLRT/UFBoot2 (e.g.,
+`99.9/97`). The `show_support_idx` argument controls which part of that
+label appears on the tree: `show_support_idx = 1` shows only SH-aLRT,
+`show_support_idx = 2` shows only UFBoot2, and a named vector like
+`c("1" = "sh_alrt", "2" = "ufboot")` shows both and names them in the
+legend. Here we use the named form so the legend identifies each metric:
 
 ```{r plot-support-beetles-70p, fig.height = 12, fig.width = 10, fig.dpi= 300}
 # For publication output, add:
@@ -593,6 +595,7 @@ plot_phylorug(
   npm,
   mode               = "support",
   show_support       = TRUE,
+  show_support_idx   = c("1" = "sh_alrt", "2" = "ufboot"),
   support_label_col  = "red",
   support_label_cex  = 0.34,
   cell_scale         = 0.35,
@@ -613,13 +616,11 @@ analyses recover the clade and rate it very-high support. The added
 value of support mode becomes visible at nodes where not all analyses
 recover the clade, or where they recover it with uneven support.
 
-The node uniting the genus *Caccobius* (including *Cleptocaccobius*)
-with a clade of *Onthophagus* species (backbone support 43.7/64
-SH-aLRT/UFBoot2) is the most weakly supported node in the entire
-subtribe. No dot or rug appears at this node, meaning none of the
-comparison analyses recovered this clade. This confirms that the
-placement of *Caccobius* relative to *Onthophagus* is genuinely
-uncertain.
+The clade containing species of Caccobius, Cleptocaccobius, and Onthophagus 
+(backbone support 43.7/64 SH-aLRT/UFBoot2) is the most weakly supported node in 
+the entire subtribe. No dot or rug appears at this node,  meaning none of the 
+comparison analyses recovered this clade. This confirms that the placement of 
+*Caccobius* relative to *Onthophagus* is unresolved across methods.
 
 Weak support and partial recovery are also visible deeper within the
 *Onthophagus* radiation. The node uniting *O. giraffa* + *O. pilosus*
