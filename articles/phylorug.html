@@ -709,7 +709,7 @@ identifies each metric:</p>
 <span>  show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_support_idx   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span> <span class="op">=</span> <span class="st">"sh_alrt"</span>, <span class="st">"2"</span> <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span>,</span>
 <span>  support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
-<span>  support_label_cex  <span class="op">=</span> <span class="fl">0.34</span>,</span>
+<span>  support_label_cex  <span class="op">=</span> <span class="fl">0.38</span>,</span>
 <span>  cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -808,10 +808,11 @@ only; in presence mode, <code>dot_identical</code> controls dots.</p>
 </h3>
 <p>If <code>support_type</code> is not declared when building the node
 presence matrix, <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> falls back to universal
-thresholds. Values greater than 1 are divided by 100 to bring them onto
-a 0–1 scale, and all trees are binned against the same cutoffs
-regardless of metric. This is useful for quick exploration but less
-precise than metric-specific binning:</p>
+thresholds. Values greater than 1 (such as UFBoot2 scores on the 0-100
+scale) are divided by 100 internally so that all trees are binned
+against the same 0-1 cutoffs (0.95 / 0.80 / 0.50) regardless of metric.
+The legend displays these as percentages (&gt;=95, 80-94, 50-79, &lt;50)
+for readability:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">npm_universal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -857,7 +858,7 @@ thresholds:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode             <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>              include_backbone <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="phylorug_files/figure-html/include-bb-support-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
@@ -905,7 +906,7 @@ numeric vector instead:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, nodes <span class="op">=</span> <span class="fl">18</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/nodes-by-id-1.png" class="r-plt" alt="" width="672"></p>
 <p>But how do you find the right node ID in the first place? To find the
-nodes where analyses disagree,filter the presence matrix for rows with
+nodes where analyses disagree, filter the presence matrix for rows with
 at least one 0, then look up the tips at each one:</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disagree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span><span class="op">)</span><span class="op">)</span><span class="op">[</span></span>
@@ -1016,16 +1017,15 @@ phylogenetic trees. <em>BMC Bioinformatics</em>, 16, 204. <a href="https://doi.o
 Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
 Daniel, G.M. &amp; Tarasov, S. (2026). Phylogenomics resolves a
 200-year-old puzzle: a revised tribal classification of Afro-Eurasian
-dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a>
-</li>
-<li>Simmons, M.P. &amp; Freudenstein, J.V. (2011). Spurious 99%
-bootstrap and jackknife support for unsupported clades. <em>Molecular
-Phylogenetics and Evolution</em>, 61(1), 177–191. <a href="https://doi.org/10.1016/j.ympev.2011.06.003" class="external-link uri">https://doi.org/10.1016/j.ympev.2011.06.003</a>
+dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a> <a href="https://doi.org/10.1016/j.ympev.2011.06.003" class="external-link uri">https://doi.org/10.1016/j.ympev.2011.06.003</a>
 </li>
 <li>Sanders, J.G. (2010). Program note: Cladescan, a program for
 automated phylogenetic sensitivity analysis. <em>Cladistics</em>, 26(1),
 114–116. <a href="https://doi.org/10.1111/j.1096-0031.2009.00280.x" class="external-link uri">https://doi.org/10.1111/j.1096-0031.2009.00280.x</a>
 </li>
+<li>Simmons, M.P. &amp; Freudenstein, J.V. (2011). Spurious 99%
+bootstrap and jackknife support for unsupported clades. <em>Molecular
+Phylogenetics and Evolution</em>, 61(1), 177–191.</li>
 <li>Steenwyk, J.L., Li, Y., Zhou, X., Shen, X.X. &amp; Rokas, A. (2023).
 Incongruence in the phylogenomics era. <em>Nature Reviews Genetics</em>,
 24(12), 834–850. <a href="https://doi.org/10.1038/s41576-023-00620-x" class="external-link uri">https://doi.org/10.1038/s41576-023-00620-x</a>
