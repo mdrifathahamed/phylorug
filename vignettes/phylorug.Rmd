@@ -597,7 +597,7 @@ plot_phylorug(
   show_support       = TRUE,
   show_support_idx   = c("1" = "sh_alrt", "2" = "ufboot"),
   support_label_col  = "red",
-  support_label_cex  = 0.34,
+  support_label_cex  = 0.38,
   cell_scale         = 0.35,
   cex                = 0.8
 )
@@ -694,10 +694,11 @@ plot_phylorug(backbone, npm, mode = "support", dot_on_very_high = FALSE)
 
 If `support_type` is not declared when building the node presence
 matrix, `plot_phylorug()` falls back to universal thresholds. Values
-greater than 1 are divided by 100 to bring them onto a 0–1 scale, and
-all trees are binned against the same cutoffs regardless of metric. This
-is useful for quick exploration but less precise than metric-specific
-binning:
+greater than 1 (such as UFBoot2 scores on the 0-100 scale) are
+divided by 100 internally so that all trees are binned against the
+same 0-1 cutoffs (0.95 / 0.80 / 0.50) regardless of metric. The
+legend displays these as percentages (>=95, 80-94, 50-79, <50) for
+readability:
 
 ```{r universal_threshold }
 npm_universal <- node_presence_matrix(backbone, others, support_col = c(1, 2))
@@ -740,11 +741,12 @@ plot_phylorug(backbone, npm, include_backbone = TRUE)
 In support mode, pass the backbone's support metric directly to
 `include_backbone` so it gets binned against the correct thresholds:
 
-```{r}
+````{r include-bb-support}
 plot_phylorug(backbone, npm,
               mode             = "support",
               include_backbone = "ufboot")
-```
+
+````
 
 ## Custom thresholds
 
@@ -795,7 +797,7 @@ plot_phylorug(backbone, npm, nodes = 18)
 ```
 
 But how do you find the right node ID in the first place? To find the
-nodes where analyses disagree,filter the presence matrix for rows with
+nodes where analyses disagree, filter the presence matrix for rows with
 at least one 0, then look up the tips at each one:
 
 ```{r find-disagreeing-nodes}
@@ -871,13 +873,13 @@ effect.
   200-year-old puzzle: a revised tribal classification of Afro-Eurasian
   dung beetles (Coleoptera: Scarabaeinae). *bioRxiv*.
   https://doi.org/10.64898/2026.07.22.740134
-- Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99% bootstrap
-  and jackknife support for unsupported clades. *Molecular
-  Phylogenetics and Evolution*, 61(1), 177–191.
   https://doi.org/10.1016/j.ympev.2011.06.003
 - Sanders, J.G. (2010). Program note: Cladescan, a program for
   automated phylogenetic sensitivity analysis. *Cladistics*, 26(1),
   114–116. https://doi.org/10.1111/j.1096-0031.2009.00280.x
+- Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99% bootstrap
+  and jackknife support for unsupported clades. *Molecular
+  Phylogenetics and Evolution*, 61(1), 177–191.
 - Steenwyk, J.L., Li, Y., Zhou, X., Shen, X.X. & Rokas, A. (2023).
   Incongruence in the phylogenomics era. *Nature Reviews Genetics*,
   24(12), 834–850. https://doi.org/10.1038/s41576-023-00620-x
