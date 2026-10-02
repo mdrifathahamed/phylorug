@@ -9,21 +9,21 @@
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Project Status:
-WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Codecov test
 coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
 <!-- badges: end -->
 
 **phylorug** is an R package for comparing and visualizing clade
-recovery and support across multiple phylogenetic trees. It takes a set
-of trees from different inference pipelines, datasets, or statistical
-models, all representing the same focal group of organisms. It draws a
-compact coloured grid, a **rug plot**, at each internal node of a
-reference tree, showing which clades are stable across trees and which
-are not. In presence mode, nodes recovered by all comparison trees
-appear as solid dots; in support mode, a dot means every comparison tree
-also rates the clade as very-high support. Contested or mixed-support
-nodes get a full grid showing each analysis individually.
+recovery and support across phylogenetic trees. It takes a set of trees
+from different inference pipelines, datasets, or statistical models, all
+representing the same focal group of organisms. It draws a compact
+coloured grid, a **rug plot**, at each internal node of a reference
+tree, showing which clades are stable across trees and which are not. In
+presence mode, nodes recovered by all comparison trees appear as solid
+dots; in support mode, a dot means every comparison tree also rates the
+clade as very-high support. Contested or mixed-support nodes get a full
+**rug plot** showing each analysis individually.
 
 ## Overview
 
@@ -39,8 +39,8 @@ A convenient way to visualize such comparisons is a phylogenetic **rug
 plot**, in which each node of the backbone tree is associated with a
 series of cells representing different analyses. Each cell indicates
 whether a clade was recovered and, where applicable, its level of
-support. Rug plots give an intuitive overview of clade stability across
-alternative phylogenetic analyses, but compiling them manually is
+support. **Rug plots** give an intuitive overview of clade stability
+across alternative phylogenetic analyses, but compiling them manually is
 tedious and time-consuming. Despite the extensive use of R in the
 phylogenetics community, no dedicated R package exists for generating
 such plots.
@@ -49,20 +49,15 @@ such plots.
 
 ## Presence mode
 
-<figure>
-<img src="man/figures/README-presence.png" alt="Presence mode" />
-<figcaption aria-hidden="true">Presence mode</figcaption>
-</figure>
+![](man/figures/README-presence.png)
 
 Black/white cells showing whether each analysis recovered a given clade
-or not. Stable nodes appear as black dots; contested nodes show a grid.
+or not. Stable nodes appear as black dots; contested nodes show a **rug
+plot**.
 
 ## Support mode
 
-<figure>
-<img src="man/figures/README-support.png" alt="Support mode" />
-<figcaption aria-hidden="true">Support mode</figcaption>
-</figure>
+![](man/figures/README-support.png)
 
 Cells are shaded in greyscale by how strongly each analysis supports a
 given clade, from black (very high) through progressively lighter greys
@@ -75,9 +70,8 @@ users are encouraged to set their own.
 In support mode a dot is stricter than in presence mode: it appears only
 where every comparison analysis recovers the clade *and* rates it
 very-high support. A clade recovered everywhere but with weaker or
-missing support in even one analysis is drawn as a full grid instead, so
-a dot never hides uneven support. Set `dot_on_very_high = FALSE` to draw
-a grid at every node.
+missing support in even one analysis is drawn as a full **rug plot**
+instead. Set `dot_on_very_high = FALSE` to draw a grid at every node.
 
 *Figures show a 9-taxon subset of `sample_trees` (tip labels cleaned)
 for readability.*
@@ -96,6 +90,8 @@ GitHub:
 ``` r
 # install.packages("pak")
 pak::pak("mdrifathahamed/phylorug")
+# or
+devtools::install_github("mdrifathahamed/phylorug")
 library(phylorug)
 ```
 
@@ -140,9 +136,7 @@ raw tree files to publication-ready figures:
 - `node_presence_matrix()` builds the comparison matrix recording which
   clades are recovered by which analyses, along with their support
   values.
-- `plot_phylorug()` draws the rug plot on a reference tree in presence
-  or support mode, with automatic normalization of heterogeneous support
-  formats.
+- `plot_phylorug()` draws the rug plot on a reference tree.
 
 That is the basic pipeline: read -\> matrix -\> plot. Four additional
 helpers are available when your data needs them:
@@ -179,8 +173,9 @@ external dependencies are required.
   and controls what appears on the tree via `show_support_idx` in
   `plot_phylorug()`
 - Treats a bare `"multiPhylo"` as one analysis (a pool of tied-optimal
-  trees). Cell shading reflects the proportion of pool trees recovering
-  the clade, from white (none) through grey to black (all)
+  trees). Whether a clade counts as present depends on `pool_threshold`:
+  `1.0` (default) requires all pool trees to recover it (strict
+  consensus), `0.5` requires a majority.
 - Supports both `"inside"` and `"outside"` rug positioning relative to
   the tree
 - Backbone support values can be displayed alongside rug cells via
@@ -193,10 +188,6 @@ external dependencies are required.
   reference phylogenetic tree, and lets users choose which nodes to
   visualize.
 - Saves directly to PDF, PNG, or JPEG via the `file` argument.
-- Unanimous nodes are collapsed to dots by default. In presence mode,
-  `dot_identical = FALSE` shows rug plots on every node. In support
-  mode, `dot_on_very_high = FALSE` does the same, revealing support
-  variation even at unanimous nodes
 
 ### Getting help
 
