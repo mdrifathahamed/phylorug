@@ -141,7 +141,7 @@ stability visible as separate facts.</p>
 <p>The fastest way to see phylorug in action is with the built-in
 <code>sample_trees</code> dataset, a 15-taxon subset of the beetle data
 (Montanaro, Lopes et al., 2026), already rooted, pruned, and with tip
-labels translated to scientific names. Lets start with attaching the
+labels translated to scientific names. Let’s start with attaching the
 package :</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mdrifathahamed/phylorug" class="external-link">phylorug</a></span><span class="op">)</span></span></code></pre></div>
@@ -502,7 +502,7 @@ comparisons:</p>
 position to an analysis name.</p>
 </div>
 <div class="section level3">
-<h3 id="support-mode-1">support-mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
+<h3 id="support-mode-1">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-1"></a>
 </h3>
 <p>Here we use <code>show_support = TRUE</code> to overlay the
 backbone’s own node labels in red for cross-referencing, with
@@ -626,7 +626,7 @@ species name. Lets load it and check the first few rows:</p>
 <span><span class="co">#&gt; 5    ApimmST003                         Aphodius_immundus_ST003</span></span>
 <span><span class="co">#&gt; 6   STL10140140 Apotolamprus_aff_ambohitsitondronensi__STL10140</span></span></code></pre></div>
 <p>Now lets translate. The ordering rule from earlier applies here.
-Frist root and drop outgroups before translating, because
+First root and drop outgroups before translating, because
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> replaces the original codes and
 <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> would no longer find ” <em>NicorbUCE</em> ”
 after translation.</p>
@@ -678,7 +678,7 @@ both support values with <code>support_col = c(1, 2)</code>:</p>
 </h3>
 <p>At 43 taxa the tree is comfortably readable. All-white rugs are
 hidden by default, and writing to a file with explicit width and height
-is strongly recommended to avoids the distortion that GUI windows
+is strongly recommended to avoid the distortion that GUI windows
 introduce.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span><span class="op">)</span></span></code></pre></div>
@@ -1013,6 +1013,10 @@ Losacco, F., Rossini, M., Gillett, C.P.D.T., Saxton, N.A., Stone, R.L.,
 Daniel, G.M. &amp; Tarasov, S. (2026). Phylogenomics resolves a
 200-year-old puzzle: a revised tribal classification of Afro-Eurasian
 dung beetles (Coleoptera: Scarabaeinae). <em>bioRxiv</em>. <a href="https://doi.org/10.64898/2026.07.22.740134" class="external-link uri">https://doi.org/10.64898/2026.07.22.740134</a>
+</li>
+<li>Simmons, M.P. &amp; Freudenstein, J.V. (2011). Spurious 99%
+bootstrap and jackknife support for unsupported clades. <em>Molecular
+Phylogenetics and Evolution</em>, 61(1), 177–191. <a href="https://doi.org/10.1016/j.ympev.2011.06.003" class="external-link uri">https://doi.org/10.1016/j.ympev.2011.06.003</a>
 </li>
 <li>Sanders, J.G. (2010). Program note: Cladescan, a program for
 automated phylogenetic sensitivity analysis. <em>Cladistics</em>, 26(1),

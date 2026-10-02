@@ -74,7 +74,7 @@ and nodal stability visible as separate facts.
 The fastest way to see phylorug in action is with the built-in
 `sample_trees` dataset, a 15-taxon subset of the beetle data (Montanaro,
 Lopes et al., 2026), already rooted, pruned, and with tip labels
-translated to scientific names. Lets start with attaching the package :
+translated to scientific names. Let’s start with attaching the package :
 
 ``` r
 
@@ -467,7 +467,7 @@ With 9 comparison trees, phylorug automatically arranges the rug grid (3
 columns by 3 rows in this case). The position legend maps each cell
 position to an analysis name.
 
-### support-mode
+### Support mode
 
 Here we use `show_support = TRUE` to overlay the backbone’s own node
 labels in red for cross-referencing, with `show_support_idx = 1` to
@@ -597,7 +597,7 @@ head(biogeo)
 #> 6   STL10140140 Apotolamprus_aff_ambohitsitondronensi__STL10140
 ```
 
-Now lets translate. The ordering rule from earlier applies here. Frist
+Now lets translate. The ordering rule from earlier applies here. First
 root and drop outgroups before translating, because
 [`translate_tips()`](https://mdrifathahamed.github.io/phylorug/reference/translate_tips.md)
 replaces the original codes and
@@ -659,8 +659,7 @@ npm <- node_presence_matrix(backbone, others, support_col = c(1, 2),
 
 At 43 taxa the tree is comfortably readable. All-white rugs are hidden
 by default, and writing to a file with explicit width and height is
-strongly recommended to avoids the distortion that GUI windows
-introduce.
+strongly recommended to avoid the distortion that GUI windows introduce.
 
 ``` r
 
@@ -1042,6 +1041,10 @@ effect.
   200-year-old puzzle: a revised tribal classification of Afro-Eurasian
   dung beetles (Coleoptera: Scarabaeinae). *bioRxiv*.
   <https://doi.org/10.64898/2026.07.22.740134>
+- Simmons, M.P. & Freudenstein, J.V. (2011). Spurious 99% bootstrap and
+  jackknife support for unsupported clades. *Molecular Phylogenetics and
+  Evolution*, 61(1), 177–191.
+  <https://doi.org/10.1016/j.ympev.2011.06.003>
 - Sanders, J.G. (2010). Program note: Cladescan, a program for automated
   phylogenetic sensitivity analysis. *Cladistics*, 26(1), 114–116.
   <https://doi.org/10.1111/j.1096-0031.2009.00280.x>
