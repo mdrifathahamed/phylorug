@@ -268,9 +268,10 @@ each clade. Cells are shaded by binned support strength, darker means
 stronger. Support values are binned against thresholds specific to their
 own metric: a tree with LPP 0.95 and a tree with LPP 0.65 are compared
 to LPP thresholds, while a tree carrying UFBoot2 values is binned
-against UFBoot2 thresholds independently. phylorug never cross-compares
-values from different support metrics, because LPP 0.95 and UFBoot2 95
-do not measure the same thing despite looking numerically similar.</p>
+against UFBoot2 thresholds independently. <em>phylorug</em> never
+cross-compares values from different support metrics, because LPP 0.95
+and UFBoot2 95 do not measure the same thing despite looking numerically
+similar.</p>
 <p>Since we already declared <code>support_type</code> when building the
 node presence matrix, <code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> reads it
 automatically from the stored attribute and applies the correct
@@ -492,11 +493,11 @@ comparisons:</p>
 <code class="sourceCode R"><span><span class="va">npm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_presence_matrix.html">node_presence_matrix</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">others</span>, support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="plot-the-phylorug-presence">plot the phylorug-presence<a class="anchor" aria-label="anchor" href="#plot-the-phylorug-presence"></a>
+<h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
 </h3>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, show_support <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="768"></p>
+<p><img src="phylorug_files/figure-html/plot-culico-1.png" class="r-plt" alt="" width="2400"></p>
 <p>With 9 comparison trees, phylorug automatically arranges the rug grid
 (3 columns by 3 rows in this case). The position legend maps each cell
 position to an analysis name.</p>
@@ -543,12 +544,13 @@ models are more prone to missing this relationship, and the pattern is
 immediately visible in the rug without consulting multiple tree
 files.</p>
 <p>Two additional areas show disagreement. Near the base of
-<em>Chironomidae</em>, the rug plots at nodes near <em>Podonomus</em>
-and <em>Parochlus</em> show mixed shading, indicating that the internal
-arrangement of basal chironomid lineages varies across methods. Near the
-tips, the node at <em>Nilodorum</em> + <em>Dicrotendipes</em> (backbone
-support 75.0) shows grey shading, moderate support in the backbone that
-is not unanimously endorsed by all comparison analyses.</p>
+<em>Chironomidae</em>, the rug plots at the node uniting
+<em>Podonomus</em> and <em>Parochlus steinenii</em> show mixed shading,
+indicating that the internal arrangement of basal chironomid lineages
+varies across methods. Near the tips, the node at <em>Nilodorum</em> +
+<em>Dicrotendipes</em> (backbone support 75.0) shows grey shading,
+moderate support in the backbone that is not unanimously endorsed by all
+comparison analyses.</p>
 <p>A few cells appear red at nodes within <em>Chironomidae</em>. Red
 means the analysis recovered the clade but no support value could be
 parsed from the node label. In this dataset, the original tree files do
@@ -575,12 +577,11 @@ with 5 independent analyses (45 tips including 2 outgroups) built from
 UCE loci retained at different completeness thresholds (50% and 70%).
 The two datasets produce slightly different topologies, making them a
 good test case for exploring how data filtering affects clade recovery.
-For this vignette we use the 70p set to match the paper figure, but
-users are encouraged to try both. Unlike the <em>Culicomorpha</em>
-trees, these trees store specimen codes as tip labels (e.g.,
-<code>"OntauST002"</code> rather than a species name), so this example
-adds one extra step: translating tip labels using a lookup table before
-building the rug.</p>
+For this vignette we use the 70p set, but users are encouraged to try
+both. Unlike the <em>Culicomorpha</em> trees, these trees store specimen
+codes as tip labels (e.g., <code>"OntauST002"</code> rather than a
+species name), so this example adds one extra step: translating tip
+labels using a lookup table before building the rug plots.</p>
 <div class="section level3">
 <h3 id="read-the-trees-1">Read the trees<a class="anchor" aria-label="anchor" href="#read-the-trees-1"></a>
 </h3>
@@ -612,7 +613,7 @@ tree.</p>
 </h3>
 <p>The trees still carry specimen codes at this point. A CSV file
 <code>biogeo.csv</code> included with the package maps each code to its
-species name. Lets load it and check the first few rows:</p>
+species name. Let’s load it and check the first few rows:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">biogeo_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"beetles_70p"</span>, <span class="st">"biogeo.csv"</span>,</span>
 <span>                           package <span class="op">=</span> <span class="st">"phylorug"</span><span class="op">)</span></span>
@@ -625,7 +626,7 @@ species name. Lets load it and check the first few rows:</p>
 <span><span class="co">#&gt; 4   Anop1COL892                         Anoplostethus_sp_COL892</span></span>
 <span><span class="co">#&gt; 5    ApimmST003                         Aphodius_immundus_ST003</span></span>
 <span><span class="co">#&gt; 6   STL10140140 Apotolamprus_aff_ambohitsitondronensi__STL10140</span></span></code></pre></div>
-<p>Now lets translate. The ordering rule from earlier applies here.
+<p>Now let’s translate. The ordering rule from earlier applies here.
 First root and drop outgroups before translating, because
 <code><a href="../reference/translate_tips.html">translate_tips()</a></code> replaces the original codes and
 <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> would no longer find ” <em>NicorbUCE</em> ”
@@ -674,7 +675,7 @@ both support values with <code>support_col = c(1, 2)</code>:</p>
 <span>                            support_type <span class="op">=</span> <span class="va">support_type</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
+<h3 id="presence-mode-1">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode-1"></a>
 </h3>
 <p>At 43 taxa the tree is comfortably readable. All-white rugs are
 hidden by default, and writing to a file with explicit width and height
@@ -687,12 +688,15 @@ introduce.</p>
 <div class="section level3">
 <h3 id="support-mode-2">Support mode<a class="anchor" aria-label="anchor" href="#support-mode-2"></a>
 </h3>
-<p>With 43 taxa, the canvas still fits a single page.
-<code>show_support = TRUE</code> with
-<code>support_label_col = "red"</code> overlays the backbone’s own
-support values for cross-referencing against the rug shading, and
-<code>cell_scale = 0.35</code> keeps the rug cells from crowding each
-other .</p>
+<p>With 43 taxa, the canvas still fits a single page. The backbone tree
+carries compound IQ-TREE labels in the format SH-aLRT/UFBoot2 (e.g.,
+<code>99.9/97</code>). The <code>show_support_idx</code> argument
+controls which part of that label appears on the tree:
+<code>show_support_idx = 1</code> shows only SH-aLRT,
+<code>show_support_idx = 2</code> shows only UFBoot2, and a named vector
+like <code>c("1" = "sh_alrt", "2" = "ufboot")</code> shows both and
+names them in the legend. Here we use the named form so the legend
+identifies each metric:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For publication output, add:</span></span>
 <span><span class="co"># file = "beetles_support.pdf"</span></span>
@@ -703,6 +707,7 @@ other .</p>
 <span>  <span class="va">npm</span>,</span>
 <span>  mode               <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>  show_support       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_support_idx   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span> <span class="op">=</span> <span class="st">"sh_alrt"</span>, <span class="st">"2"</span> <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span>,</span>
 <span>  support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  support_label_cex  <span class="op">=</span> <span class="fl">0.34</span>,</span>
 <span>  cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
@@ -723,13 +728,12 @@ each node.</p>
 analyses recover the clade and rate it very-high support. The added
 value of support mode becomes visible at nodes where not all analyses
 recover the clade, or where they recover it with uneven support.</p>
-<p>The node uniting the genus <em>Caccobius</em> (including
-<em>Cleptocaccobius</em>) with a clade of <em>Onthophagus</em> species
-(backbone support 43.7/64 SH-aLRT/UFBoot2) is the most weakly supported
-node in the entire subtribe. No dot or rug appears at this node, meaning
-none of the comparison analyses recovered this clade. This confirms that
-the placement of <em>Caccobius</em> relative to <em>Onthophagus</em> is
-genuinely uncertain.</p>
+<p>The clade containing species of Caccobius, Cleptocaccobius, and
+Onthophagus (backbone support 43.7/64 SH-aLRT/UFBoot2) is the most
+weakly supported node in the entire subtribe. No dot or rug appears at
+this node, meaning none of the comparison analyses recovered this clade.
+This confirms that the placement of <em>Caccobius</em> relative to
+<em>Onthophagus</em> is unresolved across methods.</p>
 <p>Weak support and partial recovery are also visible deeper within the
 <em>Onthophagus</em> radiation. The node uniting <em>O. giraffa</em> +
 <em>O. pilosus</em> with <em>O. bicavifrons</em> + <em>O.
