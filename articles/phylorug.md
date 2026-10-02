@@ -10,8 +10,8 @@ inference methods (IQ-TREE, ASTRAL, MrBayes), different data types
 that may differ in topology and report clade support using different
 metrics and formats (Steenwyk et al., 2023).
 
-The question this creates at every node is simple: **does this clade
-appear in all analyses, and how strongly does each one support it?**
+The question this creates at every node is simple: Does this clade
+appear in all analyses, and how strongly does each one support it?
 
 Answering that by opening tree files side by side is tedious and
 error-prone, especially as taxon counts and the number of analyses grow.
@@ -20,54 +20,56 @@ between two trees, or quantify gene-tree conflict within a single
 pipeline, but neither shows you which clades hold up across analytical
 choices and which do not.
 
-**phylorug** fills this gap. It draws a compact coloured grid, a **rug
+*phylorug* fills this gap. It draws a compact coloured grid, a **rug
 plot** at every internal node of a reference tree. Each cell represents
-one analysis; its colour shows whether that analysis recovered the clade
+one analysis, its colour shows whether that analysis recovered the clade
 and, in support mode, how strongly it supported it.
 
 ### Brief history
 
-The rug plot concept originated with Wheeler (1995), who plotted clade
-recovery across gap and transversion–transition cost ratios in parsimony
-analysis. Giribet (2003) named these plots “Navajo rugs” and showed that
-nodal support and nodal stability can tell different stories. Sanders
-(2010) automated parameter-space sensitivity analysis with Cladescan
-(Perl), and Machado (2015) extended the approach with YBYRÁ (Python).
-Both produce individual SVG plots per node that must be manually placed
-onto the tree in a vector editor, and neither is actively maintained
-today. More importantly, both were designed around sensitivity analysis
-within a single analytical framework — varying parameters and cost
-schemes — rather than comparing trees from fundamentally different
-inference pipelines that report support in incompatible formats (e.g.,
-UFBoot2, SH-aLRT, posterior probability, ASTRAL LPP). phylorug extends
-this lineage into R: it reads trees from any pipeline, bins support
-values against thresholds built for their own metric instead of
-rescaling everything onto one numeric scale, and draws the rug directly
-on the reference tree — no manual placement, no outside software.
+Wheeler (1995) introduced a matrix plot to show how clade recovery
+varied across analytical parameters. Each cell represented a combination
+of gap cost and transversion-transition ratio, and was marked according
+to whether the clade was recovered as monophyletic, left unresolved, or
+resolved as nonmonophyletic under that parameter set. By plotting these
+matrices for individual clades across the full parameter space, Wheeler
+showed which groups were robust to analytical choices and which were
+sensitive to them. Giribet (2003) named these plots “Navajo rugs” and
+drew a distinction between nodal support and nodal stability. Sanders
+(2010) automated the approach with Cladescan (Perl), and Machado (2015)
+extended it with YBYRÁ (Python). Both produce standalone SVG files per
+node that have to be placed onto the tree by hand in a vector editor,
+and neither is maintained today. Both were also built for sensitivity
+analysis within a single analytical framework, varying parameters and
+cost schemes, rather than comparing trees from different inference
+pipelines that report support in incompatible formats (UFBoot2, SH-aLRT,
+posterior probability, ASTRAL LPP). phylorug moves this idea into R: it
+reads trees from any pipeline, bins support values against thresholds
+set for their own metric rather than forcing everything onto one scale,
+and draws the rug plot on the reference tree directly, with no manual
+placement and no outside software.
 
 ## Nodal support versus nodal stability
 
-Giribet (2003) drew a distinction worth understanding before using
-phylorug. **Nodal support** measures how confident a single analysis is
-in a clade such as bootstrap, posterior probability, or local posterior
-probability. **Nodal stability** measures whether that clade is
-consistently recovered across different analytical strategies, data
-types, and inference methods. The two can decouple: a clade may receive
-100% bootstrap under one model yet collapse under all others, or carry
-only moderate support everywhere yet appear in every tree. Reporting
-both gives a more complete picture of a clade’s robustness than either
-alone.
+Giribet (2003) drew a distinction worth keeping in mind when using
+phylorug. **Nodal support** is how confident a single analysis is in a
+clade: bootstrap values, posterior probabilities, local posterior
+probabilities. **Nodal stability** is whether that clade turns up across
+different analytical strategies, data types, and inference methods. The
+two can be decoupled: a clade may get 100% bootstrap under one model and
+collapse under all others, or carry only moderate support everywhere yet
+appear in every tree. Reporting both says more about a clade’s
+robustness than either one alone.
 
-*phylorug* captures this directly. In `presence` mode, each node gets a
-black dot if every analysis recovers the clade, or a grid showing which
-analyses recover it and which do not, this is nodal stability. In
-`support` mode, the same grid shades each cell by how strongly that
-analysis supports the clade — this is nodal support layered on top of
-stability. A dot in `support` mode is stricter than in `presence` mode:
-it marks a clade that every analysis recovers and rates as *very-high*
-support. A clade recovered everywhere but not uniformly very-high in
-support value is drawn as a full grid instead, which keeps nodal support
-and nodal stability visible as separate facts.
+phylorug captures this directly. In `presence` mode, a node gets a black
+dot if every analysis recovers the clade, or a rug plot showing which
+analyses recover it and which do not. That is nodal stability. In
+`support` mode, the same rug plot shades each cell by how strongly that
+analysis supports the clade, which is nodal support layered on top of
+stability. A dot in `support` mode is stricter: it marks a clade that
+every analysis recovers and rates as very-high support. A clade
+recovered everywhere but not uniformly very-high is drawn as a full rug
+plot instead, so support and stability stay visible as separate facts.
 
 ## Quick start
 
@@ -259,9 +261,10 @@ In support mode a dot carries more information than in presence mode. It
 marks a clade that every comparison analysis recovers *and* rates
 very-high support against its own metric’s thresholds. A clade recovered
 by every analysis but weaker in even one, or with no usable support
-value, is drawn as a grid instead, so a dot never hides uneven support.
-Because the rule uses the same thresholds that shade the cells, changing
-`thresholds` also changes which nodes earn a dot (see Customisation).
+value, is drawn as a rug plot instead, so a dot never hides uneven
+support. Because the rule uses the same thresholds that shade the cells,
+changing `thresholds` also changes which nodes earn a dot (see
+Customisation).
 
 ## Reading the rug plot
 
@@ -277,7 +280,7 @@ At each node you will see one of these patterns:
   dot is stricter: all analyses recover the clade and every one rates it
   *very-high* support (`dot_on_very_high = TRUE`, the default). No rug
   is drawn at a dot, to reduce clutter.
-- **Grid with no white cells** (support mode only): every analysis
+- **Rug plot with no white cells** (support mode only): every analysis
   recovers the clade, but at least one does not rate it very-high, or
   reports no usable support value.
 - **Mixed grid**: some cells filled with solid black, some white. These
@@ -286,7 +289,7 @@ At each node you will see one of these patterns:
 - **Bare node** (no dot, no rug): no comparison tree recovers this
   backbone clade, it exists only in the backbone topology. This is the
   default behaviour (`hide_unsupported = TRUE`). Set
-  `hide_unsupported = FALSE` to draw all-white grids at these nodes
+  `hide_unsupported = FALSE` to draw all-white rug plots at these nodes
   instead.
 
 In support mode, filled cells are shaded by how strongly each analysis
@@ -510,7 +513,7 @@ the pattern is immediately visible in the rug without consulting
 multiple tree files.
 
 Two additional areas show disagreement. Near the base of *Chironomidae*,
-the rug grids at nodes near *Podonomus* and *Parochlus* show mixed
+the rug plots at nodes near *Podonomus* and *Parochlus* show mixed
 shading, indicating that the internal arrangement of basal chironomid
 lineages varies across methods. Near the tips, the node at *Nilodorum* +
 *Dicrotendipes* (backbone support 75.0) shows grey shading, moderate
@@ -750,7 +753,7 @@ capture different levels of conflict that support mode makes visible.
 In support mode a black dot is a complete summary: the clade was
 recovered everywhere and every analysis has very-high support values.
 Nodes recovered everywhere but support is not uniformly very high are
-drawn as grids. To draw the grid at every node, including those that
+drawn as rug plots. To draw the grid at every node, including those that
 would otherwise get a dot, set `dot_on_very_high = FALSE`.
 
 ## Customisation
