@@ -49,7 +49,7 @@ set for their own metric rather than forcing everything onto one scale,
 and draws the rug plot on the reference tree directly, with no manual
 placement and no outside software.
 
-## Nodal support versus nodal stability
+#### Nodal support versus nodal stability
 
 Giribet (2003) drew a distinction worth keeping in mind when using
 phylorug. **Nodal support** is how confident a single analysis is in a
