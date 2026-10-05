@@ -51,9 +51,9 @@ such plots.
 
 <figure>
 <img src="man/figures/README-presence.png"
-alt="Phylogenetic rug plot showing clade presence across a 9-taxon subset of sample_trees" />
-<figcaption aria-hidden="true">Phylogenetic rug plot showing clade
-presence across a 9-taxon subset of sample_trees</figcaption>
+alt="Presence mode rug plot on a 9-taxon beetle subset" />
+<figcaption aria-hidden="true">Presence mode rug plot on a 9-taxon
+beetle subset</figcaption>
 </figure>
 
 Black/white cells showing whether each analysis recovered a given clade
@@ -62,15 +62,15 @@ plot**.
 
 ## Support mode
 
-![Phylogenetic rug plot showing node support values across a 9-taxon
-subset of sample_trees](man/figures/README-support.png) Cells are shaded
-in greyscale by how strongly each analysis supports a given clade, from
-black (very high) through progressively lighter greys to the lightest
-(low). White means the clade was not recovered; red means it was
-recovered but carries no support value. Each support value is binned
-against its own metric’s thresholds, UFBoot2 95 and LPP 0.95 are never
-treated as equivalent. Default thresholds are provided, but users are
-encouraged to set their own.
+![Support mode rug plot on a 9-taxon beetle
+subset](man/figures/README-support.png) Cells are shaded in greyscale by
+how strongly each analysis supports a given clade, from black (very
+high) through progressively lighter greys to the lightest (low). White
+means the clade was not recovered; red means it was recovered but
+carries no support value. Each support value is binned against its own
+metric’s thresholds, UFBoot2 95 and LPP 0.95 are never treated as
+equivalent. Default thresholds are provided, but users are encouraged to
+set their own.
 
 In support mode a dot is stricter than in presence mode: it appears only
 where every comparison analysis recovers the clade *and* rates it
