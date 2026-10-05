@@ -35,11 +35,10 @@ such plots.
 
 ## Presence mode
 
-![Phylogenetic rug plot showing clade presence across a 9-taxon subset
-of sample_trees](reference/figures/README-presence.png)
+![Presence mode rug plot on a 9-taxon beetle
+subset](reference/figures/README-presence.png)
 
-Phylogenetic rug plot showing clade presence across a 9-taxon subset of
-sample_trees
+Presence mode rug plot on a 9-taxon beetle subset
 
 Black/white cells showing whether each analysis recovered a given clade
 or not. Stable nodes appear as black dots; contested nodes show a **rug
@@ -47,12 +46,12 @@ plot**.
 
 ## Support mode
 
-![Phylogenetic rug plot showing node support values across a 9-taxon
-subset of sample_trees](reference/figures/README-support.png) Cells are
-shaded in greyscale by how strongly each analysis supports a given
-clade, from black (very high) through progressively lighter greys to the
-lightest (low). White means the clade was not recovered; red means it
-was recovered but carries no support value. Each support value is binned
+![Support mode rug plot on a 9-taxon beetle
+subset](reference/figures/README-support.png) Cells are shaded in
+greyscale by how strongly each analysis supports a given clade, from
+black (very high) through progressively lighter greys to the lightest
+(low). White means the clade was not recovered; red means it was
+recovered but carries no support value. Each support value is binned
 against its own metric’s thresholds, UFBoot2 95 and LPP 0.95 are never
 treated as equivalent. Default thresholds are provided, but users are
 encouraged to set their own.

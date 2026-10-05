@@ -70,14 +70,14 @@
 <div class="section level2">
 <h2 id="presence-mode">Presence mode<a class="anchor" aria-label="anchor" href="#presence-mode"></a>
 </h2>
-<figure><img src="reference/figures/README-presence.png" alt="Phylogenetic rug plot showing clade presence across a 9-taxon subset of sample_trees"><figcaption aria-hidden="true">
-Phylogenetic rug plot showing clade presence across a 9-taxon subset of sample_trees
+<figure><img src="reference/figures/README-presence.png" alt="Presence mode rug plot on a 9-taxon beetle subset"><figcaption aria-hidden="true">
+Presence mode rug plot on a 9-taxon beetle subset
 </figcaption></figure><p>Black/white cells showing whether each analysis recovered a given clade or not. Stable nodes appear as black dots; contested nodes show a <strong>rug plot</strong>.</p>
 </div>
 <div class="section level2">
 <h2 id="support-mode">Support mode<a class="anchor" aria-label="anchor" href="#support-mode"></a>
 </h2>
-<p><img src="reference/figures/README-support.png" alt="Phylogenetic rug plot showing node support values across a 9-taxon subset of sample_trees"> Cells are shaded in greyscale by how strongly each analysis supports a given clade, from black (very high) through progressively lighter greys to the lightest (low). White means the clade was not recovered; red means it was recovered but carries no support value. Each support value is binned against its own metric’s thresholds, UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default thresholds are provided, but users are encouraged to set their own.</p>
+<p><img src="reference/figures/README-support.png" alt="Support mode rug plot on a 9-taxon beetle subset"> Cells are shaded in greyscale by how strongly each analysis supports a given clade, from black (very high) through progressively lighter greys to the lightest (low). White means the clade was not recovered; red means it was recovered but carries no support value. Each support value is binned against its own metric’s thresholds, UFBoot2 95 and LPP 0.95 are never treated as equivalent. Default thresholds are provided, but users are encouraged to set their own.</p>
 <p>In support mode a dot is stricter than in presence mode: it appears only where every comparison analysis recovers the clade <em>and</em> rates it very-high support. A clade recovered everywhere but with weaker or missing support in even one analysis is drawn as a full <strong>rug plot</strong> instead. Set <code>dot_on_very_high = FALSE</code> to draw a grid at every node.</p>
 <p>The entire workflow runs in R, from reading raw tree files to publication-ready figures. The package was developed around a dung beetle phylogenomic dataset (Montanaro, Lopes et al. 2026) and includes three bundled datasets so users can try the pipeline on real data before applying it to their own.</p>
 <p><strong>Figures show a 9-taxon subset of <code>sample_trees</code> (tip labels cleaned) for readability.</strong></p>
