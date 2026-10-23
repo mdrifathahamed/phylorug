@@ -82,18 +82,16 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Md Rifath Ahamed <rifath.ahamed@helsinki.fi>
+**Maintainer**: Md Rifath Ahamed <rifathahamed777@gmail.com>
 ([ORCID](https://orcid.org/0009-0005-6158-8658)) \[copyright holder\]
 
 Authors:
 
-- Md Rifath Ahamed <rifath.ahamed@helsinki.fi>
+- Md Rifath Ahamed <rifathahamed777@gmail.com>
   ([ORCID](https://orcid.org/0009-0005-6158-8658)) \[copyright holder\]
+
+- J. Salvador Arias <js.arias@conicet.gov.ar>
+  ([ORCID](https://orcid.org/0000-0002-3717-435X))
 
 - Sergei Tarasov <sergei.tarasov@helsinki.fi>
   ([ORCID](https://orcid.org/0000-0002-1737-9403))
-
-Other contributors:
-
-- J. Salvador Arias <js.arias@conicet.gov.ar>
-  ([ORCID](https://orcid.org/0000-0002-3717-435X)) \[contributor\]

@@ -1,4 +1,4 @@
-# Draw a phylorug: a backbone tree with rug plots on every internal nodes
+# Draw a phylorug: a backbone tree with rug plots on every internal node
 
 `plot_phylorug()` overlays rug plots on a backbone phylogeny, compares
 how multiple analyses treat each internal node. In presence mode, cells

@@ -10,7 +10,7 @@
   : Tabulate clade recovery and support across trees
 - [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
   : Draw a phylorug: a backbone tree with rug plots on every internal
-  nodes
+  node
 - [`prune_to_shared()`](https://mdrifathahamed.github.io/phylorug/reference/prune_to_shared.md)
   : Trim the backbone and its comparison trees to their shared set of
   taxa
