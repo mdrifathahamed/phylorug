@@ -68,7 +68,7 @@ how strongly each analysis supports a given clade, from black (very
 high) through progressively lighter greys to the lightest (low). White
 means the clade was not recovered; red means it was recovered but
 carries no support value. Each support value is binned against its own
-metric’s thresholds, UFBoot2 95 and LPP 0.95 are never treated as
+metric’s thresholds: UFBoot2 95 and LPP 0.95 are never treated as
 equivalent. Default thresholds are provided, but users are encouraged to
 set their own.
 
@@ -123,8 +123,8 @@ check_taxa(backbone, others)
 npm <- node_presence_matrix(backbone, others, support_col = 1, support_type = c(
                 "70p_ASTRAL_partition_entropy" = "lpp",
                 "70p_ASTRAL_uce"               = "lpp",
-                "70p_ghost"                    = "ufboot",
-                "70p_partition_entropy"        = "ufboot"))
+                "70p_ghost"                    = "sh_alrt",
+                "70p_partition_entropy"        = "sh_alrt"))
 
 # Presence mode: Which analyses recover each clade?
 plot_phylorug(backbone, npm)
@@ -168,8 +168,6 @@ helpers are available when your data needs them:
 You can learn more about each step in `vignette("phylorug")`.
 
 ### Dependencies
-
-# new
 
 **phylorug** depends on [ape](https://CRAN.R-project.org/package=ape)
 and [phangorn](https://CRAN.R-project.org/package=phangorn). No other
