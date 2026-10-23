@@ -176,8 +176,8 @@ you want every internal node to carry a visible grid for annotation or
 figure editing.}
 
 \item{...}{Additional arguments passed to \code{\link[ape:plot.phylo]{ape::plot.phylo()}}, such as
-\code{cex}, \code{edge.width}, \code{font}, or \code{label.offset}. These override the
-automatic scaling when provided.}
+\code{cex}, \code{edge.width}, \code{font}, \code{label.offset}, or \code{align.tip.label}.
+These override the automatic scaling when provided.}
 }
 \value{
 Invisibly, the file path if a file was written, or \code{NULL} if plotted

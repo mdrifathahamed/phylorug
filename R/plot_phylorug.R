@@ -158,8 +158,8 @@
 #'   figure editing.
 #'
 #' @param ... Additional arguments passed to [ape::plot.phylo()], such as
-#'   `cex`, `edge.width`, `font`, or `label.offset`. These override the
-#'   automatic scaling when provided.
+#'   `cex`, `edge.width`, `font`, `label.offset`, or `align.tip.label`.
+#'   These override the automatic scaling when provided.
 #'
 #' @returns Invisibly, the file path if a file was written, or `NULL` if plotted
 #'   directly to the active graphics device.
