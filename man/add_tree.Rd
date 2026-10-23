@@ -42,7 +42,7 @@ is appended to the npm's \code{"support_type"} attribute so that
 \code{NULL}, the new tree's support values will be auto-normalized (values >1
 divided by 100) and binned against universal thresholds at plot time. For
 this reason, raw Bremer support (an unbounded integer) is not supported;
-use the\code{"bremer_ratio"} instead, which is bounded between 0 and 1.}
+use \code{"bremer_ratio"} instead, which is bounded between 0 and 1.}
 
 \item{pool_threshold}{Numeric between 0 and 1. Controls how pools are
 scored. Default \code{1.0} (strict consensus). Should match the value used
@@ -53,16 +53,16 @@ generated via TNT or similar software).}
 }
 \value{
 The updated npm list with the new tree appended as an additional
-column in the \code{presence} matrix and each \verb{support_*} matrix. Attributes
-\code{"node_id"} and \code{"pool_sizes"} are updated, and \code{"support_type"} is
-extended if the argument was supplied.
+column in the \code{presence} matrix and each \verb{support_*} matrix. The
+\code{"pool_sizes"} attribute is updated, and \code{"support_type"} is extended
+if the argument was supplied.
 }
 \description{
 Adds a new comparison tree to an existing node presence matrix without
 rerunning the whole pipeline from scratch. The function computes clade
-recovery(presence) and support for the new tree only and attaches the results
-as a new column in every matrix of the npm. All existing columns remain
-unchanged.
+recovery (presence) and support for the new tree only and attaches the
+results as a new column in every matrix of the npm. All existing columns
+remain unchanged.
 }
 \details{
 Three taxon scenarios are handled automatically:
@@ -116,21 +116,19 @@ npm <- add_tree(npm, backbone,
                 name = "ASTRAL_uce")
 ncol(npm$presence)   # now 3
 
-# Add the fifth tree with a declared support type:
-npm <- add_tree(npm, backbone,
-                sample_trees[["70p_ASTRAL_partition_entropy"]],
+# Add the fifth tree from a file, with a declared support type.
+# Here a shipped tree is first written to a temporary file; with your own
+# data, pass the path to your tree file. The tree must be rooted
+# (see ape::root()).
+tree_file <- tempfile(fileext = ".tre")
+ape::write.tree(sample_trees[["70p_ASTRAL_partition_entropy"]], tree_file)
+new_tree <- ape::read.tree(tree_file)
+npm <- add_tree(npm, backbone, new_tree,
                 name = "ASTRAL_part_entropy",
                 support_type = "lpp")
 ncol(npm$presence)   # now 4
 attr(npm, "support_type")
-
-# To add a tree from an external file (not run):
-#   new_tree <- ape::read.tree("path/to/new_analysis.treefile")
-#   new_tree <- ape::root(new_tree, outgroup = "outgroup_sp",
-#                         resolve.root = TRUE)
-#   new_tree <- ape::drop.tip(new_tree, "outgroup_sp")
-#   npm <- add_tree(npm, backbone, new_tree, name = "new_analysis",
-#                   support_type = "ufboot")
+unlink(tree_file)
 }
 \seealso{
 \code{\link[=node_presence_matrix]{node_presence_matrix()}} to build the initial npm, \code{\link[=plot_phylorug]{plot_phylorug()}}
