@@ -64,7 +64,7 @@ matrix, are skipped with a message. A tree file that fails to parse is an
 error.
 }
 \examples{
-# phylorug ships example  raw tree files in its `extdata` directory.
+# phylorug ships example raw tree files in its `extdata` directory.
 # Point read_trees() at one of those folders:
 dir <- system.file("extdata", "beetles_70p", package = "phylorug")
 

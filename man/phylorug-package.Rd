@@ -64,17 +64,13 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
+\strong{Maintainer}: Md Rifath Ahamed \email{rifathahamed777@gmail.com} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Md Rifath Ahamed \email{rifath.ahamed@helsinki.fi} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
+  \item Md Rifath Ahamed \email{rifathahamed777@gmail.com} (\href{https://orcid.org/0009-0005-6158-8658}{ORCID}) [copyright holder]
+  \item J. Salvador Arias \email{js.arias@conicet.gov.ar} (\href{https://orcid.org/0000-0002-3717-435X}{ORCID})
   \item Sergei Tarasov \email{sergei.tarasov@helsinki.fi} (\href{https://orcid.org/0000-0002-1737-9403}{ORCID})
-}
-
-Other contributors:
-\itemize{
-  \item J. Salvador Arias \email{js.arias@conicet.gov.ar} (\href{https://orcid.org/0000-0002-3717-435X}{ORCID}) [contributor]
 }
 
 }

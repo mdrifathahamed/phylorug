@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_phylorug.R
 \name{plot_phylorug}
 \alias{plot_phylorug}
-\title{Draw a phylorug: a backbone tree with rug plots on  every internal nodes}
+\title{Draw a phylorug: a backbone tree with rug plots on every internal node}
 \usage{
 plot_phylorug(
   backbone,
