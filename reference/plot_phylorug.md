@@ -238,8 +238,8 @@ plot_phylorug(
 
   Additional arguments passed to
   [`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html),
-  such as `cex`, `edge.width`, `font`, or `label.offset`. These override
-  the automatic scaling when provided.
+  such as `cex`, `edge.width`, `font`, `label.offset`, or
+  `align.tip.label`. These override the automatic scaling when provided.
 
 ## Value
 

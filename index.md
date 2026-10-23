@@ -117,7 +117,9 @@ npm <- node_presence_matrix(backbone, others, support_col = 1, support_type = c(
 plot_phylorug(backbone, npm)
 
 # Support mode: How strongly?
-plot_phylorug(backbone, npm, mode = "support")
+plot_phylorug(backbone,
+                   npm, 
+                   mode = "support")
 ```
 
 ### Core functions

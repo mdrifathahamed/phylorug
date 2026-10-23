@@ -521,7 +521,8 @@ default, so only contested and stable nodes remain visible.</p>
 <span>              support_label_cex  <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>              support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>              cell_scale         <span class="op">=</span> <span class="fl">0.3</span>,</span>
-<span>              rug_position       <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span></span></code></pre></div>
+<span>              rug_position       <span class="op">=</span> <span class="st">"outside"</span>,</span>
+<span>              align.tip.label    <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-culico-support-1.png" class="r-plt" alt="" width="2400"></p>
 </div>
 <div class="section level3">
@@ -712,7 +713,8 @@ identifies each metric:</p>
 <span>  support_label_col  <span class="op">=</span> <span class="st">"red"</span>,</span>
 <span>  support_label_cex  <span class="op">=</span> <span class="fl">0.38</span>,</span>
 <span>  cell_scale         <span class="op">=</span> <span class="fl">0.35</span>,</span>
-<span>  cex                <span class="op">=</span> <span class="fl">0.8</span></span>
+<span>  cex                <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>  align.tip.label    <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/plot-support-beetles-70p-1.png" class="r-plt" alt="" width="3000"></p>
 </div>
@@ -838,10 +840,20 @@ for readability:</p>
 <h3 id="tree-appearance">Tree appearance<a class="anchor" aria-label="anchor" href="#tree-appearance"></a>
 </h3>
 <p><code><a href="../reference/plot_phylorug.html">plot_phylorug()</a></code> passes additional arguments through
-<code>...</code> to <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code>. Common options:</p>
+<code>...</code> to <code><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">ape::plot.phylo()</a></code>. Common options are
+<code>cex</code> (tip label size), <code>font</code> (<code>3</code> for
+italic species names), and <code>edge.width</code> (branch
+thickness):</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, cex <span class="op">=</span> <span class="fl">0.6</span>, font <span class="op">=</span> <span class="fl">3</span>, edge.width <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/tree-appearance-1.png" class="r-plt" alt="" width="672"></p>
+<p>On phylograms with unequal branch lengths,
+<code>align.tip.label = TRUE</code> lines up all tip labels in one
+column, joined to their branches by dotted lines. Rugs, dots and support
+labels are unaffected:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, font <span class="op">=</span> <span class="fl">3</span>, align.tip.label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phylorug_files/figure-html/tree-appearance-aligned-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="including-the-backbone">Including the backbone<a class="anchor" aria-label="anchor" href="#including-the-backbone"></a>
@@ -849,13 +861,13 @@ for readability:</p>
 <p>By default, the backbone does not occupy a cell in the rug (it
 trivially recovers every clade, since it defines the topology). Set
 <code>include_backbone = TRUE</code> to add it as cell 1:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, include_backbone <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/include-bb-1.png" class="r-plt" alt="" width="672"></p>
 <p>In support mode, pass the backbone’s support metric directly to
 <code>include_backbone</code> so it gets binned against the correct
 thresholds:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>              mode             <span class="op">=</span> <span class="st">"support"</span>,</span>
 <span>              include_backbone <span class="op">=</span> <span class="st">"ufboot"</span><span class="op">)</span></span></code></pre></div>
@@ -865,7 +877,7 @@ thresholds:</p>
 <h3 id="custom-thresholds">Custom thresholds<a class="anchor" aria-label="anchor" href="#custom-thresholds"></a>
 </h3>
 <p>Override the default support bins with your own cutoffs:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  ufboot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">98</span>, high <span class="op">=</span> <span class="fl">90</span>, moderate <span class="op">=</span> <span class="fl">70</span><span class="op">)</span>,</span>
 <span>  lpp    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>very_high <span class="op">=</span> <span class="fl">0.99</span>, high <span class="op">=</span> <span class="fl">0.90</span>, moderate <span class="op">=</span> <span class="fl">0.70</span><span class="op">)</span></span>
@@ -890,7 +902,7 @@ sub-threshold analysis scores 92.</p>
 <p>Sometimes you only want to look at a few clades, not the whole tree.
 <code>nodes</code> restricts the rug to just those, using the tip labels
 that define each clade:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span></span>
 <span>  <span class="va">backbone</span>, <span class="va">npm</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">"support"</span>,</span>
@@ -903,13 +915,13 @@ that define each clade:</p>
 <p>Only these two clades get a dot or rug, every other node is left
 bare. If you already know the internal node ID, pass it directly as a
 numeric vector instead:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylorug.html">plot_phylorug</a></span><span class="op">(</span><span class="va">backbone</span>, <span class="va">npm</span>, nodes <span class="op">=</span> <span class="fl">18</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phylorug_files/figure-html/nodes-by-id-1.png" class="r-plt" alt="" width="672"></p>
 <p>But how do you find the right node ID in the first place? To find the
 nodes where analyses disagree, filter the presence matrix for rows with
 at least one 0, then look up the tips at each one:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disagree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span><span class="op">)</span><span class="op">)</span><span class="op">[</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">npm</span><span class="op">$</span><span class="va">presence</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">row</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>

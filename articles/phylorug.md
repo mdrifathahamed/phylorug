@@ -489,7 +489,8 @@ plot_phylorug(backbone, npm,
               support_label_cex  = 0.35,
               support_label_col  = "red",
               cell_scale         = 0.3,
-              rug_position       = "outside")
+              rug_position       = "outside",
+              align.tip.label    = TRUE)
 ```
 
 ![](phylorug_files/figure-html/plot-culico-support-1.png)
@@ -697,7 +698,8 @@ plot_phylorug(
   support_label_col  = "red",
   support_label_cex  = 0.38,
   cell_scale         = 0.35,
-  cex                = 0.8
+  cex                = 0.8,
+  align.tip.label    = TRUE
 )
 ```
 
@@ -837,7 +839,8 @@ plot_phylorug(backbone, npm, n_rows = 1, n_cols = 4)
 [`plot_phylorug()`](https://mdrifathahamed.github.io/phylorug/reference/plot_phylorug.md)
 passes additional arguments through `...` to
 [`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html).
-Common options:
+Common options are `cex` (tip label size), `font` (`3` for italic
+species names), and `edge.width` (branch thickness):
 
 ``` r
 
@@ -845,6 +848,17 @@ plot_phylorug(backbone, npm, cex = 0.6, font = 3, edge.width = 1.5)
 ```
 
 ![](phylorug_files/figure-html/tree-appearance-1.png)
+
+On phylograms with unequal branch lengths, `align.tip.label = TRUE`
+lines up all tip labels in one column, joined to their branches by
+dotted lines. Rugs, dots and support labels are unaffected:
+
+``` r
+
+plot_phylorug(backbone, npm, font = 3, align.tip.label = TRUE)
+```
+
+![](phylorug_files/figure-html/tree-appearance-aligned-1.png)
 
 ### Including the backbone
 
