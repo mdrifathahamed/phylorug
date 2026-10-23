@@ -2,7 +2,7 @@ Package: phylorug
 Title: Visualize Clade Recovery and Support Across Phylogenetic Trees
 Version: 0.1.0
 Authors@R: c(
-    person("Md Rifath", "Ahamed", , "rifath.ahamed@helsinki.fi",
+     person("Md Rifath", "Ahamed", , "rifathahamed777@gmail.com",
            role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0009-0005-6158-8658")),
     person("J. Salvador", "Arias", , "js.arias@conicet.gov.ar",
