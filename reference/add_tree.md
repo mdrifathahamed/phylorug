@@ -2,7 +2,7 @@
 
 Adds a new comparison tree to an existing node presence matrix without
 rerunning the whole pipeline from scratch. The function computes clade
-recovery(presence) and support for the new tree only and attaches the
+recovery (presence) and support for the new tree only and attaches the
 results as a new column in every matrix of the npm. All existing columns
 remain unchanged.
 
@@ -63,7 +63,7 @@ add_tree(
   tree's support values will be auto-normalized (values \>1 divided
   by 100) and binned against universal thresholds at plot time. For this
   reason, raw Bremer support (an unbounded integer) is not supported;
-  use the`"bremer_ratio"` instead, which is bounded between 0 and 1.
+  use `"bremer_ratio"` instead, which is bounded between 0 and 1.
 
 - pool_threshold:
 
@@ -78,9 +78,9 @@ add_tree(
 ## Value
 
 The updated npm list with the new tree appended as an additional column
-in the `presence` matrix and each `support_*` matrix. Attributes
-`"node_id"` and `"pool_sizes"` are updated, and `"support_type"` is
-extended if the argument was supplied.
+in the `presence` matrix and each `support_*` matrix. The `"pool_sizes"`
+attribute is updated, and `"support_type"` is extended if the argument
+was supplied.
 
 ## Details
 
@@ -157,9 +157,14 @@ npm <- add_tree(npm, backbone,
 ncol(npm$presence)   # now 3
 #> [1] 3
 
-# Add the fifth tree with a declared support type:
-npm <- add_tree(npm, backbone,
-                sample_trees[["70p_ASTRAL_partition_entropy"]],
+# Add the fifth tree from a file, with a declared support type.
+# Here a shipped tree is first written to a temporary file; with your own
+# data, pass the path to your tree file. The tree must be rooted
+# (see ape::root()).
+tree_file <- tempfile(fileext = ".tre")
+ape::write.tree(sample_trees[["70p_ASTRAL_partition_entropy"]], tree_file)
+new_tree <- ape::read.tree(tree_file)
+npm <- add_tree(npm, backbone, new_tree,
                 name = "ASTRAL_part_entropy",
                 support_type = "lpp")
 ncol(npm$presence)   # now 4
@@ -167,12 +172,5 @@ ncol(npm$presence)   # now 4
 attr(npm, "support_type")
 #> ASTRAL_part_entropy 
 #>               "lpp" 
-
-# To add a tree from an external file (not run):
-#   new_tree <- ape::read.tree("path/to/new_analysis.treefile")
-#   new_tree <- ape::root(new_tree, outgroup = "outgroup_sp",
-#                         resolve.root = TRUE)
-#   new_tree <- ape::drop.tip(new_tree, "outgroup_sp")
-#   npm <- add_tree(npm, backbone, new_tree, name = "new_analysis",
-#                   support_type = "ufboot")
+unlink(tree_file)
 ```
