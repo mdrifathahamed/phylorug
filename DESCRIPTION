@@ -3,14 +3,15 @@ Title: Visualize Clade Recovery and Support Across Phylogenetic Trees
 Version: 0.1.0
 Authors@R: c(
     person("Md Rifath", "Ahamed", , "rifath.ahamed@helsinki.fi",
-            role = c("aut", "cre", "cph"),
-            comment = c(ORCID = "0009-0005-6158-8658")),
-    person("Sergei", "Tarasov", , "sergei.tarasov@helsinki.fi", role = "aut",
-           comment = c(ORCID = "0000-0002-1737-9403")),
-    person("J. Salvador", "Arias", , "js.arias@conicet.gov.ar", 
-            role = "ctb",
-            comment = c(ORCID = "0000-0002-3717-435X"))
-            )
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0009-0005-6158-8658")),
+    person("J. Salvador", "Arias", , "js.arias@conicet.gov.ar",
+           role = "aut",
+           comment = c(ORCID = "0000-0002-3717-435X")),
+    person("Sergei", "Tarasov", , "sergei.tarasov@helsinki.fi",
+           role = "aut",
+           comment = c(ORCID = "0000-0002-1737-9403"))
+    )
 Description: Generates rug plot visualizations directly on tree nodes to
     illustrate clade recovery and support from multiple phylogenetic and
     phylogenomic analyses. As modern studies routinely employ diverse

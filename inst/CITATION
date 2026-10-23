@@ -1,6 +1,6 @@
 bibentry(
   "Manual",
-  title  = "phylorug: Visualize and Compare Clade Recovery and Support Across Phylogenetic Trees",
+  title  = "phylorug: Visualize Clade Recovery and Support Across Phylogenetic Trees",
   author = c(
     person("Md Rifath", "Ahamed"),
     person("J. Salvador", "Arias"),
