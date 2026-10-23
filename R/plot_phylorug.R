@@ -900,6 +900,7 @@ plot_phylorug <- function(backbone, npm,
       x0                    = x0_left,
       y0                    = y0_top,
       text_cex              = pos_text_cex,
+      mode                  = mode,
       show_dot              = any(dot_rows),
       dot_col               = dot_col,
       backbone_support_line = backbone_support_line,
@@ -1072,6 +1073,7 @@ choose_grid <- function(n_cells) {
 #' @noRd
 draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
                                  x0, y0, text_cex = 0.5,
+                                 mode = "presence",
                                  show_dot = FALSE, dot_col,
                                  backbone_support_line = NULL,
                                  backbone_value_str = NULL,
@@ -1087,15 +1089,27 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
   g_scale <- n_an / n_grid_rows
   g_w     <- cell_w * g_scale
   g_h     <- cell_h * g_scale
+  support_fills <- c("#000000", "#5F5E5A", "#B4B2A9", "#D6D4C9")
+
   for (k in seq_len(n_an)) {
     row_idx <- ceiling(k / n_cols)
     col_idx <- ((k - 1) %% n_cols) + 1
     xleft   <- x0 + (col_idx - 1) * g_w
     ytop    <- y0 - (row_idx - 1) * g_h
+
+    if (mode == "presence") {
+      cell_fill <- if ((row_idx + col_idx) %% 2 == 0) "black" else "white"
+      text_col  <- if (cell_fill == "black") "white" else "black"
+    } else {
+      cell_fill <- support_fills[((k - 1) %% 4) + 1]
+      text_col  <- if (k %% 4 %in% c(1, 2)) "white" else "black"
+    }
+
     graphics::rect(xleft, ytop - g_h, xleft + g_w, ytop,
-                   col = "white", border = grid_border, lwd = grid_lwd)
+                   col = cell_fill, border = grid_border, lwd = grid_lwd)
     graphics::text(xleft + g_w / 2, ytop - g_h / 2,
-                   labels = k, cex = text_cex, family = "sans")
+                   labels = k, cex = text_cex, col = text_col,
+                   family = "sans")
   }
 
   # --- 2. Table rows: analyses, then dot, then backbone -------------------
@@ -1127,30 +1141,34 @@ draw_position_legend <- function(analyses, n_cols, cell_w, cell_h,
   tbl_mid   <- tbl_left + val_w
   tbl_right <- tbl_mid + lab_w
 
-  # --- 4. Draw the table ---------------------------------------------------
+  # --- 4. Draw the label rows (alternating band shading, no borders) --------
+  val_cx     <- (tbl_left + tbl_mid) / 2      # centre of the value column
+  stripe_col <- "#F0F0F0"                     # very light grey for even rows
+
   for (i in seq_along(rows)) {
     r    <- rows[[i]]
     ytop <- y0 - (i - 1) * cell_h
     ybot <- ytop - cell_h
     ymid <- (ytop + ybot) / 2
 
-    graphics::rect(tbl_left, ybot, tbl_mid, ytop,
-                   col = NA, border = grid_border, lwd = grid_lwd)
-    graphics::rect(tbl_mid, ybot, tbl_right, ytop,
-                   col = NA, border = grid_border, lwd = grid_lwd)
+    # Alternating row background (no border, just a subtle fill)
+    if (i %% 2 == 0) {
+      graphics::rect(tbl_left, ybot, tbl_right, ytop,
+                     col = stripe_col, border = NA)
+    }
 
     if (r$is_dot) {
-      graphics::points((tbl_left + tbl_mid) / 2, ymid,
+      graphics::points(val_cx, ymid,
                        pch = 16, col = dot_col, cex = text_cex * 1.2)
     } else {
-      graphics::text((tbl_left + tbl_mid) / 2, ymid, labels = r$value,
-                     cex = text_cex, col = r$col, family = "sans")
+      graphics::text(val_cx, ymid, labels = r$value,
+                     adj = c(0.5, 0.5), cex = text_cex, col = r$col,
+                     family = "sans")
     }
     graphics::text(tbl_mid + padx, ymid, labels = r$label,
                    adj = c(0, 0.5), cex = text_cex, col = r$col,
                    family = "sans")
   }
-
   invisible(y0 - length(rows) * cell_h)
 }
 #' Draw the support-threshold colour key
@@ -1288,47 +1306,31 @@ draw_threshold_legend <- function(x0, y0,
     metric_col_x[k] <- running_x
     running_x <- running_x + metric_col_widths[k]
   }
-
-  # -- Draw the whole thing as a real table -------------------------------
-  # Every cell is its own graphics::rect() with grey borders, so the exported
-  # SVG contains a proper grid a user can select as cells in Inkscape or
-  # Illustrator rather than loose text floating over a background. Header row
-  # has no fill; bin rows carry the swatch colour in column 1; note rows
-  # (Option A) span all metric columns with one label and no interior
-  # verticals, honestly showing they are categorical states, not thresholds..
-
+  # -- Draw with modern minimal style: no cell borders, alternating shading --
   grid_lwd    <- 0.7
   grid_border <- "grey40"
-  padx        <- text_gap                           # horizontal cell padding
+  padx        <- text_gap
+  stripe_col  <- "#F0F0F0"
 
-  header_h    <- sq_h + gap                         # header row height
-  swatch_w    <- xright - x0                        # width of swatch column
-  bin_col_r   <- col1_x + col1_w                    # right edge of "Bin" col
+  swatch_w    <- xright - x0
+  bin_col_r   <- col1_x + col1_w
   metric_edges <- c(metric_col_x,
                     metric_col_x[n_cols_th] +
                       metric_col_widths[n_cols_th])
   table_right <- metric_edges[length(metric_edges)]
 
-  # ---- Header row cells (unfilled, bold text) --------------------------
+  total_rows <- 1L + length(tiers) + 2L
+
+  # ---- Header row (bold text, no fill) ---------------------------------
   y_top_h <- y0
   y_bot_h <- y_top_h - sq_h
   y_mid_h <- (y_top_h + y_bot_h) / 2
-  # swatch column header (empty rect, keeps grid alignment)
-  graphics::rect(x0, y_bot_h, xright, y_top_h,
-                 col = NA, border = grid_border, lwd = grid_lwd)
-  # bin word header
-  graphics::rect(xright, y_bot_h, bin_col_r, y_top_h,
-                 col = NA, border = grid_border, lwd = grid_lwd)
+
   graphics::text(col1_x + padx, y_mid_h, "Bin", adj = c(0, 0.5),
                  cex = text_cex, family = "sans", font = 2)
-  # metric headers
   for (k in seq_len(n_cols_th)) {
-    left  <- metric_edges[k]
-    right <- metric_edges[k + 1L]
-    graphics::rect(left, y_bot_h, right, y_top_h,
-                   col = NA, border = grid_border, lwd = grid_lwd)
-    graphics::text(left + padx, y_mid_h, col_headers[k], adj = c(0, 0.5),
-                   cex = text_cex, family = "sans", font = 2)
+    graphics::text(metric_col_x[k] + padx, y_mid_h, col_headers[k],
+                   adj = c(0, 0.5), cex = text_cex, family = "sans", font = 2)
   }
 
   # ---- Four bin rows (swatch + bin word + values) ----------------------
@@ -1336,27 +1338,24 @@ draw_threshold_legend <- function(x0, y0,
     ytop <- y_bot_h - (i - 1) * sq_h
     ybot <- ytop - sq_h
     ymid <- (ytop + ybot) / 2
+    row_num <- 1L + i
 
-    # swatch cell (this is the actual coloured square)
+    if (row_num %% 2 == 0) {
+      graphics::rect(xright, ybot, table_right, ytop,
+                     col = stripe_col, border = NA)
+    }
+
     graphics::rect(x0, ybot, xright, ytop,
                    col = fills[i], border = grid_border, lwd = grid_lwd)
-    # bin word cell
-    graphics::rect(xright, ybot, bin_col_r, ytop,
-                   col = NA, border = grid_border, lwd = grid_lwd)
     graphics::text(col1_x + padx, ymid, bin_words[i], adj = c(0, 0.5),
                    cex = text_cex, family = "sans")
-    # metric value cells
     for (k in seq_len(n_cols_th)) {
-      left  <- metric_edges[k]
-      right <- metric_edges[k + 1L]
-      graphics::rect(left, ybot, right, ytop,
-                     col = NA, border = grid_border, lwd = grid_lwd)
-      graphics::text(left + padx, ymid, col_values[[k]][i], adj = c(0, 0.5),
-                     cex = text_cex, family = "sans")
+      graphics::text(metric_col_x[k] + padx, ymid, col_values[[k]][i],
+                     adj = c(0, 0.5), cex = text_cex, family = "sans")
     }
   }
 
-  # ---- Two note rows (Option A: swatch + one full-width label cell) ----
+  # ---- Two note rows (swatch + label, no cell borders) -----------------
   note_rows <- list(
     list(fill = "white",   label = "Clade not recovered"),
     list(fill = "#D64545", label = "Not computed")
@@ -1367,13 +1366,15 @@ draw_threshold_legend <- function(x0, y0,
     ytop <- notes_top - (i - 1) * sq_h
     ybot <- ytop - sq_h
     ymid <- (ytop + ybot) / 2
+    row_num <- 1L + length(tiers) + i
 
-    # swatch cell (the coloured square, same as bin rows)
+    if (row_num %% 2 == 0) {
+      graphics::rect(xright, ybot, table_right, ytop,
+                     col = stripe_col, border = NA)
+    }
+
     graphics::rect(x0, ybot, xright, ytop,
                    col = r$fill, border = grid_border, lwd = grid_lwd)
-    # one wide cell spanning the entire rest of the row (no vertical dividers)
-    graphics::rect(xright, ybot, table_right, ytop,
-                   col = NA, border = grid_border, lwd = grid_lwd)
     graphics::text(col1_x + padx, ymid, r$label, adj = c(0, 0.5),
                    cex = text_cex, family = "sans")
   }
