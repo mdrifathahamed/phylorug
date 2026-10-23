@@ -73,16 +73,19 @@ for readability.**
 
 ### Installation
 
-**phylorug** is not yet on CRAN. To install the development version from
-GitHub:
+Install the released version of **phylorug** from CRAN:
+
+``` r
+
+install.packages("phylorug")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 
 # install.packages("pak")
 pak::pak("mdrifathahamed/phylorug")
-# or
-devtools::install_github("mdrifathahamed/phylorug")
-library(phylorug)
 ```
 
 ### Quick example
@@ -98,7 +101,7 @@ data(sample_trees)
 backbone <- sample_trees[["70p_uce"]]
 others   <- sample_trees[names(sample_trees) != "70p_uce"]
 
-# Validate  all trees share same set of taxa (recommended but optional)
+# Check that all trees share the same set of taxa (recommended but optional)
 check_taxa(backbone, others)
 
 # Build the node presence matrix
@@ -163,8 +166,10 @@ You can learn more about each step in
 
 ### Dependencies
 
-**phylorug** depends on [ape](https://cran.r-project.org/package=ape)
-and [phangorn](https://cran.r-project.org/package=phangorn). No other
+# new
+
+**phylorug** depends on [ape](https://CRAN.R-project.org/package=ape)
+and [phangorn](https://CRAN.R-project.org/package=phangorn). No other
 external dependencies are required.
 
 ### Additional features
