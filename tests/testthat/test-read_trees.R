@@ -211,9 +211,14 @@ test_that("forced newick on a nexus file does not read the correct tree", {
       "TREE 1 = (((A,B),C),(D,E));", "END;"),
     file.path(tmp, "tree.nex")
   )
-  result <- read_trees(tmp, ext = "nex", format = "newick", verbose = FALSE)
   correct <- ape::read.nexus(file.path(tmp, "tree.nex"))
-  expect_false(ape::all.equal.phylo(result$tree, correct))
+  # Depending on the ape version, forcing newick either errors or
+  # returns a wrong tree; both mean the NEXUS file was not read correctly.
+  misread <- tryCatch({
+    result <- read_trees(tmp, ext = "nex", format = "newick", verbose = FALSE)
+    !isTRUE(ape::all.equal.phylo(result$tree, correct))
+  }, error = function(e) TRUE)
+  expect_true(misread)
 })
 
 test_that("auto mode reads mixed newick and nexus in one call", {
