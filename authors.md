@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/mdrifathahamed/phylorug/blob/v0.1.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/mdrifathahamed/phylorug/blob/master/inst/CITATION)
 
 Ahamed M, Arias J, Tarasov S (2026). *phylorug: Visualize Clade Recovery
 and Support Across Phylogenetic Trees*. R package version 0.1.0,
