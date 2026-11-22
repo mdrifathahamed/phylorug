@@ -73,7 +73,14 @@ for readability.**
 
 ### Installation
 
-install the development version from GitHub:
+Install the released version from CRAN:
+
+``` r
+
+install.packages("phylorug")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 
