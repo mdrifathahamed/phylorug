@@ -12,6 +12,8 @@ MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/
 Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Codecov test
 coverage](https://codecov.io/gh/mdrifathahamed/phylorug/graph/badge.svg)](https://app.codecov.io/gh/mdrifathahamed/phylorug)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/phylorug)](https://CRAN.R-project.org/package=phylorug)
 <!-- badges: end -->
 
 **phylorug** is an R package for comparing and visualizing clade
@@ -89,7 +91,13 @@ for readability.**
 
 ### Installation
 
-install the development version from GitHub:
+Install the released version from CRAN:
+
+``` r
+install.packages("phylorug")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
